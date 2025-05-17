@@ -10,7 +10,7 @@ return new class extends Migration
             $table->id('id_auth');
             $table->string('email', 45);
             $table->string('password');
-            $table->enum('role',['super admin', 'admin', 'user']);
+            $table->enum('role',['super_admin', 'admin', 'user']);
             $table->rememberToken();
         });
     }

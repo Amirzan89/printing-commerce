@@ -13,4 +13,12 @@ class Transaksi extends Model
     protected $fillable = [
         'order_id', 'jumlah', 'status', 'bukti_pembayaran', 'waktu_pembayaran', 'expired_at', 'id_metode_pembayaran', 'id_pesanan'
     ];
+    public function toMetodePembayaran()
+    {
+        return $this->belongsTo(MetodePembayaran::class, 'id_metode_pembayaran');
+    }
+    public function toPesanan()
+    {
+        return $this->belongsTo(Pesanan::class, 'id_pesanan');
+    }
 }

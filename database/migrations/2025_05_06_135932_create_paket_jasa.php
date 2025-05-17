@@ -9,7 +9,7 @@ return new class extends Migration
         Schema::create('paket_jasa', function (Blueprint $table) {
             $table->id('id_paket_jasa');
             $table->string('nama_paket_jasa', 15);
-            $table->string('deskripsi_paket_jasa', 15);
+            $table->string('deskripsi_paket_jasa', 500);
             $table->string('harga_paket_jasa', 8);
             $table->dateTime('waktu_pengerjaan');
             $table->tinyInteger('maksimal_revisi');

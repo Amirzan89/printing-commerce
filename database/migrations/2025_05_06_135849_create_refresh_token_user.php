@@ -10,7 +10,6 @@ return new class extends Migration
             $table->id('id_refresh_token_user');
             $table->string('email', 45);
             $table->longText('token');
-            $table->enum('device',['website','mobile']);
             $table->unsignedSmallInteger('number');
             $table->timestamps();
             $table->unsignedBigInteger('id_auth');

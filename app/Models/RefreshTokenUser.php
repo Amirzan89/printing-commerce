@@ -13,8 +13,8 @@ class RefreshTokenUser extends Model
     protected $fillable = [
         'email', 'token', 'number', 'id_auth'
     ];
-    public function authAccount()
+    public function toAuth()
     {
-        return $this->belongsTo(AuthAccount::class, 'id_auth');
+        return $this->belongsTo(Auth::class, 'id_auth');
     }
 }

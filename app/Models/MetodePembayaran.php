@@ -13,4 +13,8 @@ class MetodePembayaran extends Model
     protected $fillable = [
         'nama_metode_pembayaran', 'nomor_metode_pembayaran', 'deskripsi_1', 'deskripsi_2', 'thumbnail', 'icon'
     ];
+    public function fromTransaksi()
+    {
+        return $this->hasMany(Transaksi::class, 'id_transaksi');
+    }
 }

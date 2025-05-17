@@ -9,8 +9,16 @@ class PaketJasa extends Model
     protected $primaryKey = "id_paket_jasa";
     public $incrementing = true;
     protected $keyType = 'integer';
-    public $timestamps = true;
+    public $timestamps = false;
     protected $fillable = [
-        'uuid', 'nama_admin', 'role', 'id_auth'
+        'nama_paket_jasa', 'deskripsi_paket_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'fitur', 'id_jasa'
     ];
+    public function fromPesanan()
+    {
+        return $this->hasMany(Review::class, 'id_review');
+    }
+    public function toJasa()
+    {
+        return $this->belongsTo(Jasa::class, 'id_jasa');
+    }
 }

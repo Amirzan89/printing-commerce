@@ -13,4 +13,8 @@ class Jasa extends Model
     protected $fillable = [
         'nama_jasa', 'thumbnail_jasa', 'kategori'
     ];
+    public function fromPaketJasa()
+    {
+        return $this->hasMany(PaketJasa::class, 'id_paket_jasa');
+    }
 }

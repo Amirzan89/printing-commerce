@@ -9,9 +9,12 @@ return new class extends Migration
         Schema::create('pesanan', function (Blueprint $table) {
             $table->id('id_pesanan');
             $table->uuid();
+            $table->string('deskripsi');
             $table->enum('status', ['pending', 'proses', 'revisi', 'selesai', 'dibatalkan']);
             $table->enum('status_pembayaran', ['belum_bayar', 'menunggu_konfirmasi', 'lunas']);
             $table->unsignedInteger('total_harga');
+            $table->dateTime('estimasi_waktu');
+            $table->unsignedTinyInteger('jumlah_revisi');
             $table->timestamps();
             $table->unsignedBigInteger('id_user');
             $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');

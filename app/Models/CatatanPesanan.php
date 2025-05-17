@@ -13,4 +13,12 @@ class CatatanPesanan extends Model
     protected $fillable = [
         'catatan', 'id_admin', 'id_pesanan'
     ];
+    public function toAdmin()
+    {
+        return $this->belongsTo(Admin::class, 'id_admin');
+    }
+    public function toPesanan()
+    {
+        return $this->belongsTo(Pesanan::class, 'id_pesanan');
+    }
 }

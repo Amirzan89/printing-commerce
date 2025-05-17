@@ -2,19 +2,19 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-class Review extends Model
+class Editor extends Model
 {
     use HasFactory;
-    protected $table = "review";
-    protected $primaryKey = "id_review";
+    protected $table = "editor";
+    protected $primaryKey = "id_editor";
     public $incrementing = true;
     protected $keyType = 'integer';
     public $timestamps = false;
     protected $fillable = [
-        'review', 'rating', 'created_at', 'id_pesanan'
+        'nama_editor', 'jenis_kelamin', 'no_telpon'
     ];
-    public function toPesanan()
+    public function fromRiwayatEditors()
     {
-        return $this->belongsTo(Pesanan::class, 'id_pesanan');
+        return $this->hasMany(RiwayatEditor::class, 'id_riwayat_editor');
     }
 }

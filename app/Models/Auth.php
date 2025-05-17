@@ -1,20 +1,29 @@
 <?php
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-class Auth extends Model
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+class Auth extends Authenticatable
 {
-    use HasFactory;
-    protected $table = "verifikasi_admin";
-    protected $primaryKey = "id_verifikasi_admin";
+    use HasApiTokens, HasFactory, Notifiable;
+    protected $table = "auth";
+    protected $primaryKey = "id_auth";
     public $incrementing = true;
     protected $keyType = 'integer';
-    public $timestamps = true;
+    public $timestamps = false;
     protected $fillable = [
-        'email', 'kode_otp', 'link_otp', 'deskripsi', 'terkirim', 'id_admin'
+        'email', 'password', 'role'
     ];
-    public function refreshTokens()
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
+    public function fromAdmin()
     {
-        return $this->hasMany(RefreshTokenUser::class, 'id_auth');
+        return $this->hasMany(Admin::class, 'id_admin');
+    }
+    public function fromUser()
+    {
+        return $this->hasMany(User::class, 'id_user');
     }
 }

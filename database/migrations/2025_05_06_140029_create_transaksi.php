@@ -9,8 +9,8 @@ return new class extends Migration
         Schema::create('transaksi', function (Blueprint $table) {
             $table->id('id_transaksi');
             $table->string('order_id');
-            $table->unsignedTinyInteger('jumlah');
-            $table->enum('status', ['pending', 'sukses', 'gagal']);
+            $table->unsignedInteger('jumlah');
+            $table->enum('status', ['belum_bayar', 'menunggu_konfirmasi', 'lunas']);
             $table->string('bukti_pembayaran');
             $table->dateTime('waktu_pembayaran');
             $table->dateTime('expired_at');

@@ -13,4 +13,8 @@ class VerifikasiAdmin extends Model
     protected $fillable = [
         'email', 'kode_otp', 'link_otp', 'deskripsi', 'terkirim', 'id_admin'
     ];
+    public function toAdmin()
+    {
+        return $this->belongsTo(Admin::class, 'id_admin');
+    }
 }

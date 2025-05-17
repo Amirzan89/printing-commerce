@@ -13,4 +13,8 @@ class VerifikasiUser extends Model
     protected $fillable = [
         'email', 'kode_otp', 'link_otp', 'deskripsi', 'terkirim', 'id_user'
     ];
+    public function toUser()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
 }

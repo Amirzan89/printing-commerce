@@ -13,4 +13,16 @@ class Admin extends Model
     protected $fillable = [
         'uuid', 'nama_admin', 'role', 'id_auth'
     ];
+    public function fromVerifikasiAdmin()
+    {
+        return $this->hasMany(VerifikasiAdmin::class, 'id_verifikasi_admin');
+    }
+    public function fromCatatanPesanan()
+    {
+        return $this->hasMany(CatatanPesanan::class, 'id_catatan_pesanan');
+    }
+    public function toAuth()
+    {
+        return $this->belongsTo(Auth::class, 'id_auth');
+    }
 }
