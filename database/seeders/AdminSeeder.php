@@ -24,7 +24,7 @@ class AdminSeeder extends Seeder
             'nama_admin' => 'Super Admin',
             'id_auth' => $idAuth,
         ]);
-        $roles = ['admin'];
+        $roles = ['admin_chat', 'admin_pemesanan'];
         foreach($roles as $role){
             $nameRole = ucwords(str_replace('admin_', '', $role));
             for($i = 1; $i <= 10; $i++){

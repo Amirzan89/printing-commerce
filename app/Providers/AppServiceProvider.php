@@ -19,7 +19,5 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        CosRateLimiterWebProvider::configure();
-        CosRateLimiterMobileProvider::configure();
     }
 }

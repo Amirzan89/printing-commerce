@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Services;
 use App\Http\Controllers\Controller;
 class ReviewController extends Controller
 {
