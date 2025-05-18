@@ -1,8 +1,8 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Pages;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-class ReviewController extends Controller
+class TransaksiController extends Controller
 {
     public function showData(Request $request){
         $dataShow = [
