@@ -20,25 +20,70 @@ use App\Http\Controllers\Page\ReviewController AS ShowReviewController;
 use App\Http\Controllers\Page\AdminController AS ShowAdminController;
 
 Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
-    //artikel public route
-    //API only admin route
-    Route::group(['prefix'=>'/metode-pembayaran'], function(){
-        //page metode-pembayaran
-        Route::get('/',[ShowAdminController::class,'showAdmin']);
-        Route::get('/tambah',[ShowAdminController::class,'showAdminTambah']);
-        Route::get('/edit/{any}',[ShowAdminController::class,'showAdminEdit']);
+    //API only jasa route
+    Route::group(['prefix'=>'/jasa'], function(){
+        //page jasa
+        Route::get('/',[ShowJasaController::class,'showAll']);
+        Route::get('/detail/{any}',[ShowJasaController::class,'showDetail']);
+        Route::get('/tambah',[ShowJasaController::class,'showTambah']);
+        Route::get('/edit/{any}',[ShowJasaController::class,'showEdit']);
         Route::get('/edit', function(){
             return view('page.admin.data');
         });
-        // route for admin
-        Route::post('/tambah',[AdminController::class,'tambahAdmin']);
-        Route::put('/update',[AdminController::class,'editAdmin']);
-        Route::delete('/delete',[AdminController::class,'hapusAdmin']);
-        Route::group(['prefix'=>'/update'],function(){
-            Route::put('/profile', [AdminController::class, 'updateProfile']);
-            Route::put('/password', [AdminController::class, 'updatePassword']);
-        });
+        // route for jasa
+        Route::post('/tambah',[JasaController::class,'tambahAdmin']);
+        Route::put('/update',[JasaController::class,'editAdmin']);
+        Route::delete('/delete',[JasaController::class,'hapusAdmin']);
     });
+
+    //API only pesanan route
+    Route::group(['prefix'=>'/pesanan'], function(){
+        //page pesanan
+        Route::get('/',[ShowPesananController::class,'showAll']);
+        Route::get('/detail/{any}',[ShowPesananController::class,'showDetail']);
+        Route::get('/tambah',[ShowPesananController::class,'showTambah']);
+        Route::get('/edit/{any}',[ShowPesananController::class,'showEdit']);
+        Route::get('/edit', function(){
+            return view('page.admin.data');
+        });
+        // route for pesanan
+        Route::post('/tambah',[PesananController::class,'tambahAdmin']);
+        Route::put('/update',[PesananController::class,'editAdmin']);
+        Route::delete('/delete',[PesananController::class,'hapusAdmin']);
+    });
+
+    //API only transaksi route
+    Route::group(['prefix'=>'/transaksi'], function(){
+        //page transaksi
+        Route::get('/',[ShowTransaksiController::class,'showAll']);
+        Route::get('/detail/{any}',[ShowTransaksiController::class,'showDetail']);
+        Route::get('/tambah',[ShowTransaksiController::class,'showTambah']);
+        Route::get('/edit/{any}',[ShowTransaksiController::class,'showEdit']);
+        Route::get('/edit', function(){
+            return view('page.admin.data');
+        });
+        // route for transaksi
+        Route::post('/tambah',[TransaksiController::class,'tambahAdmin']);
+        Route::put('/update',[TransaksiController::class,'editAdmin']);
+        Route::delete('/delete',[TransaksiController::class,'hapusAdmin']);
+    });
+
+    //API only metode pembayaran route
+    Route::group(['prefix'=>'/metode-pembayaran'], function(){
+        //page metode pembayaran
+        Route::get('/',[ShowMetodePembayaranController::class,'showAll']);
+        Route::get('/detail/{any}',[ShowMetodePembayaranController::class,'showDetail']);
+        Route::get('/tambah',[ShowMetodePembayaranController::class,'showTambah']);
+        Route::get('/edit/{any}',[ShowMetodePembayaranController::class,'showEdit']);
+        Route::get('/edit', function(){
+            return view('page.admin.data');
+        });
+        // route for metode pembayaran
+        Route::post('/tambah',[MetodePembayaranController::class,'tambahAdmin']);
+        Route::put('/update',[MetodePembayaranController::class,'editAdmin']);
+        Route::delete('/delete',[MetodePembayaranController::class,'hapusAdmin']);
+    });
+
     Route::group(['prefix'=>'/admin'], function(){
         //page admin
         Route::get('/',[ShowAdminController::class,'showAdmin']);
@@ -65,7 +110,7 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
 Route::group(['middleware' => 'admin.guest'], function(){
     Route::get('/login', function(){
         return view('page.login');
-    });
+    })->name('login');
     Route::group(['prefix'=>'/admin'], function(){
         Route::post('/login', function(Request $request){
             $validator = Validator::make($request->only('email','password'), [

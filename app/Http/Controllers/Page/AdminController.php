@@ -91,18 +91,17 @@ class AdminController extends Controller
     }
     //only admin
     public function showAdmin(Request $request){
-        $adminAuth = $request->input('admin_auth');
-        $adminData = Admin::select('uuid', 'nama_lengkap', 'no_telpon', 'email')->whereNotIn('role',['admin', 'super admin'])->get();
+        $adminData = [];
+        $adminData = Admin::select('admin.uuid', 'admin.nama_admin', 'auth.email', 'auth.role')->join('auth', 'admin.id_auth', '=', 'auth.id_auth')->whereNotIn('auth.role', ['admin', 'super admin'])->get();
         $dataShow = [
-            'adminAuth' => $adminAuth,
+            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
             'adminData' => $adminData ?? '',
         ];
         return view('page.admin.data',$dataShow);
     }
     public function showAdminTambah(Request $request){
-        $adminAuth = $request->input('admin_auth');
         $dataShow = [
-            'adminAuth' => $adminAuth,
+            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
         ];
         return view('page.admin.tambah',$dataShow);
     }
@@ -112,7 +111,7 @@ class AdminController extends Controller
             return redirect('/admin')->with('error', 'Data Admin tidak ditemukan');
         }
         $dataShow = [
-            'adminAuth' => $request->input('admin_auth'),
+            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
             'adminData' => $adminData,
         ];
         return view('page.admin.edit',$dataShow);

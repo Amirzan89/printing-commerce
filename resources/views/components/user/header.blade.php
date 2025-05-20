@@ -1,5 +1,5 @@
 <header>
-    <h1>EduAksi</h1>
+    <h1>TATA</h1>
     <li>
         @if($nav === 'home')
             <a href="#beranda">Beranda</a>

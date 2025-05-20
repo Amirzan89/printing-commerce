@@ -1,3 +1,3 @@
 <footer>
-    <span>© Copyright EduAksi. All Rights Reserved</span>
+    <span>© Copyright TATA. All Rights Reserved</span>
 </footer>

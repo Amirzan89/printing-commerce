@@ -7,7 +7,7 @@ $tPath = app()->environment('local') ? '' : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Disi | EduAksi</title>
+    <title>Tambah Pesanan | TATA</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset($tPath.'img/icon/icon.png') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
@@ -32,8 +32,7 @@ $tPath = app()->environment('local') ? '' : '';
     const domain = window.location.protocol + '//' + window.location.hostname + ":" + window.location.port;
     const reff = '/disi';
     var csrfToken = "{{ csrf_token() }}";
-    var email = "{{ $userAuth['email'] }}";
-    var number = "{{ $userAuth['number'] }}";
+    var userAuth = @json($userAuth);
     </script>
     <!--  Body Wrapper -->
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
@@ -42,29 +41,22 @@ $tPath = app()->environment('local') ? '' : '';
         @php
             $nav = 'disi';
         @endphp
-        @include('page.Components.admin.sidebar')
+        @include('components.admin.sidebar')
         <!--  Sidebar End -->
         <!--  Main wrapper -->
         <div class="body-wrapper">
             <!--  Header Start -->
-            @include('page.Components.admin.header')
+            @include('components.admin.header')
             <!--  Header End -->
             <div class="container-fluid" style="background-color: #F6F9FF">
                 <div class="pagetitle">
-                    <h1>Tambah Digital Literasi</h1>
-                    <nav>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="/dashboard">Beranda</a></li>
-                            <li class="breadcrumb-item"><a href="/disi">Kelola Disi</a></li>
-                            <li class="breadcrumb-item">Tambah Digital Literasi</li>
-                        </ol>
-                    </nav>
+                    <h1>Tambah Pesanan</h1>
                 </div>
                 <div class="d-flex align-items-stretch"
                     style="background-color: #ffffff; border-radius: 20px; box-shadow: rgba(145,158,171,0.2) 0px 0px 2px 0px, rgba(145,158,171,0.12) 0px 12px 24px -4px;">
                     <form id="tambahForm">
                         <div class="crow">
-                            <label for="">Judul Digital Literasi</label>
+                            <label for="">Judul Pesanan</label>
                             <input type="text" id="inpJudul">
                         </div>
                         <div class="crow">
@@ -85,7 +77,7 @@ $tPath = app()->environment('local') ? '' : '';
                         </div>
                         <div class="crow">
                             <label for="">Deskripsi</label>
-                            <textarea name="deskripsi" id="inpDeskripsi" placeholder="Masukkan Isi Digital Literasi"
+                            <textarea name="deskripsi" id="inpDeskripsi" placeholder="Masukkan Isi Pesanan"
                                 class="" style="height:120px"></textarea>
                         </div>
                         <div class="img" onclick="handleFileClick()" ondragover="handleDragOver(event)"
@@ -104,11 +96,11 @@ $tPath = app()->environment('local') ? '' : '';
                         </div>
                     </form>
                 </div>
-                @include('page.Components.admin.footer')
+                @include('components.admin.footer')
             </div>
         </div>
     </div>
-    @include('page.Components.preloader')
+    @include('components.preloader')
     <div id="greenPopup" style="display:none"></div>
     <div id="redPopup" style="display:none"></div>
     <script src="{{ asset($tPath.'assets/libs/jquery/dist/jquery.min.js') }}"></script>

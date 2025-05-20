@@ -11,13 +11,13 @@ if(app()->environment('local')){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Favicons -->
-    <link href="{{ asset($tPath.'assets3/img/logo.png') }}" rel="icon">
-    <link href="{{ asset($tPath.'assets3/img/logo.png') }}" rel="apple-touch-icon">
-    <title>Login | TATA</title>
+    <link href="{{ asset($tPath.'assets2/img/logo.png') }}" rel="icon">
+    <link href="{{ asset($tPath.'assets2/img/logo.png') }}" rel="apple-touch-icon">
+    <title>Profile | TATA</title>
     <link rel="stylesheet" href="{{ asset($tPath.'assets/css/styles.min.css') }}">
-    <link rel="stylesheet" href="{{ asset($tPath.'assets3/css/popup.css') }}">
-    <link rel="stylesheet" href="{{ asset($tPath.'assets3/css/preloader.css') }}" />
-    <link href="{{ asset($tPath.'assets3/css/page/login.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/popup.css') }}">
+    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/preloader.css') }}" />
+    <link href="{{ asset($tPath.'assets2/css/page/login.css') }}" rel="stylesheet">
     <style>
         html{
             scroll-behavior: smooth;
@@ -87,8 +87,8 @@ if(app()->environment('local')){
                                         <div class="relative">
                                             <input id="inpPassword" type="password" class="form-control" id="exampleInputPassword1" style="padding-right: 45px;" oninput="showEyePass()">
                                             <div id="iconPass" onclick="showPass()" style="display: none;">
-                                                <img src="{{ asset($tPath.'assets3/icon/eye-slash.svg') }}" alt="" id="passClose">
-                                                <img src="{{ asset($tPath.'assets3/icon/eye.svg') }}" alt="" id="passShow" style="display: none">
+                                                <img src="{{ asset($tPath.'assets2/icon/eye-slash.svg') }}" alt="" id="passClose">
+                                                <img src="{{ asset($tPath.'assets2/icon/eye.svg') }}" alt="" id="passShow" style="display: none">
                                             </div>
                                         </div>
                                         <input type="submit" class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2" value="Masuk">
@@ -106,6 +106,6 @@ if(app()->environment('local')){
     <div id="redPopup" style="display:none"></div>
     <script src="{{ asset($tPath.'assets/libs/jquery/dist/jquery.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset($tPath.'assets3/js/page/login.js') }}"></script>
+    <script src="{{ asset($tPath.'assets2/js/page/login.js') }}"></script>
 </body>
 </html>

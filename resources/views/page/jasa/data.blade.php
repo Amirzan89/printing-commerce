@@ -7,15 +7,15 @@ $tPath = app()->environment('local') ? '' : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Digital Literasi | EduAksi</title>
-    <link rel="shortcut icon" type="image/png" href="{{ asset($tPath.'img/icon/icon.png') }}" />
+    <title>Data Jasa | TATA</title>
+    <link rel="shortcut icon" type="image/png" href="{{ asset($tPath.'assets2/icon/icon.png') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets/css/styles.min.css') }}" />
-    <link rel="stylesheet" href="{{ asset($tPath.'css/page/modalDelete.css') }}" />
-    <link rel="stylesheet" href="{{ asset($tPath.'css/popup.css') }}" />
-    <link rel="stylesheet" href="{{ asset($tPath.'css/preloader.css') }}" />
+    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/page/modalDelete.css') }}" />
+    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/popup.css') }}" />
+    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/preloader.css') }}" />
     <style>
     #btnTambah{
         padding: 0px;
@@ -185,30 +185,24 @@ $tPath = app()->environment('local') ? '' : '';
         @php
             $nav = 'disi';
         @endphp
-        @include('page.Components.admin.sidebar')
+        @include('components.admin.sidebar')
         <!--  Sidebar End -->
         <!--  Main wrapper -->
         <div class="body-wrapper">
             <!--  Header Start -->
-            @include('page.Components.admin.header')
+            @include('components.admin.header')
             <!--  Header End -->
             <div class="container-fluid" style="background-color: #F6F9FF">
                 <div class="pagetitle">
-                    <h1>Kelola Digital Literasi</h1>
-                    <nav>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="/dashboard">Beranda</a></li>
-                            <li class="breadcrumb-item">Kelola Digital Literasi</li>
-                        </ol>
-                    </nav>
+                    <h1>Kelola Jasa</h1>
                 </div>
                 <div class="d-flex align-items-stretch">
                     <div class="card w-100">
                         <div class="card-body p-4"
                             style="box-shadow: rgba(145,158,171,0.2) 0px 0px 2px 0px, rgba(145,158,171,0.12) 0px 12px 24px -4px;">
-                            <a href="/disi/tambah" class="btn btn-success" id="btnTambah">
-                                <img src="{{ asset($tPath.'img/icon/tambah.svg') }}" alt="">
-                                <span>Tambah Disi</span>
+                            <a href="/jasa/tambah" class="btn btn-success" id="btnTambah">
+                                <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="">
+                                <span>Tambah Jasa</span>
                             </a>
                             <div class="table-responsive">
                                 <table class="table mb-0 align-middle">
@@ -230,7 +224,7 @@ $tPath = app()->environment('local') ? '' : '';
                                     </thead>
                                     <tbody>
                                         @php $no = 1; @endphp
-                                        @foreach ($dataDisi as $data)
+                                        @foreach ($dataJasa as $data)
                                         <tr>
                                             <td class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">{{ $no++ }}</h6>
@@ -244,11 +238,11 @@ $tPath = app()->environment('local') ? '' : '';
                                             </td>
                                             <td class="border-bottom-0">
                                                 <a href="/disi/edit/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1">
-                                                    <img src="{{ asset($tPath.'img/icon/edit.svg') }}" alt="">
+                                                    <img src="{{ asset($tPath.'assets2/icon/edit.svg') }}" alt="">
                                                     <span>Edit</span>
                                                 </a>
                                                 <button type="button" class="btn btn-danger btn-delete m-1" onclick="showModalDelete('{{ $data['uuid'] }}')">
-                                                    <img src="{{ asset($tPath.'img/icon/delete.svg') }}" alt="">
+                                                    <img src="{{ asset($tPath.'assets2/icon/delete.svg') }}" alt="">
                                                     <span>Hapus</span>
                                                 </button>
                                             </td>
@@ -260,15 +254,15 @@ $tPath = app()->environment('local') ? '' : '';
                         </div>
                     </div>
                 </div>
-                @include('page.Components.admin.footer')
+                @include('components.admin.footer')
             </div>
         </div>
     </div>
     @php
-    $modalDelete = 'digital literasi';
+    $modalDelete = 'jasa';
     @endphp
-    @include('page.Components.admin.modalDelete')
-    @include('page.Components.preloader')
+    @include('components.admin.modalDelete')
+    @include('components.preloader')
     <div id="greenPopup" style="display:none"></div>
     <div id="redPopup" style="display:none"></div>
     <script src="{{ asset($tPath.'assets/libs/jquery/dist/jquery.min.js') }}"></script>
@@ -278,8 +272,8 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/dashboard.js') }}"></script>
-    <script src="{{ asset($tPath.'js/popup.js') }}"></script>
-    <script src="{{ asset($tPath.'js/page/modalDelete.js') }}"></script>
+    <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
+    <script src="{{ asset($tPath.'assets2/js/page/modalDelete.js') }}"></script>
 </body>
 
 </html>

@@ -1,21 +1,22 @@
 <?php
 namespace App\Http\Controllers\Services;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use App\Models\Auth;
+use App\Models\Admin;
 use App\Models\RefreshToken;
 use Carbon\Carbon;
 class AdminController extends Controller
 {
     public function tambahAdmin(Request $request){
         //check email
-        if (User::select("email")->whereRaw("BINARY email = ?",[$request->input('email_admin')])->limit(1)->exists()){
+        if (Auth::select("email")->whereRaw("BINARY email = ?",[$request->input('email_admin')])->limit(1)->exists()){
             return response()->json(['status'=>'error','message'=>'Email sudah digunakan'],400);
         }
         //process file foto
@@ -24,22 +25,22 @@ class AdminController extends Controller
             if(!($file->isValid() && in_array($file->extension(), ['jpeg', 'png', 'jpg']))){
                 return response()->json(['status'=>'error','message'=>'Format Foto tidak valid. Gunakan format jpeg, png, jpg'], 400);
             }
+            
             $fotoName = $file->hashName();
-            $fileData = Crypt::encrypt(file_get_contents($file));
-            Storage::disk('admin')->put('foto/' . $fotoName, $fileData);
+            // $fotoName = $file->hashName();
+            // $fileData = Crypt::encrypt(file_get_contents($file));
+            // Storage::disk('admin')->put('foto/' . $fotoName, $fileData);
         }
-        $ins = User::insert([
-            'uuid' =>  Str::uuid(),
-            'nama_lengkap' => $request->input('nama_lengkap'),
-            'no_telpon' => $request->input('no_telpon'),
-            'jenis_kelamin' => $request->input('jenis_kelamin'),
-            'role'=>$request->input('role'),
+        $idAuth = Auth::insertGetId([
+            'nama_admin' => $request->input('nama_admin'),
             'email' => $request->input('email_admin'),
             'password' => Hash::make($request->input('password')),
+            'role'=>$request->input('role'),
+        ]);
+        $ins = Admin::insert([
+            'uuid' =>  Str::uuid(),
             'foto' => $request->hasFile('foto') ? $fotoName : '',
-            'verifikasi' => true,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
+            'auth' => $idAuth,
         ]);
         if(!$ins){
             return response()->json(['status'=>'error','message'=>'Gagal menambahkan data Admin'], 500);
@@ -48,12 +49,12 @@ class AdminController extends Controller
     }
     public function editAdmin(Request $request){
         //check data admin
-        $admin = User::select('password','foto')->whereRaw("BINARY email = ?",[$request->input('email_admin_lama')])->first();
+        $admin = Admin::select('password','foto')->whereRaw("BINARY email = ?",[$request->input('email_admin_lama')])->first();
         if (is_null($admin)) {
             return response()->json(['status' => 'error', 'message' => 'Data Admin tidak ditemukan'], 404);
         }
         //check email on table user
-        if (User::select('email')->whereRaw("BINARY email = ?",[$request->input('email_admin')])->first() && $request->input('email_admin') != $request->input('email_admin_lama')) {
+        if (Admin::select('email')->whereRaw("BINARY email = ?",[$request->input('email_admin')])->first() && $request->input('email_admin') != $request->input('email_admin_lama')) {
             return response()->json(['status' => 'error', 'message' => 'Email sudah digunakan'], 400);
         }
         //process file foto
@@ -73,8 +74,8 @@ class AdminController extends Controller
             Storage::disk('admin')->put('foto/' . $fotoName, $fileData);
         }
         //update admin
-        $updatedAdmin = User::whereRaw("BINARY email = ?",[$request->input('email_admin_lama')])->update([
-            'nama_lengkap'=>$request->input('nama_lengkap'),
+        $updatedAdmin = Admin::whereRaw("BINARY email = ?",[$request->input('email_admin_lama')])->update([
+            'nama_admin'=>$request->input('nama_admin'),
             'jenis_kelamin'=>$request->input('jenis_kelamin'),
             'no_telpon'=>$request->input('no_telpon'),
             'role'=>$request->input('role'),
@@ -91,12 +92,12 @@ class AdminController extends Controller
     }
     public function updateProfile(Request $request){
         //check email
-        $user = User::select('email','foto')->whereRaw("BINARY email = ?",[$request->input('user_auth')['email']])->first();
+        $user = Admin::select('email','foto')->whereRaw("BINARY email = ?",[$request->input('user_auth')['email']])->first();
         if (!$user) {
             return response()->json(['status' => 'error', 'message' => 'Admin tidak ditemukan'], 400);
         }
         //check email on table user
-        if(!is_null($request->input('email_new') || !empty($request->input('email_new'))) &&User::select('role')->whereRaw("BINARY email = ?",[$request->input('email_new')])->first() && $request->input('email_new') != $request->input('user_auth')['email']){
+        if(!is_null($request->input('email_new') || !empty($request->input('email_new'))) &&Admin::select('role')->whereRaw("BINARY email = ?",[$request->input('email_new')])->first() && $request->input('email_new') != $request->input('user_auth')['email']){
             return response()->json(['status' => 'error', 'message' => 'Email sudah digunakan'], 400);
         }
         //process file foto
@@ -116,9 +117,9 @@ class AdminController extends Controller
             Storage::disk('admin')->put('foto/' . $fotoName, $fileData);
         }
         //update profile
-        $updateProfile = User::whereRaw("BINARY email = ?",[$request->input('user_auth')['email']])->update([
+        $updateProfile = Admin::whereRaw("BINARY email = ?",[$request->input('user_auth')['email']])->update([
             'email'=> (empty($request->input('email_new')) || is_null($request->input('email_new'))) ? $request->input('user_auth')['email'] : $request->input('email_new'),
-            'nama_lengkap' => $request->input('nama_lengkap'),
+            'nama_admin' => $request->input('nama_admin'),
             'jenis_kelamin' => $request->input('jenis_kelamin'),
             'no_telpon' => $request->input('no_telpon'),
             'foto' => $request->hasFile('foto') ? $fotoName : $user['foto'],
@@ -155,7 +156,7 @@ class AdminController extends Controller
             return response()->json(['status'=>'error','message'=>'Password Harus Sama'],400);
         }
         //check email
-        $user = User::select('password')->whereRaw("BINARY email = ?",[$request->input('user_auth')['email']])->first();
+        $user = Admin::select('password')->whereRaw("BINARY email = ?",[$request->input('user_auth')['email']])->first();
         if (!$user) {
             return response()->json(['status' => 'error', 'message' => 'Admin tidak ditemukan'], 400);
         }
@@ -163,7 +164,7 @@ class AdminController extends Controller
             return response()->json(['status'=>'error','message'=>'Password salah'],400);
         }
         //update password
-        $updatePassword = User::whereRaw("BINARY email = ?",[$request->input('user_auth')['email']])->update([
+        $updatePassword = Admin::whereRaw("BINARY email = ?",[$request->input('user_auth')['email']])->update([
             'password'=>Hash::make($pass),
             'updated_at'=> Carbon::now()
         ]);
@@ -174,7 +175,7 @@ class AdminController extends Controller
     }
     public function hapusAdmin(Request $request){
         //check data Admin
-        $admin = User::select('foto')->where('uuid',$request->input('uuid'))->first();
+        $admin = Admin::select('foto')->where('uuid',$request->input('uuid'))->first();
         if (is_null($admin)) {
             return response()->json(['status' => 'error', 'message' => 'Data Admin tidak ditemukan'], 404);
         }
@@ -186,7 +187,7 @@ class AdminController extends Controller
         }
         Storage::disk('admin')->delete('foto/'.$admin->foto);
 
-        if (!User::where('uuid',$request->input('uuid'))->delete()) {
+        if (!Admin::where('uuid',$request->input('uuid'))->delete()) {
             return response()->json(['status' => 'error', 'message' => 'Gagal menghapus data Admin'], 500);
         }
         return response()->json(['status' => 'success', 'message' => 'Data Admin berhasil dihapus']);

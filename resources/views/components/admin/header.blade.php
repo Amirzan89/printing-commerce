@@ -52,4 +52,4 @@
         });
     });
 </script> --}}
-<script src="{{ asset($tPath . '/assets3/js/page/logout.js') }}"></script>
+<script src="{{ asset($tPath . '/assets2/js/page/logout.js') }}"></script>

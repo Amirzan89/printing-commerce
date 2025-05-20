@@ -4,13 +4,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Admin;
 use App\Models\Jasa;
-use App\Models\PaketJasa;
-class JasaController extends Controller
+class EditorController extends Controller
 {
     public function showAll(Request $request){
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'jasaData' => Jasa::select('nama_jasa', 'kategori')->get(),
+            'jasaData' => Jasa::select('')->get(),
         ];
         return view('page.jasa.data',$dataShow);
     }
@@ -21,12 +20,12 @@ class JasaController extends Controller
         return view('page.jasa.tambah',$dataShow);
     }
     public function showEdit(Request $request, $uuid){
-        $jasaData = PaketJasa::select('jasa.uuid', 'jasa.nama_jasa', 'auth.email', 'auth.role')->join('jasa', 'jasa.id_jasa', '=', 'jasa.id_jasa')->get();
+        $jasaData = jasa::select('uuid','nama_lengkap', '')->whereNotIn('role', ['jasa'])->whereRaw("BINARY uuid = ?",[$uuid])->first();
         if(is_null($jasaData)){
-            return redirect('/jasa')->with('error', 'Data Jasa tidak ditemukan');
+            return redirect('/jasa')->with('error', 'Data jasa tidak ditemukan');
         }
         $dataShow = [
-            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
+            'userAuth' => array_merge(jasa::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
             'jasaData' => $jasaData,
         ];
         return view('page.jasa.edit',$dataShow);
