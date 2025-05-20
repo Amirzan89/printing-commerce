@@ -10,7 +10,7 @@ return new class extends Migration
             $table->id('id_paket_jasa');
             $table->string('nama_paket_jasa', 15);
             $table->string('deskripsi_paket_jasa', 500);
-            $table->string('harga_paket_jasa', 8);
+            $table->integer('harga_paket_jasa');
             $table->dateTime('waktu_pengerjaan');
             $table->tinyInteger('maksimal_revisi');
             $table->string('fitur', 300);

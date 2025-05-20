@@ -3,6 +3,7 @@ namespace Database\Seeders;
 use App\Models\Jasa;
 use App\Models\PaketJasa;
 use Illuminate\Database\Seeder;
+Use Illuminate\Support\Str;
 use Carbon\Carbon;
 class JasaSeeder extends Seeder
 {
@@ -14,6 +15,7 @@ class JasaSeeder extends Seeder
     {
         for($i = 1; $i <= 3; $i++){
             $idJasa = Jasa::insertGetId([
+                'uuid' =>  Str::uuid(),
                 'nama_jasa' => 'Jasa '. $i,
                 'thumbnail_jasa' => '/1.jpg',
                 'kategori' => ['printing', 'desain'][rand(0,1)],
