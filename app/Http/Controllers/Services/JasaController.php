@@ -27,7 +27,7 @@ class JasaController extends Controller
         }
         return response()->json(['status'=>'success','message'=>'Data Jasa berhasil ditambahkan']);
     }
-    public function createJasa(Request $request){
+    public function updateJasa(Request $request){
         $idJasa = Jasa::insertGetId([
             'nama_jasa' => $request->input('nama_jasa'),
             'thumbnail_jasa' => $request->input('thumbnail_jasa'),

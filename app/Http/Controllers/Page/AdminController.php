@@ -80,32 +80,30 @@ class AdminController extends Controller
     //         $item['created_at'] = Carbon::parse($item['created_at'])->translatedFormat('l, d F Y');
     //         return $item;
     //     }, $dataAll ?? []);
-    //     return view('page.riwayat',['adminAuth' => $request->input('admin_auth'), 'dataRiwayat' => $dataAll]);
+    //     return view('page.riwayat',['userAuth' => $request->input('admin_auth'), 'dataRiwayat' => $dataAll]);
     // }
     public function showProfile(Request $request){
-        $adminAuth = $request->input('admin_auth');
         $dataShow = [
-            'adminAuth' => $adminAuth,
+            'userAuth' => $request->user(),
         ];
         return view('page.profile',$dataShow);
     }
     //only admin
-    public function showAdmin(Request $request){
-        $adminData = [];
-        $adminData = Admin::select('admin.uuid', 'admin.nama_admin', 'auth.email', 'auth.role')->join('auth', 'admin.id_auth', '=', 'auth.id_auth')->whereNotIn('auth.role', ['admin', 'super admin'])->get();
+    public function showAll(Request $request){
+        $adminData = Admin::select('admin.uuid', 'admin.nama_admin', 'auth.email', 'auth.role')->join('auth', 'admin.id_auth', '=', 'auth.id_auth')->whereNotIn('auth.role', ['admin', 'super admin'])->whereNotIn('auth.id_auth', $request->user()['id_auth'])->get();
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'adminData' => $adminData ?? '',
+            'adminData' => $adminData ?? [],
         ];
         return view('page.admin.data',$dataShow);
     }
-    public function showAdminTambah(Request $request){
+    public function showTambah(Request $request){
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
         ];
         return view('page.admin.tambah',$dataShow);
     }
-    public function showAdminEdit(Request $request, $uuid){
+    public function showEdit(Request $request, $uuid){
         $adminData = Admin::select('uuid','nama_lengkap', 'jenis_kelamin', 'no_telpon','role', 'email', 'foto')->whereNotIn('role', ['admin'])->whereRaw("BINARY uuid = ?",[$uuid])->first();
         if(is_null($adminData)){
             return redirect('/admin')->with('error', 'Data Admin tidak ditemukan');

@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('no_telpon', 15)->nullable();
             $table->string('alamat', 400)->nullable();
             $table->string('no_rekening', 20)->nullable();
+            $table->string('foto', 50)->nullable();
             $table->dateTime('email_verified_at')->nullable();
             $table->timestamps();
             $table->unsignedBigInteger('id_auth');

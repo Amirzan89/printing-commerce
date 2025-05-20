@@ -10,6 +10,7 @@ return new class extends Migration
             $table->id('id_admin');
             $table->uuid();
             $table->string('nama_admin', 50);
+            $table->string('foto', 50)->nullable();
             $table->unsignedBigInteger('id_auth');
             $table->foreign('id_auth')->references('id_auth')->on('auth')->onDelete('cascade');
         });

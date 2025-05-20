@@ -31,9 +31,9 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
             return view('page.admin.data');
         });
         // route for jasa
-        Route::post('/tambah',[JasaController::class,'tambahAdmin']);
-        Route::put('/update',[JasaController::class,'editAdmin']);
-        Route::delete('/delete',[JasaController::class,'hapusAdmin']);
+        Route::post('/create',[JasaController::class,'createJasa']);
+        Route::put('/update',[JasaController::class,'updateJasa']);
+        Route::delete('/delete',[JasaController::class,'deleteJasa']);
     });
 
     //API only pesanan route
@@ -47,9 +47,9 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
             return view('page.admin.data');
         });
         // route for pesanan
-        Route::post('/tambah',[PesananController::class,'tambahAdmin']);
-        Route::put('/update',[PesananController::class,'editAdmin']);
-        Route::delete('/delete',[PesananController::class,'hapusAdmin']);
+        Route::post('/create',[PesananController::class,'createPesanan']);
+        Route::put('/update',[PesananController::class,'updatePesanan']);
+        Route::delete('/delete',[PesananController::class,'deletePesanan']);
     });
 
     //API only transaksi route
@@ -63,9 +63,9 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
             return view('page.admin.data');
         });
         // route for transaksi
-        Route::post('/tambah',[TransaksiController::class,'tambahAdmin']);
-        Route::put('/update',[TransaksiController::class,'editAdmin']);
-        Route::delete('/delete',[TransaksiController::class,'hapusAdmin']);
+        Route::post('/create',[TransaksiController::class,'createTransaksi']);
+        Route::put('/update',[TransaksiController::class,'updateTransaksi']);
+        Route::delete('/delete',[TransaksiController::class,'deleteTransaksi']);
     });
 
     //API only metode pembayaran route
@@ -79,24 +79,24 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
             return view('page.admin.data');
         });
         // route for metode pembayaran
-        Route::post('/tambah',[MetodePembayaranController::class,'tambahAdmin']);
-        Route::put('/update',[MetodePembayaranController::class,'editAdmin']);
-        Route::delete('/delete',[MetodePembayaranController::class,'hapusAdmin']);
+        Route::post('/create',[MetodePembayaranController::class,'createMepe']);
+        Route::put('/update',[MetodePembayaranController::class,'updateMepe']);
+        Route::delete('/delete',[MetodePembayaranController::class,'deleteMepe']);
     });
 
     Route::group(['prefix'=>'/admin'], function(){
         //page admin
-        Route::get('/',[ShowAdminController::class,'showAdmin']);
-        Route::get('/tambah',[ShowAdminController::class,'showAdminTambah']);
-        Route::get('/edit/{any}',[ShowAdminController::class,'showAdminEdit']);
+        Route::get('/',[ShowAdminController::class,'showAll']);
+        Route::get('/tambah',[ShowAdminController::class,'showTambah']);
+        Route::get('/edit/{any}',[ShowAdminController::class,'showEdit']);
         Route::get('/edit', function(){
             return view('page.admin.data');
         });
         // route for admin
-        Route::post('/tambah',[AdminController::class,'tambahAdmin']);
-        Route::put('/update',[AdminController::class,'editAdmin']);
-        Route::delete('/delete',[AdminController::class,'hapusAdmin']);
+        Route::post('/create',[AdminController::class,'createAdmin']);
+        Route::delete('/delete',[AdminController::class,'deleteAdmin']);
         Route::group(['prefix'=>'/update'],function(){
+            Route::put('/',[AdminController::class,'updateAdmin']);
             Route::put('/profile', [AdminController::class, 'updateProfile']);
             Route::put('/password', [AdminController::class, 'updatePassword']);
         });
