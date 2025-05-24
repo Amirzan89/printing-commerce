@@ -44,7 +44,7 @@ class MetodePembayaranController extends Controller
             }
             return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
         }
-        $ins = Metode_Pembayaran::insert([
+        $ins = MetodePembayaran::insert([
             'nama_metode_pembayaran' => $rt->input('nama_metode_pembayaran'),
             'no_metode_pembayaran' => $rt->input('no_metode_pembayaran'),
             'deskripsi_1' => $rt->input('deskripsi_1'),
@@ -125,8 +125,8 @@ class MetodePembayaranController extends Controller
             'nama_metode_pembayaran' => $rt->input('nama_metode_pembayaran'),
             'deskripsi_1' => $rt->input('deskripsi_1'),
             'deskripsi_2' => $rt->input('deskripsi_2'),
-            'thumbnail' => $rt->hasFile('thumbnail') ? $ft : $j['thumbnail'],
-            'icon' => $rt->hasFile('icon') ? $fc : $j['icon'],
+            'thumbnail' => $rt->hasFile('thumbnail') ? $ft : $mepe['thumbnail'],
+            'icon' => $rt->hasFile('icon') ? $fc : $mepe['icon'],
         ]);
         if (!$uM){
             return response()->json(['status' => 'error', 'message' => 'Gagal memperbarui data Metode Pembayaran'], 500);

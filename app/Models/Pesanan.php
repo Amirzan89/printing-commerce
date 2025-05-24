@@ -11,7 +11,12 @@ class Pesanan extends Model
     protected $keyType = 'integer';
     public $timestamps = true;
     protected $fillable = [
-        'uuid', 'deskripsi', 'status_pembayaran', 'total_harga', 'estimasi_waktu', 'jumlah_revisi', 'id_user', 'id_jasa', 'id_paket_jasa'
+        'uuid', 'deskripsi', 'status', 'status_pembayaran', 'total_harga', 'estimasi_waktu', 'jumlah_revisi', 'id_user', 'id_jasa', 'id_paket_jasa'
+    ];
+    protected $casts = [
+        'estimasi_waktu' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
     public function fromPesananFile()
     {

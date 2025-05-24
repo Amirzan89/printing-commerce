@@ -13,6 +13,9 @@ class PesananFile extends Model
     protected $fillable = [
         'file_path', 'status', 'uploaded_at', 'id_pesanan'
     ];
+    protected $casts = [
+        'uploaded_at' => 'datetime'
+    ];
     public function toPesanan()
     {
         return $this->belongsTo(Pesanan::class, 'id_pesanan');

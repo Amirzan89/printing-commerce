@@ -1,0 +1,156 @@
+<?php
+
+namespace App\Http\Controllers\Mobile;
+
+use App\Http\Controllers\Controller;
+use App\Models\Review;
+use App\Models\Pesanan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+
+class ReviewController extends Controller
+{
+    /**
+     * Create a new review for an order
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        try {
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'id_pesanan' => 'required|exists:pesanan,id_pesanan',
+                'review' => 'required|string|max:250|min:5',
+                'rating' => 'required|integer|between:1,5',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validation error',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Sanitize input
+            $sanitizedReview = strip_tags($request->review);
+            $sanitizedReview = htmlspecialchars($sanitizedReview, ENT_QUOTES, 'UTF-8');
+
+            // Check if order belongs to user and is completed
+            $pesanan = Pesanan::where('id_pesanan', $request->id_pesanan)
+                ->where('id_user', Auth::id())
+                ->where('status', 'selesai')
+                ->first();
+
+            if (!$pesanan) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Order not found or not completed'
+                ], 404);
+            }
+
+            // Check if review already exists
+            $existingReview = Review::where('id_pesanan', $request->id_pesanan)->first();
+            if ($existingReview) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'You have already reviewed this order'
+                ], 409);
+            }
+
+            // Create review
+            $review = new Review();
+            $review->id_pesanan = $request->id_pesanan;
+            $review->review = $sanitizedReview;
+            $review->rating = $request->rating;
+            $review->created_at = Carbon::now();
+            $review->save();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Thank you for your review!',
+                'data' => $review
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to submit review',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all reviews by the authenticated user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        try {
+            $reviews = Review::join('pesanan', 'review.id_pesanan', '=', 'pesanan.id_pesanan')
+                ->where('pesanan.id_user', Auth::id())
+                ->select(
+                    'review.*',
+                    'pesanan.uuid as order_number',
+                    'pesanan.deskripsi as order_description'
+                )
+                ->orderBy('review.created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => $reviews
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch your reviews',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get review for a specific order
+     * @param string $orderId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show($orderId)
+    {
+        try {
+            $review = Review::join('pesanan', 'review.id_pesanan', '=', 'pesanan.id_pesanan')
+                ->where('pesanan.uuid', $orderId)
+                ->where('pesanan.id_user', Auth::id())
+                ->select(
+                    'review.*',
+                    'pesanan.uuid as order_number',
+                    'pesanan.deskripsi as order_description'
+                )
+                ->first();
+
+            if (!$review) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Review not found'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => $review
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch review',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+} 
