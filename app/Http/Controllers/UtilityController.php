@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
+use App\Models\RiwayatEditor;
 use App\Models\User;
 class UtilityController extends Controller
 {
@@ -10,5 +11,8 @@ class UtilityController extends Controller
             return ['status'=>'error','message'=>'Account not found','code'=>404];
         }
         return ['status'=>'success', 'data' => $userDB->toArray()];
+    }
+    public static function getHeaderData(){
+        return RiwayatEditor::select('nama_editor', 'deskripsi_pengerjaan')->orderBy('id_riwayat_editor', 'desc')->limit(5)->get();
     }
 }

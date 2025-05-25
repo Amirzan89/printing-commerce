@@ -7,7 +7,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('riwayat_editor', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_riwayat_editor');
             $table->string('nama_editor', 50);
             $table->string('deskripsi_pengerjaan', 500);
             $table->unsignedTinyInteger('revisi');

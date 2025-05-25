@@ -9,7 +9,7 @@ class MetodePembayaranController extends Controller
     public function showAll(Request $request){
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'mepeData' => MetodePembayaran::get(),
+            'metodePembayaranData' => MetodePembayaran::select('uuid','nama_metode_pembayaran')->get(),
         ];
         return view('page.metode-pembayaran.data',$dataShow);
     }
@@ -20,13 +20,13 @@ class MetodePembayaranController extends Controller
         return view('page.metode-pembayaran.tambah',$dataShow);
     }
     public function showEdit(Request $request, $uuid){
-        $mepeData = MetodePembayaran::select('uuid','nama_lengkap', '')->whereNotIn('role', ['MetodePembayaran'])->whereRaw("BINARY uuid = ?",[$uuid])->first();
-        if(is_null($mepeData)){
-            return redirect('/MetodePembayaran')->with('error', 'Data MetodePembayaran tidak ditemukan');
+        $metodePembayaranData = MetodePembayaran::select('uuid','nama_metode_pembayaran', '')->whereRaw("BINARY uuid = ?",[$uuid])->first();
+        if(is_null($metodePembayaranData)){
+            return redirect('/metode-pembayaran')->with('error', 'Data Metode Pembayaran tidak ditemukan');
         }
         $dataShow = [
             'userAuth' => array_merge(MetodePembayaran::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'mepeData' => $mepeData,
+            'metodePembayaranData' => $metodePembayaranData,
         ];
         return view('page.metode-pembayaran.edit',$dataShow);
     }

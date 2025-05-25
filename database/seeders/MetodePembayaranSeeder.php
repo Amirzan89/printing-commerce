@@ -2,6 +2,7 @@
 namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\MetodePembayaran;
+use Illuminate\Support\Str;
 class MetodePembayaranSeeder extends Seeder
 {
     private static $tempFile;
@@ -12,6 +13,7 @@ class MetodePembayaranSeeder extends Seeder
     {
         return [
             [
+                'uuid' => Str::uuid(),
                 'nama_metode_pembayaran' => 'BRI',
                 'no_metode_pembayaran' => '973530284542',
                 'deskripsi_1'=> 'fwffw',
@@ -20,6 +22,7 @@ class MetodePembayaranSeeder extends Seeder
                 'icon' => '1.jpeg',
             ],
             [
+                'uuid' => Str::uuid(),
                 'nama_metode_pembayaran' => 'BCA',
                 'no_metode_pembayaran' => '973530284542',
                 'deskripsi_1'=> 'fwffw',
@@ -28,6 +31,7 @@ class MetodePembayaranSeeder extends Seeder
                 'icon' => '1.jpeg',
             ],
             [
+                'uuid' => Str::uuid(),
                 'nama_metode_pembayaran' => 'GOPAY',
                 'no_metode_pembayaran' => '973530284542',
                 'deskripsi_1'=> 'fwffw',

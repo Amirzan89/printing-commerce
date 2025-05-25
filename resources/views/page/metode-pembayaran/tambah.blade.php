@@ -15,7 +15,7 @@ $tPath = app()->environment('local') ? '' : '';
     <link rel="stylesheet" href="{{ asset($tPath.'assets/css/styles.min.css') }}" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/popup.css') }}" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/preloader.css') }}" />
-    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/page/tambahAdmin.css') }}" />
+    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/page/tambahMetodePembayaran.css') }}" />
 </head>
 
 <body>
@@ -55,56 +55,28 @@ $tPath = app()->environment('local') ? '' : '';
                 <div class="d-flex align-items-stretch" style="background-color: #ffffff; border-radius: 20px;">
                     <form id="tambahForm">
                         <div class="crow">
-                            <label for="">Nama Lengkap</label>
+                            <label for="">Nama Rekening</label>
                             <input type="text" id="inpNama">
                         </div>
                         <div class="crow">
-                            <div style="width: 20%">
-                                <label for="">Jenis Kelamin</label>
-                                <select aria-label="Default select example" id="inpJenisKelamin">
-                                    <option value="" selected>Pilih Kelamin</option>
-                                    <option value="laki-laki">Laki-Laki</option>
-                                    <option value="perempuan">Perempuan</option>
-                                </select>
-                            </div>
-                            <div style="width: 25%">
-                                <label>Role</label>
-                                <select name="role" aria-label="Default select example" id="inpRole">
-                                    <option value="" disabled selected>Pilih Role</option>
-                                    <option value="admin disi">Admin Disi</option>
-                                    <option value="admin emotal">Admin Emotal</option>
-                                    <option value="admin nutrisi">Admin Nutrisi</option>
-                                    <option value="admin pengasuhan">Admin Pengasuhan</option>
-                                </select>
-                            </div>
-                            <div style="flex: 1">
-                                <label for="">Nomer Telepon</label>
-                                <input type="text" id="inpNomerTelepon">
-                            </div>
+                            <label for="">No Rekening</label>
+                            <input type="text" id="inpNoRekening">
                         </div>
                         <div class="crow">
-                            <div>
-                                <label for="">Email</label>
-                                <input type="text" id="inpEmail">
-                            </div>
-                            <div>
-                                <label for="">Password</label>
-                                <div style="position: relative">
-                                    <input type="password" id="inpPassword" style="padding-right: 45px;" oninput="showEyePass()">
-                                    <div id="iconPass" onclick="showPass()" style="display: none;">
-                                        <img src="{{ asset($tPath.'assets2/icon/eye-slash.svg') }}" alt="" id="passClose">
-                                        <img src="{{ asset($tPath.'assets2/icon/eye.svg') }}" alt="" id="passShow" style="display: none">
-                                    </div>
-                                </div>
-                            </div>
+                            <label for="">Deskripsi 1</label>
+                            <input type="text" id="inpDeskripsi1">
                         </div>
-                        <div class="img" onclick="handleFileClick()" ondragover="handleDragOver(event)"
+                        <div class="crow">
+                            <label for="">Deskripsi 2</label>
+                            <input type="text" id="inpDeskripsi2">
+                        </div>
+                        {{-- <div class="img" onclick="handleFileClick()" ondragover="handleDragOver(event)"
                             ondrop="handleDrop(event)">
                             <img src="{{ asset($tPath.'assets2/icon/upload.svg') }}" alt="" id="icon">
                             <span>Pilih File atau Jatuhkan File</span>
                             <input type="file" id="inpFoto" hidden onchange="handleFileChange(event)">
                             <img src="" alt="" id="file" style="display:none">
-                        </div>
+                        </div> --}}
                         <div class="crow">
                             <a href="/admin" class="btn btn-danger">Kembali</a>
                             <button type="submit" class="btn btn-success">
@@ -127,7 +99,7 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets/js/app.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
-    <script src="{{ asset($tPath.'assets2/js/page/tambahAdmin.js') }}"></script>
+    <script src="{{ asset($tPath.'assets2/js/page/tambahMetodePembayaran.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
 </body>
 </html>

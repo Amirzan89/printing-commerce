@@ -1,18 +1,19 @@
 <?php
 ?>
-<aside class="left-sidebar" style="background-color: #38AD5E">
+<aside class="left-sidebar" style="background-color: #38AD5E;">
     <!-- Sidebar scroll-->
-    <div class="brand-logo d-flex flex-row align-items-center justify-content-between" style="width: 50%">
-        <a href="/dashboard" class="text-nowrap logo-img" style="display: flex; gap: 10px; align-items:center; width: 100%">
-            <img src="{{ asset($tPath.'assets2/img/logo.png') }}" alt="" style="width: 100px; height:50px;"></img>
-            <span class="hide-menu text-white text-decoration-none" style="font-size:27px; font-weight:600;">Solusi Cerdas Design Cepat</span>
+    <div class="brand-logo d-flex align-items-center justify-content-center">
+        <a href="/dashboard" class="text-nowrap logo-img position-relative">
+            <img src="{{ asset($tPath.'assets2/img/logo.png') }}" alt="" class="position-relative" style="width: 180px; height:100px; left: 50%; transform: translate(-50%, 0%);"></img>
+            <span class="hide-menu position-absolute text-white text-decoration-none" style="top: 87%; left: 50%; transform: translate(-50%, -50%); font-size:15px; font-weight:600;">Solusi Cerdas Design Cepat</span>
         </a>
         <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
             <i class="ti ti-x fs-8"></i>
         </div>
     </div>
+    <!-- End Sidebar scroll-->
     <!-- Sidebar navigation-->
-    <nav class="sidebar-nav scroll-sidebar" data-simplebar="" style="margin-top: 15px">
+    <nav class="sidebar-nav scroll-sidebar" data-simplebar="" style="margin-top: 40px">
         <ul id="sidebarnav" style="display:flex; flex-direction: column; gap: 2px;">
             <li class="sidebar-item {{ $nav == 'dashboard' ? 'selected' : ''}}">
                 <a class="sidebar-link {{ $nav == 'dashboard' ? 'active' : ''}}" href="/dashboard"
@@ -21,7 +22,6 @@
                     <span class="hide-menu text-white">Dashboard</span>
                 </a>
             </li>
-
             @if($userAuth['role'] == 'super_admin' || $userAuth['role'] == 'admin')
             <li class="sidebar-item {{ $nav == 'jasa' ? 'selected' : ''}}">
                 <a class="sidebar-link {{ $nav == 'jasa' ? 'active' : ''}}" href="/jasa" aria-expanded="false">
@@ -60,7 +60,9 @@
         </ul>
     </nav>
     <!-- End Sidebar navigation -->
-    <!-- End Sidebar scroll-->
+    <div class="sidebar-footer">
+        <a href="#" class="btn btn-outline-primary mx-3 mt-2 d-block" onclick="logout()">Logout</a>
+    </div>
 </aside>
 <script>
     const sidebarItems = document.querySelectorAll('.sidebar-item');
@@ -80,4 +82,25 @@
             });
         }
     });
+    function logout(){
+        var xhr = new XMLHttpRequest();
+        var requestBody = {
+            email: email,
+            number:number
+        };
+        //open the request
+        xhr.open('POST', "/admin/logout");
+        xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        //send the form data
+        xhr.send(JSON.stringify(requestBody));
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    window.location.reload();
+                } else {
+                }
+            }
+        }
+    }
 </script>

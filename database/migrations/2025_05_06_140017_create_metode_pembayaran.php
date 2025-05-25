@@ -8,6 +8,7 @@ return new class extends Migration
     {
         Schema::create('metode_pembayaran', function (Blueprint $table) {
             $table->id('id_metode_pembayaran');
+            $table->uuid('uuid');
             $table->string('nama_metode_pembayaran', 12);
             $table->string('no_metode_pembayaran', 20);
             $table->string('deskripsi_1', 500);

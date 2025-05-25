@@ -2,10 +2,11 @@
 namespace App\Http\Controllers\Page;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Admin;
-use App\Models\Pesanan;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Http\Controllers\UtilityController;
+use App\Models\Admin;
+use App\Models\Pesanan;
 class AdminController extends Controller
 {
     public function showDashboard(Request $request){
@@ -23,7 +24,7 @@ class AdminController extends Controller
 
         $salesData = [];
         for ($month = 1; $month <= 12; $month++) {
-            $monthData = $monthlyTotals->first(function($item) use ($month) {
+            $monthData = $monthlyTotals->first(function($item) use ($month){
                 return $item->month == $month;
             });
             $salesData[] = $monthData ? $monthData->total : 0;
@@ -68,16 +69,17 @@ class AdminController extends Controller
                     ];
                 }),
             'monthly_sales' => $salesData,
+            'headerData' => UtilityController::getHeaderData(),
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
         ];
         return view('page.dashboard',$dataShow);
     }
-    public function showProfile(Request $request){
-        $dataShow = [
-            'userAuth' => $request->user(),
-        ];
-        return view('page.profile',$dataShow);
-    }
+    // public function showProfile(Request $request){
+    //     $dataShow = [
+    //         'userAuth' => $request->user(),
+    //     ];
+    //     return view('page.profile',$dataShow);
+    // }
     //only admin
     public function showAll(Request $request){
         $adminData = Admin::select('admin.uuid', 'admin.nama_admin', 'auth.email', 'auth.role')->join('auth', 'admin.id_auth', '=', 'auth.id_auth')->whereNotIn('auth.role', ['admin', 'super admin'])->whereNotIn('auth.id_auth', $request->user()['id_auth'])->get();
