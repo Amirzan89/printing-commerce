@@ -173,17 +173,16 @@ $tPath = app()->environment('local') ? '' : '';
     @endif
     <script>
     const domain = window.location.protocol + '//' + window.location.hostname + ":" + window.location.port;
-    const reff = '/disi';
+    const reff = '/jasa';
     var csrfToken = "{{ csrf_token() }}";
-    var email = "{{ $userAuth['email'] }}";
-    var number = "{{ $userAuth['number'] }}";
+    var userAuth = @json($userAuth);
     </script>
     <!--  Body Wrapper -->
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
         data-sidebar-position="fixed" data-header-position="fixed">
         <!-- Sidebar Start -->
         @php
-            $nav = 'disi';
+            $nav = 'jasa';
         @endphp
         @include('components.admin.sidebar')
         <!--  Sidebar End -->
@@ -198,8 +197,7 @@ $tPath = app()->environment('local') ? '' : '';
                 </div>
                 <div class="d-flex align-items-stretch">
                     <div class="card w-100">
-                        <div class="card-body p-4"
-                            style="box-shadow: rgba(145,158,171,0.2) 0px 0px 2px 0px, rgba(145,158,171,0.12) 0px 12px 24px -4px;">
+                        <div class="card-body p-4" style="box-shadow: rgba(145,158,171,0.2) 0px 0px 2px 0px, rgba(145,158,171,0.12) 0px 12px 24px -4px;">
                             <a href="/jasa/tambah" class="btn btn-success" id="btnTambah">
                                 <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="">
                                 <span>Tambah Jasa</span>
@@ -215,7 +213,7 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <h6 class="fw-semibold mb-0">Judul</h6>
                                             </th>
                                             <th class="border-bottom-0">
-                                                <h6 class="fw-semibold mb-0">Rentang Usia</h6>
+                                                <h6 class="fw-semibold mb-0">Kategori</h6>
                                             </th>
                                             <th class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">Aksi</h6>
@@ -224,20 +222,20 @@ $tPath = app()->environment('local') ? '' : '';
                                     </thead>
                                     <tbody>
                                         @php $no = 1; @endphp
-                                        @foreach ($dataJasa as $data)
+                                        @foreach ($jasaData as $data)
                                         <tr>
                                             <td class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">{{ $no++ }}</h6>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <span class="fw-normal">{{ $data['judul'] }}
+                                                <span class="fw-normal">{{ $data['nama_jasa'] }}
                                                 </span>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <p class="mb-0 fw-normal">{{ $data['rentang_usia']}}</p>
+                                                <p class="mb-0 fw-normal">{{ $data['kategori']}}</p>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <a href="/disi/edit/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1">
+                                                <a href="/jasa/edit/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1">
                                                     <img src="{{ asset($tPath.'assets2/icon/edit.svg') }}" alt="">
                                                     <span>Edit</span>
                                                 </a>
@@ -271,7 +269,6 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets/js/app.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
-    <script src="{{ asset($tPath.'assets/js/dashboard.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/page/modalDelete.js') }}"></script>
 </body>

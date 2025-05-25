@@ -9,8 +9,8 @@ class JasaController extends Controller
 {
     public function showAll(Request $request){
         $dataShow = [
-            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
             'jasaData' => Jasa::select('nama_jasa', 'kategori')->get(),
+            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
         ];
         return view('page.jasa.data',$dataShow);
     }

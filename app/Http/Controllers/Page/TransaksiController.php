@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Page;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Services\TransaksiController AS ServiceTransaksiController;
 class TransaksiController extends Controller
 {
     public function showData(Request $request){

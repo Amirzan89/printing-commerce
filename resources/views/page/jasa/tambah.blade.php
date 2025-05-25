@@ -13,9 +13,9 @@ $tPath = app()->environment('local') ? '' : '';
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets/css/styles.min.css') }}" />
-    <link rel="stylesheet" href="{{ asset($tPath.'css/popup.css') }}" />
-    <link rel="stylesheet" href="{{ asset($tPath.'css/preloader.css') }}" />
-    <link rel="stylesheet" href="{{ asset($tPath.'css/page/tambahData.css') }}" />
+    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/popup.css') }}" />
+    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/preloader.css') }}" />
+    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/page/tambahJasa.css') }}" />
 </head>
 
 <body>
@@ -30,17 +30,16 @@ $tPath = app()->environment('local') ? '' : '';
     @endif
     <script>
     const domain = window.location.protocol + '//' + window.location.hostname + ":" + window.location.port;
-    const reff = '/disi';
+    const reff = '/jasa';
     var csrfToken = "{{ csrf_token() }}";
-    var email = "{{ $userAuth['email'] }}";
-    var number = "{{ $userAuth['number'] }}";
+    var userAuth = @json($userAuth);
     </script>
     <!--  Body Wrapper -->
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
         data-sidebar-position="fixed" data-header-position="fixed">
         <!-- Sidebar Start -->
         @php
-            $nav = 'disi';
+            $nav = 'jasa';
         @endphp
         @include('components.admin.sidebar')
         <!--  Sidebar End -->
@@ -57,43 +56,54 @@ $tPath = app()->environment('local') ? '' : '';
                     style="background-color: #ffffff; border-radius: 20px; box-shadow: rgba(145,158,171,0.2) 0px 0px 2px 0px, rgba(145,158,171,0.12) 0px 12px 24px -4px;">
                     <form id="tambahForm">
                         <div class="crow">
-                            <label for="">Judul Jasa</label>
-                            <input type="text" id="inpJudul">
+                            <label for="inpGambar">Gambar Jasa</label>
+                            <button class="btn btn-success">Tambah Baru</button>
                         </div>
-                        <div class="crow">
-                            <div>
-                                <label for="">Rentang Usia</label>
-                                <select class="" aria-label="Default select example" id="inpRentangUsia">
-                                    <option value="" selected>Pilih Umur</option>
-                                    <option value="0-3 tahun">0-3 Tahun</option>
-                                    <option value="4-6 tahun">4-6 Tahun</option>
-                                    <option value="7-9 tahun">7-9 Tahun</option>
-                                    <option value="10-12 tahun">10-12 Tahun</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="">Link Video</label>
-                                <input type="text" id="inpLinkVideo">
-                            </div>
-                        </div>
-                        <div class="crow">
-                            <label for="">Deskripsi</label>
-                            <textarea name="deskripsi" id="inpDeskripsi" placeholder="Masukkan Isi Jasa"
-                                class="" style="height:120px"></textarea>
-                        </div>
-                        <div class="img" onclick="handleFileClick()" ondragover="handleDragOver(event)"
+                        {{-- <div class="img" onclick="handleFileClick()" ondragover="handleDragOver(event)"
                             ondrop="handleDrop(event)">
-                            <img src="{{ asset($tPath.'img/icon/upload.svg') }}" alt="" id="icon">
+                            <img src="{{ asset($tPath.'assets2/icon/upload.svg') }}" alt="" id="icon">
                             <span>Pilih File atau Jatuhkan File</span>
                             <input type="file" id="inpFoto" hidden onchange="handleFileChange(event)">
                             <img src="" alt="" id="file" style="display:none">
+                        </div> --}}
+                        <div class="crow">
+                            <label for="">Nama Jasa</label>
+                            <input type="text" id="inpJudul">
                         </div>
                         <div class="crow">
-                            <a href="/disi" class="btn btn-danger">Kembali</a>
+                            <label for="">Deskripsi Jasa</label>
+                            <textarea name="deskripsi" id="inpDeskripsi" placeholder="Masukkan Deskripsi Jasa" class="" style="height:120px"></textarea>
+                        </div>
+                        <div class="crow">
+                            <label for="">Kelas Jasa</label>
+                            <select class="" aria-label="Default select example" id="inpKelasJasa">
+                                <option value="" selected>Pilih Kelas Jasa</option>
+                                <option value="printing">Printing</option>
+                                <option value="desain">Desain</option>
+                            </select>
+                        </div>
+                        <div class="crow">
+                            <label for="">Harga Jasa</label>
+                            <input type="number" id="inpHarga">
+                        </div>
+                        <div class="crow">
+                            <label for="">Deskripsi Singkat</label>
+                            <textarea name="deskripsiSingkat" id="inpDeskripsiSingkat" placeholder="Masukkan Deskripsi Singkat" class="" style="height:120px"></textarea>
+                        </div>
+                        <div class="crow">
+                            <label for="">Waktu Pengerjaan</label>
+                            <input type="date" id="inpWaktuPengerjaan">
+                        </div>
+                        <div class="crow">
+                            <label for="">Total Revisi</label>
+                            <input type="number" id="inpTotalRevisi">
+                        </div>
+                        <div class="crow">
                             <button type="submit" class="btn btn-success">
-                                <img src="{{ asset($tPath.'img/icon/tambah.svg') }}" alt="" width="30" height="30">
+                                <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="" width="30" height="30">
                                 <span>Tambah</span>
                             </button>
+                            <a href="/jasa" class="btn btn-danger">Kembali</a>
                         </div>
                     </form>
                 </div>
@@ -110,9 +120,7 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets/js/app.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
-    <script src="{{ asset($tPath.'assets/js/dashboard.js') }}"></script>
-    <script src="{{ asset($tPath.'js/page/tambahData.js') }}"></script>
-    <script src="{{ asset($tPath.'js/popup.js') }}"></script>
+    <script src="{{ asset($tPath.'assets2/js/page/tambahJasa.js') }}"></script>
+    <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
 </body>
-
 </html>
