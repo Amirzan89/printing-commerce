@@ -10,7 +10,7 @@ return new class extends Migration
             $table->id('id_pesanan');
             $table->uuid();
             $table->string('deskripsi');
-            $table->enum('status', ['pending', 'proses', 'revisi', 'selesai', 'dibatalkan']);
+            $table->enum('status', ['menunggu', 'proses', 'dikerjakan', 'revisi', 'selesai', 'dibatalkan']);
             $table->enum('status_pembayaran', ['belum_bayar', 'menunggu_konfirmasi', 'lunas']);
             $table->unsignedInteger('total_harga');
             $table->dateTime('estimasi_waktu');

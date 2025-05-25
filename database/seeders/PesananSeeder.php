@@ -16,17 +16,20 @@ class PesananSeeder extends Seeder
     {
         $jsonData = json_decode(file_get_contents(self::$tempFile), true);
         for($i = 1; $i <= 100; $i++){
+            $now = Carbon::now();
             $idPesanan = Pesanan::insertGetId([
                 'uuid' =>  Str::uuid(),
                 'deskripsi' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis consequuntur praesentium quod delectus maiores non nostrum qui blanditiis odio optio adipisci illum dignissimos quidem iure, placeat incidunt tempore doloribus odit.',
-                'status' => ['pending', 'proses', 'revisi', 'selesai', 'dibatalkan'][rand(0,4)],
+                'status' => ['menunggu', 'proses', 'dikerjakan', 'revisi', 'selesai', 'dibatalkan'][rand(0,5)],
                 'status_pembayaran' => ['belum_bayar', 'menunggu_konfirmasi', 'lunas'][rand(0,2)],
                 'total_harga' => 500000,
-                'estimasi_waktu' => Carbon::now(),
+                'estimasi_waktu' => $now,
                 'jumlah_revisi' => 5,
                 'id_user' => $jsonData['user'][rand(0, 40)],
                 'id_jasa' => $jsonData['jasa'][rand(0, 2)],
                 'id_paket_jasa' => $jsonData['paket_jasa'][rand(0, 5)],
+                'created_at' => $now,
+                'updated_at' => $now
             ]);
             $idPesanans[] = $idPesanan;
         }
