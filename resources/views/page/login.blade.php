@@ -13,7 +13,7 @@ if(app()->environment('local')){
     <!-- Favicons -->
     <link href="{{ asset($tPath.'assets2/img/logo.png') }}" rel="icon">
     <link href="{{ asset($tPath.'assets2/img/logo.png') }}" rel="apple-touch-icon">
-    <title>Profile | TATA</title>
+    <title>Login | TATA</title>
     <link rel="stylesheet" href="{{ asset($tPath.'assets/css/styles.min.css') }}">
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/popup.css') }}">
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/preloader.css') }}" />
@@ -45,65 +45,78 @@ if(app()->environment('local')){
     <script>
     var csrfToken = "{{ csrf_token() }}";
     @if(isset($logout))
-    var logoutt = "{{$logout}}";
+    var logoutt = "{{$logout}}";    
     showPopup(logoutt);
     @endif
     </script>
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full" data-sidebar-position="fixed" data-header-position="fixed">
-        <div class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center">
-            <div class="d-flex align-items-center justify-content-center w-100">
-                <div class="row justify-content-center w-100">
-                    <divc class="col-md-8 col-lg-6 col-xxl-3">
-                        <div class="card mb-0">
-                            <main class="card-body">
-                                <div class="relative">
-                                    <svg width="616" height="840" viewBox="0 0 616 840" fill="none" xmlns="http://www.w3.org/2000/svg" class="relative z-0 left-0 top-0">
-                                        <path d="M579 187.5C598.2 137.5 507.5 41.5 461 0C376.667 0 94.9002 0.500018 48.5002 0.500008C13.5002 0.5 -0.065952 10.5 0.000240942 40C0.500241 262.833 0.500275 731.187 0.500275 786C0.500275 818 3.50027 839.5 39.0003 839.5C160.334 839.5 514.7 839 541.5 839C575 839 590 688.5 579 634C568 579.5 579 568.5 608 513.5C637 458.5 579 363 556.5 335.5C534 308 555 250 579 187.5Z" fill="url(#paint0_linear_232_2910)"/>
-                                        <defs>
-                                        <linearGradient id="paint0_linear_232_2910" x1="465.5" y1="14.4999" x2="31.0004" y2="820.5" gradientUnits="userSpaceOnUse">
-                                        <stop stop-color="#53C879"/>
-                                        <stop offset="1" stop-color="#239849"/>
-                                        </linearGradient>
-                                        </defs>
-                                    </svg>
-                                    <div class="absolute z-10">
-                                        <img src="" alt="">
-                                        <p>Solusi Cerdas Design Cepat</p>
-                                    </div>
-                                    <div class="absolute w-1/2 -translate-x-1/2 z-10">
-                                        <h2>Selamat Datang!</h2>
-                                        <p>Masukkan User anda dan Password untuk akses</p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div>
-                                        <h3>Login Admin</h3>
-                                    </div>
-                                    <form action="" id="loginForm">
-                                        <div class="col-12">
-                                            <label for="inpEmail">Email</label>
-                                            <input type="text" id="inpEmail" class="rounded-2xl">
-                                        </div>
-                                        <div class="relative">
-                                            <input id="inpPassword" type="password" class="form-control" id="exampleInputPassword1" style="padding-right: 45px;" oninput="showEyePass()">
-                                            <div id="iconPass" onclick="showPass()" style="display: none;">
-                                                <img src="{{ asset($tPath.'assets2/icon/eye-slash.svg') }}" alt="" id="passClose">
-                                                <img src="{{ asset($tPath.'assets2/icon/eye.svg') }}" alt="" id="passShow" style="display: none">
-                                            </div>
-                                        </div>
-                                        <input type="submit" class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2" value="Masuk">
-                                    </form>
-                                </div>
-                            </main>
-                        </div>
-                    </divc>
+        <div class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center bg-warning">
+            <main class="d-flex bg-white rounded-5" style="width: 80%">
+                <div class="position-relative" style="width: 40%;">
+                    <div id="login-content"></div>
+                    <div id="logo-content" class="position-absolute z-10 d-flex justify-content-center align-items-center flex-column-reverse" style="top: 20%; left: 50%; transform: translate(-50%, -50%);">
+                        <p class="text-white">Solusi Cerdas Design Cepat</p>
+                    </div>
+                    <div class="position-absolute z-10" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <h2 class="text-white fs-5">Selamat Datang!</h2>
+                        <p class="text-white">Masukkan User anda dan Password untuk akses</p>
+                    </div>
                 </div>
-            </div>
+                <div class="" style="width: 60%;">
+                    <div class="position-relative" style="width: 50%; top: 50%; left: 60%; transform: translate(-50%, -50%);">
+                        <h3>Login Admin</h3>
+                        <form action="" id="loginForm">
+                            <div class="row">
+                                <div class="position-relative col-12 mb-3">
+                                    <input type="text" id="inpEmail" class="form-control rounded-3" style="padding-left: 45px;" required placeholder="Email">
+                                    <img src="{{ asset($tPath.'assets2/icon/login/inpEmail.png') }}" alt="" style="position: absolute; top: 50%; transform: translateY(-50%); left: 10px;">
+                                </div>
+                                <div class="position-relative col-12 mb-4">
+                                    <input id="inpPassword" type="password" class="form-control rounded-3" style="padding-left: 45px; padding-right: 45px;" oninput="showEyePass()" required placeholder="Password">
+                                    <img src="{{ asset($tPath.'assets2/icon/login/inpPassword.png') }}" alt="" style="position: absolute; top: 50%; transform: translateY(-50%); left: 10px;">
+                                    <div id="iconPass" onclick="showPass()" style="display: none;">
+                                        <img src="{{ asset($tPath.'assets2/icon/eye-slash.svg') }}" alt="" id="passClose">
+                                        <img src="{{ asset($tPath.'assets2/icon/eye.svg') }}" alt="" id="passShow" style="display: none">
+                                    </div>
+                                </div>
+                                <input type="submit" class="position-relative btn btn-primary py-8 fs-4 mb-4 rounded-3" style="width: 40%; left: 50%; transform: translate(-50%, 0);" value="Login">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
     @include('components.preloader')
     <div id="greenPopup" style="display:none"></div>
     <div id="redPopup" style="display:none"></div>
+    <script>
+        function loadSVG(svgFile, targetElement){
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', svgFile, true);
+            xhr.onload = function(){
+                if (xhr.status === 200) {
+                    targetElement.innerHTML += xhr.responseText.replace(/width="[^"]*"/, '').replace(/height="[^"]*"/, '');
+                }
+            };
+            xhr.onerror = function(){
+                console.error('Error loading SVG');
+            };
+            xhr.send();
+        }
+        document.addEventListener('DOMContentLoaded', function(){
+            const loginContent = document.querySelector('#login-content');
+            const loginPath = "{{ asset($tPath.'assets2/icon/login/login.svg') }}";
+            if(loginContent){
+                loadSVG(loginPath, loginContent);
+            }
+            const logoContent = document.querySelector('#logo-content');
+            const logoPath = "{{ asset($tPath.'assets2/icon/logo.svg') }}";
+            if(logoContent){
+                loadSVG(logoPath, logoContent);
+            }
+        });
+    </script>
     <script src="{{ asset($tPath.'assets/libs/jquery/dist/jquery.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/page/login.js') }}"></script>
