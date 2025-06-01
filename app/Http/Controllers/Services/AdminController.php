@@ -274,8 +274,8 @@ class AdminController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Data Admin berhasil dihapus']);
     }
     public function logout(Request $rt){
-        $rt->user();
-        return response()->json(['status' => 'success', 'message' => '']);
+        $rt->user()->currentAccessToken()->delete();
+        return response()->json(['status' => 'success', 'message' => 'Logout berhasil silahkan login kembali']);
     }
 }
 ?>

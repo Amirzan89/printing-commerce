@@ -13,10 +13,6 @@ class User extends Model
     protected $fillable = [
         'uuid', 'nama_user', 'jenis_kelamin', 'no_telpon', 'alamat', 'no_rekening', 'email_verified_at', 'created_at', 'updated_at', 'id_auth'
     ];
-    public function fromRefreshTokenUser()
-    {
-        return $this->hasMany(RefreshTokenUser::class, 'id_refresh_token_user');
-    }
     public function fromVerifikasi()
     {
         return $this->hasMany(VerifikasiUser::class, 'id_verifikasi_user');

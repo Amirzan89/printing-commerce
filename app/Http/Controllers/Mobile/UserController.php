@@ -4,41 +4,118 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Auth;
-use App\Models\User;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\UtilityController;
+use App\Models\User;
 use Illuminate\Support\Str;
 class UserController extends Controller
 {
-    public function register(Request $request){
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
-        $auth = Auth::create([
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
-        $user->id_auth = $auth->id_auth;
-        $user->save();
-        return response()->json(['status' => 'success', 'message' => 'User registered successfully. Please login to continue.']);
-    }
+    /**
+     * Mobile app login - generates API token for Sanctum authentication
+     */
     public function login(Request $request){
-        $credentials = $request->validate([
-            'email' => ['required'],
-            'password' => ['required'],
+        $validator = Validator::make($request->only('email','password'), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ], [
+            'email.required' => 'Email wajib di isi',
+            'email.email' => 'Email yang anda masukkan invalid',
+            'password.required' => 'Password wajib di isi',
         ]);
-        $auth = Auth::where('email', $credentials['email'])->first();
-        if(!$auth || !Hash::check($credentials['password'],$auth->password)){
+        
+        if ($validator->fails()) {
+            $errors = [];
+            foreach ($validator->errors()->toArray() as $field => $errorMessages) {
+                $errors[$field] = $errorMessages[0];
+                break;
+            }
+            return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
+        }
+        
+        $auth = Auth::where('email', $request->input('email'))->first();
+        if(!$auth || !Hash::check($request->input('password'), $auth->password)){
             return response()->json(['status' => 'error', 'message' => 'Invalid Credentials'], 401);
         }
-        $token = $auth->createToken($auth->name.'-AuthToken')->plainTextToken;
-        return response()->json(['status'=>'success', 'message' => 'berhasil login', 'access_token' => $token]);
+        
+        // Get user details
+        $user = User::where('id_auth', $auth->id_auth)->first();
+        
+        // Create token with abilities for mobile app
+        $token = $auth->createToken('mobile-auth-token', ['mobile-access'])->plainTextToken;
+        
+        // Return token with user info
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Login berhasil',
+            'data' => [
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => [
+                    'id' => $user->uuid,
+                    'name' => $user->nama_user,
+                    'email' => $auth->email,
+                    'role' => $auth->role
+                ]
+            ]
+        ]);
+    }
+
+    public function register(Request $request){
+        $validator = Validator::make($request->only('email', 'nama_user', 'password', 'password_confirmation'), [
+            'email'=>'required|email',
+            'nama_user' => 'required|min:3|max:50',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'max:25',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\p{P}\p{S}])[\p{L}\p{N}\p{P}\p{S}]+$/u',
+            ],
+            'password_confirmation' => 'required|same:password',
+        ],[
+            'email.required'=>'Email wajib di isi',
+            'email.email'=>'Email yang anda masukkan invalid',
+            'nama_user.required' => 'Nama user wajib di isi',
+            'nama_user.min'=>'Nama user minimal 3 karakter',
+            'nama_user.max' => 'Nama user maksimal 50 karakter',
+            'password.required'=>'Password wajib di isi',
+            'password.min'=>'Password minimal 8 karakter',
+            'password.max'=>'Password maksimal 25 karakter',
+            'password.regex'=>'Password terdiri dari 1 huruf besar, huruf kecil, angka dan karakter unik',
+            'password_confirmation.required'=>'Password confirmation wajib di isi',
+            'password_confirmation.same'=>'Password confirmation tidak sama dengan password',
+        ]);
+        if($validator->fails()){
+            $errors = [];
+            foreach($validator->errors()->toArray() as $field => $errorMessages){
+                $errors[$field] = $errorMessages[0];
+                break;
+            }
+            return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
+        }
+        if(Auth::select("email")->whereRaw("BINARY email = ?",[$request->input('email')])->exists()){
+            return response()->json(['status'=>'error','message'=>'Email sudah digunakan'],400);
+        }
+        $idAuth = Auth::insertGetId([
+            'email' => $request->input('email'),
+            'password' => Hash::make($request->input('password')),
+            'role'=> 'user',
+        ]);
+        $ins = User::insert([
+            'uuid' =>  Str::uuid(),
+            'nama_user' => $request->input('nama_user'),
+            'id_auth' => $idAuth,
+        ]);
+        if(!$ins){
+            return response()->json(['status'=>'error','message'=>'Gagal register'], 500);
+        }
+        return response()->json(['status' => 'success', 'message' => 'Register berhasil. Silahkan login untuk melanjutkan.']);
+    }
+    public function dashboard(Request $request){
+        $dataShow = [
+            'userAuth' => array_merge(User::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
+        ];
+        return response()->json($dataShow);
     }
     public function update(Request $request){
         $user = User::where('id_auth', $request->user()->id_auth)->first();
@@ -46,6 +123,7 @@ class UserController extends Controller
         $user->save();
         return response()->json(['status' => 'success', 'message' => 'User updated successfully']);
     }
+    
     public function delete(Request $request){
         $user = User::where('id_auth', $request->user()->id_auth)->first();
         $user->delete();
@@ -118,6 +196,7 @@ class UserController extends Controller
         }
         return response()->json(['status' => 'success', 'message' => 'Data User berhasil ditambahkan']);
     }
+    
     //from admin
     public function deleteUser(Request $rt){
         $validator = Validator::make($rt->only('uuid'), [
@@ -143,12 +222,14 @@ class UserController extends Controller
         }
         return response()->json(['status' => 'success', 'message' => 'Data User berhasil dihapus']);
     }
+    
     public function logout(Request $request){
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['status' => 'success', 'message' => 'Logged out from current device']);
+        return response()->json(['status' => 'success', 'message' => 'Logout berhasil silahkan login kembali']);
     }
+    
     public function logoutAll(Request $request){
         $request->user()->tokens()->delete();
-        return response()->json(['status' => 'success', 'message' => 'Logged out from all devices']);
+        return response()->json(['status' => 'success', 'message' => 'Berhasil logout dari semua perangkat']);
     }
 }
