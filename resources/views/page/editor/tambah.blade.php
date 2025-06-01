@@ -78,9 +78,10 @@ $tPath = app()->environment('local') ? '' : '';
                                 <label>Role</label>
                                 <select name="role" aria-label="Default select example" id="inpRole">
                                     <option value="" disabled selected>Pilih Role</option>
-                                    <option value="super_admin">Super Admin</option>
-                                    <option value="admin_chat">Admin Chat</option>
-                                    <option value="admin_pemesanan">Admin Pemesanan</option>
+                                    <option value="admin disi">Admin Disi</option>
+                                    <option value="admin emotal">Admin Emotal</option>
+                                    <option value="admin nutrisi">Admin Nutrisi</option>
+                                    <option value="admin pengasuhan">Admin Pengasuhan</option>
                                 </select>
                             </div>
                             <div style="flex: 1">

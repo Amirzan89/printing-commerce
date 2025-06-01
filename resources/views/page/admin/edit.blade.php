@@ -64,32 +64,16 @@ $tPath = app()->environment('local') ? '' : '';
                     <form id="editForm">
                         <div class="crow">
                             <label for="">Nama Lengkap</label>
-                            <input type="text" id="inpNama" value="{{ $adminData['nama_lengkap']}}">
+                            <input type="text" id="inpNama" value="{{ $adminData['nama_admin']}}">
                         </div>
                         <div class="crow">
-                            <div style="width: 20%">
-                                <label for="">Jenis Kelamin</label>
-                                <select class="" aria-label="Default select example" id="inpJenisKelamin">
-                                    <option value="laki-laki"
-                                        {{ ($adminData['jenis_kelamin'] == 'laki-laki') ? 'selected' : ''}}>Laki-Laki
-                                    </option>
-                                    <option value="perempuan"
-                                        {{ ($adminData['jenis_kelamin'] == 'perempuan') ? 'selected' : ''}}>Perempuan
-                                    </option>
-                                </select>
-                            </div>
-                            <div style="width: 25%">
+                            <div style="">
                                 <label>Role</label>
                                 <select name="role" aria-label="Default select example" id="inpRole">
-                                    <option value="admin disi" {{ ($adminData['role'] == 'admin disi') ? 'selected' : ''}}>Admin Disi</option>
-                                    <option value="admin emotal" {{ ($adminData['role'] == 'admin emotal') ? 'selected' : ''}}>Admin Emotal</option>
-                                    <option value="admin nutrisi" {{ ($adminData['role'] == 'admin nutrisi') ? 'selected' : ''}}>Admin Nutrisi</option>
-                                    <option value="admin pengasuhan" {{ ($adminData['role'] == 'admin pengasuhan') ? 'selected' : ''}}>Admin Pengasuhan</option>
+                                    <option value="super_admin" {{ ($adminData['role'] == 'super_admin') ? 'selected' : ''}}>Super Admin</option>
+                                    <option value="admin_chat" {{ ($adminData['role'] == 'admin_chat') ? 'selected' : ''}}>Admin Chat</option>
+                                    <option value="admin_pemesanan" {{ ($adminData['role'] == 'admin_pemesanan') ? 'selected' : ''}}>Admin Pemesanan</option>
                                 </select>
-                            </div>
-                            <div style="flex: 1">
-                                <label for="">Nomer Telepon</label>
-                                <input type="text" id="inpNomerTelepon" value="{{ $adminData['no_telpon']}}">
                             </div>
                         </div>
                         <div class="crow">
@@ -114,7 +98,7 @@ $tPath = app()->environment('local') ? '' : '';
                             <img src="{{ asset($tPath.'img/icon/upload.svg') }}" alt="" id="icon">
                             <span>Pilih File atau Jatuhkan File</span>
                             <input type="file" id="inpFoto" hidden onchange="handleFileChange(event)">
-                            <img src="{{ route('download.foto.admin', ['id'=>$adminData['uuid']]) }}" alt="" id="file" class="foto_admin" onerror="imgError('file')">
+                            <img src="{{ asset($tPath.'assets3/img/admin/'.$adminData['foto']) }}" alt="" id="file" class="foto_admin" onerror="imgError('file')">
                         </div>
                         <div class="crow">
                             <a href="/admin" class="btn btn-danger">Kembali</a>

@@ -70,7 +70,10 @@ class AdminController extends Controller
                 }),
             'monthly_sales' => $salesData,
             'headerData' => UtilityController::getHeaderData(),
-            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
+            'userAuth' => array_merge(
+                Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), 
+                ['role' => $request->user()['role'], 'formatted_role' => $this->formatRole($request->user()['role'])]
+            ),
         ];
         return view('page.dashboard',$dataShow);
     }
@@ -82,13 +85,22 @@ class AdminController extends Controller
     }
     //only admin
     public function showAll(Request $request){
-        $adminData = Admin::select('admin.uuid', 'admin.nama_admin', 'auth.email', 'auth.role')->join('auth', 'admin.id_auth', '=', 'auth.id_auth')->whereNotIn('auth.role', ['admin', 'super admin'])->whereNotIn('auth.id_auth', $request->user()['id_auth'])->get();
+        $adminData = Admin::select('admin.uuid', 'admin.nama_admin', 'auth.email', 'auth.role')
+            ->join('auth', 'admin.id_auth', '=', 'auth.id_auth')
+            ->whereNotIn('auth.role', ['admin', 'super admin'])
+            ->whereNotIn('auth.id_auth', [$request->user()['id_auth']])
+            ->get()
+            ->map(function($item) {
+                $item->role = ucwords(str_replace('_', ' ', $item->role));
+                return $item;
+            });
+            
         $dataShow = [
             'adminData' => $adminData ?? [],
             'headerData' => UtilityController::getHeaderData(),
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
         ];
-        return view('page.admin.data',$dataShow);
+        return view('page.admin.data', $dataShow);
     }
     public function showTambah(Request $request){
         $dataShow = [
@@ -98,7 +110,7 @@ class AdminController extends Controller
         return view('page.admin.tambah',$dataShow);
     }
     public function showEdit(Request $request, $uuid){
-        $adminData = Admin::select('uuid','nama_lengkap', 'jenis_kelamin', 'no_telpon','role', 'email', 'foto')->whereNotIn('role', ['admin'])->whereRaw("BINARY uuid = ?",[$uuid])->first();
+        $adminData = Admin::select('uuid','nama_admin', 'role', 'email', 'foto')->whereNotIn('role', ['admin'])->whereRaw("BINARY uuid = ?",[$uuid])->join('auth', 'admin.id_auth', '=', 'auth.id_auth')->first();
         if(is_null($adminData)){
             return redirect('/admin')->with('error', 'Data Admin tidak ditemukan');
         }

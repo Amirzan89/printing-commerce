@@ -13,7 +13,7 @@ class AdminController extends Controller
         $validator = Validator::make($rt->only('email', 'nama_admin', 'role', 'password', 'foto'), [
             'email'=>'required|email',
             'nama_admin' => 'required|min:3|max:50',
-            'role' => 'required|in:admin disi,admin emotal,admin nutrisi,admin pengasuhan',
+            'role' => 'required|in:super_admin,admin_chat,admin_pemesanan',
             'password' => [
                 'required',
                 'string',
@@ -74,11 +74,11 @@ class AdminController extends Controller
         return response()->json(['status'=>'success','message'=>'Data Admin berhasil ditambahkan']);
     }
     public function updateAdmin(Request $rt){
-        $validator = Validator::make($rt->only('email_old', 'email','nama_admin', 'role', 'password','foto'), [
-            'email_old'=>'required|email',
+        $validator = Validator::make($rt->only('uuid', 'email','nama_admin', 'role', 'password','foto'), [
+            'uuid'=>'required|email',
             'email'=>'nullable|email',
             'nama_admin' => 'required|min:3|max:50',
-            'role' => 'required|in:admin disi,admin emotal,admin nutrisi,admin pengasuhan',
+            'role' => 'required|in:super_admin,admin_chat,admin_pemesanan',
             'password' => [
                 'nullable',
                 'string',
@@ -88,8 +88,7 @@ class AdminController extends Controller
             ],
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ],[
-            'email_old.required'=>'Email wajib di isi',
-            'email_old.email'=>'Email yang anda masukkan invalid',
+            'uuid.required'=>'Admin ID wajib di isi',
             'email.email'=>'Email yang anda masukkan invalid',
             'nama_admin.required' => 'Nama admin wajib di isi',
             'nama_admin.min'=>'Nama admin minimal 3 karakter',
@@ -111,8 +110,8 @@ class AdminController extends Controller
             }
             return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
         }
-        $admin = Admin::select('auth.id_auth', 'auth.password', 'auth.role', 'admin.foto')->whereRaw("BINARY email = ?",[$rt->input('email_old')])->join('auth', 'admin.id_auth', '=', 'auth.id_auth')->firstOrFail();
-        if(!is_null($rt->input('email') || !empty($rt->input('email'))) && $rt->input('email') != $rt->input('email_old') && Auth::whereRaw("BINARY email = ?",[$rt->input('email')])->exists()){
+        $admin = Admin::select('auth.id_auth', 'auth.password', 'auth.role', 'admin.foto')->where('uuid',$rt->input('uuid'))->join('auth', 'admin.id_auth', '=', 'auth.id_auth')->firstOrFail();
+        if(!is_null($rt->input('email') || !empty($rt->input('email'))) && $rt->input('email') != $admin['email'] && Auth::whereRaw("BINARY email = ?",[$rt->input('email')])->exists()){
             return response()->json(['status' => 'error', 'message' => 'Email sudah digunakan'], 400);
         }
         if(!is_null($rt->input('role')) && !empty($rt->input('role')) && !in_array($rt->input('role'), ['super_admin', 'admin_chat', 'admin_pemesanan'])){
@@ -131,7 +130,7 @@ class AdminController extends Controller
             $fi->move(public_path('assets3/img/admin/'), $fh);
         }
         $uT = Auth::where('id_auth', $admin['id_auth'])->update([
-            'email' => (empty($rt->input('email')) || is_null($rt->input('email'))) ? $rt->input('email_old') : $rt->input('email'),
+            'email' => (empty($rt->input('email')) || is_null($rt->input('email'))) ? $admin['email'] : $rt->input('email'),
             'password' => (empty($rt->input('password')) || is_null($rt->input('password'))) ? $admin['password']: Hash::make($rt->input('password')),
             'role' => (empty($rt->input('role')) || is_null($rt->input('role'))) ? $admin['role'] : $rt->input('role'),
         ]);
@@ -277,6 +276,20 @@ class AdminController extends Controller
     public function logout(Request $rt){
         $rt->user();
         return response()->json(['status' => 'success', 'message' => '']);
+    }
+    public function getAdminData(Request $rt) {
+        $adminData = Admin::select('admin.uuid', 'admin.nama_admin', 'auth.email', 'auth.role')
+            ->join('auth', 'admin.id_auth', '=', 'auth.id_auth')
+            ->get()
+            ->map(function($item) {
+                $item->formatted_role = $this->formatRole($item->role);
+                return $item;
+            });
+            
+        return response()->json([
+            'status' => 'success',
+            'data' => $adminData
+        ]);
     }
 }
 ?>

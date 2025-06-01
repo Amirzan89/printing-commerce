@@ -10,7 +10,10 @@ class MetodePembayaranController extends Controller
     public function showAll(Request $request){
         $dataShow = [
             'headerData' => UtilityController::getHeaderData(),
-            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
+            'userAuth' => array_merge(
+                Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), 
+                ['role' => $request->user()['role'], 'formatted_role' => $this->formatRole($request->user()['role'])]
+            ),
             'metodePembayaranData' => MetodePembayaran::select('uuid','nama_metode_pembayaran')->get(),
         ];
         return view('page.metode-pembayaran.data',$dataShow);
@@ -18,7 +21,10 @@ class MetodePembayaranController extends Controller
     public function showTambah(Request $request){
         $dataShow = [
             'headerData' => UtilityController::getHeaderData(),
-            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
+            'userAuth' => array_merge(
+                Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), 
+                ['role' => $request->user()['role'], 'formatted_role' => $this->formatRole($request->user()['role'])]
+            ),
         ];
         return view('page.metode-pembayaran.tambah',$dataShow);
     }
@@ -29,7 +35,10 @@ class MetodePembayaranController extends Controller
         }
         $dataShow = [
             'headerData' => UtilityController::getHeaderData(),
-            'userAuth' => array_merge(MetodePembayaran::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
+            'userAuth' => array_merge(
+                Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), 
+                ['role' => $request->user()['role'], 'formatted_role' => $this->formatRole($request->user()['role'])]
+            ),
             'metodePembayaranData' => $metodePembayaranData,
         ];
         return view('page.metode-pembayaran.edit',$dataShow);

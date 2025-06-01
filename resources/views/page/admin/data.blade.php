@@ -213,7 +213,7 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <h6 class="fw-semibold mb-0">Nama Lengkap</h6>
                                             </th>
                                             <th class="border-bottom-0">
-                                                <h6 class="fw-semibold mb-0">No Telpon</h6>
+                                                <h6 class="fw-semibold mb-0">Role</h6>
                                             </th>
                                             <th class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">Email</h6>
@@ -231,11 +231,11 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <h6 class="fw-semibold mb-0">{{ $no++ }}</h6>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <span class="fw-normal">{{ $data['nama_lengkap'] }}
+                                                <span class="fw-normal">{{ $data['nama_admin'] }}
                                                 </span>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <p class="mb-0 fw-normal">{{ $data['no_telpon']}}</p>
+                                                <p class="mb-0 fw-normal">{{ $data['role'] }}</p>
                                             </td>
                                             <td class="border-bottom-0">
                                                 <p class="mb-0 fw-normal">{{ $data['email']}}</p>
