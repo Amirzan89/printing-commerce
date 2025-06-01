@@ -29,7 +29,7 @@ class ReviewController extends Controller
 
             if ($validator->fails()) {
                 return response()->json([
-                    'status' => false,
+                    'status' => 'error',
                     'message' => 'Validation error',
                     'errors' => $validator->errors()
                 ], 422);
@@ -47,7 +47,7 @@ class ReviewController extends Controller
 
             if (!$pesanan) {
                 return response()->json([
-                    'status' => false,
+                    'status' => 'error',
                     'message' => 'Order not found or not completed'
                 ], 404);
             }
@@ -56,7 +56,7 @@ class ReviewController extends Controller
             $existingReview = Review::where('id_pesanan', $request->id_pesanan)->first();
             if ($existingReview) {
                 return response()->json([
-                    'status' => false,
+                    'status' => 'error',
                     'message' => 'You have already reviewed this order'
                 ], 409);
             }
@@ -70,14 +70,14 @@ class ReviewController extends Controller
             $review->save();
 
             return response()->json([
-                'status' => true,
+                'status' => 'success',
                 'message' => 'Thank you for your review!',
                 'data' => $review
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
-                'status' => false,
+                'status' => 'error',
                 'message' => 'Failed to submit review',
                 'error' => $e->getMessage()
             ], 500);
@@ -102,13 +102,13 @@ class ReviewController extends Controller
                 ->get();
 
             return response()->json([
-                'status' => true,
+                'status' => 'success',
                 'data' => $reviews
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
-                'status' => false,
+                'status' => 'error',
                 'message' => 'Failed to fetch your reviews',
                 'error' => $e->getMessage()
             ], 500);
@@ -135,19 +135,19 @@ class ReviewController extends Controller
 
             if (!$review) {
                 return response()->json([
-                    'status' => false,
+                    'status' => 'error',
                     'message' => 'Review not found'
                 ], 404);
             }
 
             return response()->json([
-                'status' => true,
+                'status' => 'success',
                 'data' => $review
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
-                'status' => false,
+                'status' => 'error',
                 'message' => 'Failed to fetch review',
                 'error' => $e->getMessage()
             ], 500);

@@ -7,7 +7,7 @@ $tPath = app()->environment('local') ? '' : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Metode Pembayaran | TATA</title>
+    <title>Data Transaksi | TATA</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset($tPath.'assets2/icon/icon.png') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
@@ -216,7 +216,7 @@ $tPath = app()->environment('local') ? '' : '';
                                     </thead>
                                     <tbody>
                                         @php $no = 1; @endphp
-                                        @foreach ($metodePembayaranData as $data)
+                                        @foreach ($transaksiData as $data)
                                         <tr>
                                             <td class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">{{ $no++ }}</h6>

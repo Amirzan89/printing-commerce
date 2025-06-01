@@ -5,8 +5,9 @@ use App\Http\Controllers\Mobile\UserController;
 use App\Http\Controllers\Mobile\Page\HomeController;
 use App\Http\Controllers\Mobile\JasaController;
 use App\Http\Controllers\Mobile\PesananController;
-use App\Http\Controllers\Mobile\TransaksiController;
+use App\Http\Controllers\Mobile\TransaksiController as MobileTransaksiController;
 use App\Http\Controllers\Mobile\MetodePembayaranController;
+use App\Http\Controllers\Services\TransaksiController as ServicesTransaksiController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request){
     return $request->user();
 });
@@ -38,16 +39,16 @@ Route::group(['prefix'=>'/mobile','middleware'=>'authMobile','authorized'],funct
 
     //API only transaksi route
     Route::group(['prefix'=>'/transaksi'], function(){
-        Route::get('/',[TransaksiController::class,'showAll']);
-        Route::get('/detail/{any}',[TransaksiController::class,'showDetail']);
-        Route::get('/tambah',[TransaksiController::class,'showTambah']);
-        Route::get('/edit/{any}',[TransaksiController::class,'showEdit']);
+        Route::get('/',[MobileTransaksiController::class,'showAll']);
+        Route::get('/detail/{any}',[MobileTransaksiController::class,'showDetail']);
+        Route::get('/tambah',[MobileTransaksiController::class,'showTambah']);
+        Route::get('/edit/{any}',[MobileTransaksiController::class,'showEdit']);
         Route::get('/edit', function(){
             return redirect('/transaksi');
         });
-        Route::post('/create',[TransaksiController::class,'createTransaksi']);
-        Route::put('/update',[TransaksiController::class,'updateTransaksi']);
-        Route::delete('/delete',[TransaksiController::class,'deleteTransaksi']);
+        Route::post('/create',[MobileTransaksiController::class,'createTransaction']);
+        Route::put('/update',[MobileTransaksiController::class,'updateTransaction']);
+        Route::delete('/delete',[MobileTransaksiController::class,'deleteTransaction']);
     });
 
     //API only metode pembayaran route
@@ -97,5 +98,32 @@ Route::group(['middleware' => 'user.guest'], function(){
             Route::post('/password',[UserController::class, 'getChangePass']);
             Route::post('/email',[UserController::class, 'verifyEmail']);
         });
+    });
+});
+
+// Mobile API routes (authenticated users)
+Route::middleware('auth:sanctum')->prefix('mobile')->group(function () {
+    // Transaction routes
+    Route::prefix('transactions')->group(function () {
+        Route::post('/create', [MobileTransaksiController::class, 'createTransaction']);
+        Route::post('/upload-payment', [MobileTransaksiController::class, 'uploadPaymentProof']);
+        Route::get('/details/{orderId}', [MobileTransaksiController::class, 'getTransactionDetails']);
+        Route::get('/user-transactions', [MobileTransaksiController::class, 'getUserTransactions']);
+        Route::post('/cancel', [MobileTransaksiController::class, 'cancelTransaction']);
+    });
+});
+
+// Admin API routes (authenticated admins)
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    // Transaction routes
+    Route::prefix('transactions')->group(function () {
+        Route::get('/all', [ServicesTransaksiController::class, 'getAllTransactions']);
+        Route::post('/confirm-payment', [ServicesTransaksiController::class, 'confirmPayment']);
+        Route::post('/reject-payment', [ServicesTransaksiController::class, 'rejectPayment']);
+        Route::get('/stats', [ServicesTransaksiController::class, 'getTransactionStats']);
+        Route::get('/export', [ServicesTransaksiController::class, 'exportTransactions']);
+        Route::get('/details/{orderId}', [ServicesTransaksiController::class, 'getTransactionDetail']);
+        Route::get('/filter', [ServicesTransaksiController::class, 'filterTransactions']);
+        Route::get('/history', [ServicesTransaksiController::class, 'getTransactionHistory']);
     });
 });

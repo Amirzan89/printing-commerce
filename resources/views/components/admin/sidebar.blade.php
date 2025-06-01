@@ -41,11 +41,19 @@
             </li>
             @endif
 
-            <li class="sidebar-item {{ $nav == 'pembayaran' ? 'selected' : ''}}">
-                <a class="sidebar-link {{ $nav == 'pembayaran' ? 'active' : ''}}" href="/metode-pembayaran"
+            <li class="sidebar-item {{ $nav == 'metode-pembayaran' ? 'selected' : ''}}">
+                <a class="sidebar-link {{ $nav == 'metode-pembayaran' ? 'active' : ''}}" href="/metode-pembayaran"
                     aria-expanded="false">
                     <img src="{{ asset($tPath.'assets2/icon/sidebar/metode-pembayaran.svg') }}" alt="" width="30" height="30" class="white">
-                    <span class="hide-menu text-white">Kelola Pembayaran</span>
+                    <span class="hide-menu text-white">Metode Pembayaran</span>
+                </a>
+            </li>
+
+            <li class="sidebar-item {{ $nav == 'transaksi' ? 'selected' : ''}}">
+                <a class="sidebar-link {{ $nav == 'transaksi' ? 'active' : ''}}" href="/transaksi"
+                    aria-expanded="false">
+                    <img src="{{ asset($tPath.'assets2/icon/sidebar/transaksi.svg') }}" alt="" width="30" height="30" class="white">
+                    <span class="hide-menu text-white">Transaksi</span>
                 </a>
             </li>
 
