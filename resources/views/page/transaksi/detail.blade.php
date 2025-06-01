@@ -63,30 +63,55 @@ $tPath = app()->environment('local') ? '' : '';
                 <div class="d-flex align-items-stretch" style="background-color: #ffffff; border-radius: 20px;">
                     <form id="editForm">
                         <div class="crow">
-                            <label for="">Nama Lengkap</label>
+                            <label for="inpNama">Nama Lengkap</label>
                             <input type="text" id="inpNama" value="{{ $transaksiData['nama_lengkap']}}">
                         </div>
                         <div class="crow">
-                            <label for="">Jenis Kelamin</label>
-                            <input type="text" id="inpNama" value="{{ $transaksiData['nama_lengkap']}}">
+                            <label for="inpJenisKelamin">Jenis Kelamin</label>
+                            <select id="inpJenisKelamin">
+                                <option value="Laki-laki" {{ $transaksiData['jenis_kelamin'] == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+                                <option value="Perempuan" {{ $transaksiData['jenis_kelamin'] == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+                            </select>
                         </div>
                         <div class="crow">
-                            <label for="">Email</label>
-                            <input type="text" id="inpEmail" value="{{ $transaksiData['email']}}">
-                        </div>
-                        <div class="img" onclick="handleFileClick()" ondragover="handleDragOver(event)"
-                            ondrop="handleDrop(event)"
-                            style="{{ $adminData['foto'] ? '' : 'border: 4px dashed #b1b1b1;'}}">
-                            <img src="{{ asset($tPath.'img/icon/upload.svg') }}" alt="" id="icon">
-                            <span>Pilih File atau Jatuhkan File</span>
-                            <input type="file" id="inpFoto" hidden onchange="handleFileChange(event)">
-                            <img src="{{ route('download.foto.admin', ['id'=>$adminData['uuid']]) }}" alt="" id="file" class="foto_admin" onerror="imgError('file')">
+                            <label for="inpEmail">Email</label>
+                            <input type="email" id="inpEmail" value="{{ $transaksiData['email']}}">
                         </div>
                         <div class="crow">
-                            <a href="/admin" class="btn btn-danger">Kembali</a>
+                            <label for="inpNomerTelepon">Nomor Telepon</label>
+                            <input type="text" id="inpNomerTelepon" value="{{ $transaksiData['no_telpon'] ?? '' }}">
+                        </div>
+                        <div class="crow">
+                            <label for="inpStatus">Status Transaksi</label>
+                            <select id="inpStatus">
+                                <option value="Menunggu Pembayaran" {{ $transaksiData['status'] == 'Menunggu Pembayaran' ? 'selected' : '' }}>Menunggu Pembayaran</option>
+                                <option value="Proses" {{ $transaksiData['status'] == 'Proses' ? 'selected' : '' }}>Proses</option>
+                                <option value="Selesai" {{ $transaksiData['status'] == 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                                <option value="Dibatalkan" {{ $transaksiData['status'] == 'Dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
+                            </select>
+                        </div>
+                        <div class="crow">
+                            <label for="inpTanggal">Tanggal Transaksi</label>
+                            <input type="datetime-local" id="inpTanggal" value="{{ $transaksiData['tanggal'] ?? '' }}">
+                        </div>
+                        <div class="crow">
+                            <label>Bukti Pembayaran</label>
+                            <div class="img" onclick="handleFileClick()" ondragover="handleDragOver(event)"
+                                ondrop="handleDrop(event)"
+                                style="{{ $transaksiData['bukti_pembayaran'] ? '' : 'border: 4px dashed #b1b1b1;'}}">
+                                <img src="{{ asset($tPath.'img/icon/upload.svg') }}" alt="" id="icon" style="{{ $transaksiData['bukti_pembayaran'] ? 'display: none;' : '' }}">
+                                <span style="{{ $transaksiData['bukti_pembayaran'] ? 'display: none;' : '' }}">Pilih File atau Jatuhkan File</span>
+                                <input type="file" id="inpFoto" hidden onchange="handleFileChange(event)">
+                                @if($transaksiData['bukti_pembayaran'])
+                                    <img src="{{ asset($tPath . $transaksiData['bukti_pembayaran']) }}" alt="Bukti Pembayaran" id="file" class="foto_admin" onerror="imgError('file')">
+                                @endif
+                            </div>
+                        </div>
+                        <div class="crow">
+                            <a href="/transaksi" class="btn btn-danger">Kembali</a>
                             <button type="submit" class="btn btn-success">
                                 <img src="{{ asset($tPath.'img/icon/edit.svg') }}" alt="">
-                                <span>Edit</span>
+                                <span>Simpan Perubahan</span>
                             </button>
                         </div>
                     </form>
@@ -104,7 +129,7 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets/js/app.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
-    <script src="{{ asset($tPath.'assets2/js/page/editAdmin.js') }}"></script>
+    <script src="{{ asset($tPath.'assets2/js/page/editTransaksi.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
 </body>
 

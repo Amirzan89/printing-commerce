@@ -1,19 +1,21 @@
 const editForm = document.getElementById("editForm");
 const inpNama = document.getElementById("inpNama");
 const inpJenisKelamin = document.getElementById("inpJenisKelamin");
-const inpKategori = document.getElementById("inpKategori");
 const inpNomerTelepon = document.getElementById("inpNomerTelepon");
 const inpEmail = document.getElementById("inpEmail");
-const inpAlamat = document.getElementById("inpAlamat");
+const inpStatus = document.getElementById("inpStatus");
+const inpTanggal = document.getElementById("inpTanggal");
 const inpFoto = document.getElementById("inpFoto");
 const allowedFormats = ["image/jpeg", "image/png"];
 let uploadeFile = null;
+
 function showLoading() {
     document.querySelector("div#preloader").style.display = "block";
 }
 function closeLoading() {
     document.querySelector("div#preloader").style.display = "none";
 }
+
 function handleFileClick() {
     inpFoto.click();
 }
@@ -29,6 +31,8 @@ function handleFileChange(event) {
         fileReader.onload = function() {
             document.getElementById('file').src = fileReader.result;
             document.getElementById('file').style.display = 'block';
+            document.getElementById('icon').style.display = 'none';
+            document.querySelector('span').style.display = 'none';
             document.querySelector('div.img').style.border = 'none';
         };
         fileReader.readAsDataURL(uploadeFile);
@@ -49,37 +53,52 @@ function handleDrop(event) {
         const reader = new FileReader();
         reader.onload = function(event) {
             document.getElementById('file').src = event.target.result;
+            document.getElementById('file').style.display = 'block';
+            document.getElementById('icon').style.display = 'none';
+            document.querySelector('span').style.display = 'none';
+            document.querySelector('div.img').style.border = 'none';
         };
         reader.readAsDataURL(file);
-        fileImg = file;
     }
 }
 function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 }
+
+function imgError(id) {
+    document.getElementById(id).style.display = 'none';
+    document.getElementById('icon').style.display = 'block';
+    document.querySelector('span').style.display = 'block';
+    document.querySelector('div.img').style.border = '4px dashed #b1b1b1';
+}
+
 editForm.onsubmit = function(event){
     event.preventDefault();
     const nama = inpNama.value.trim();
-    const inp_jenis_kelamin = inpJenisKelamin.value.trim();
-    const inp_kategori = inpKategori.value.trim();
     const nomer = inpNomerTelepon.value.trim();
+    const inp_jenis_kelamin = inpJenisKelamin.value.trim();
     const inpEmails = inpEmail.value.trim();
-    const alamat = inpAlamat.value.trim();
-    if (nama === konsultasi.nama_lengkap && inp_jenis_kelamin === konsultasi.jenis_kelamin && inp_kategori === konsultasi.kategori && nomer === konsultasi.no_telpon && inpEmails === konsultasi.email && uploadeFile === null) {
+    const status = inpStatus.value.trim();
+    const tanggal = inpTanggal.value.trim();
+    
+    if (nama === users.nama_lengkap && 
+        nomer === users.no_telpon && 
+        inp_jenis_kelamin === users.jenis_kelamin && 
+        inpEmails === users.email && 
+        status === users.status && 
+        tanggal === users.tanggal && 
+        uploadeFile === null) {
         showRedPopup('Data belum diubah');
         return;
     }
-    if(nama === "") {
+    
+    if(nama === "") {  
         showRedPopup("Nama Lengkap harus diisi !");
         return;
     }
     if(inp_jenis_kelamin === "") {
         showRedPopup("Jenis Kelamin harus diisi !");
-        return;
-    }
-    if(inp_kategori === "") {
-        showRedPopup("Kategori harus diisi !");
         return;
     }
     if(nomer === "") {
@@ -103,31 +122,38 @@ editForm.onsubmit = function(event){
         showRedPopup('Format Email salah !');
         return;
     }
-    if(alamat === "") {
-        showRedPopup("Alamat harus diisi !");
+    if(status === "") {
+        showRedPopup("Status Transaksi harus diisi !");
+        return;
+    }
+    if(tanggal === "") {
+        showRedPopup("Tanggal Transaksi harus diisi !");
         return;
     }
     if (uploadeFile) {
-        if(!allowedFormats.includes(uploadeFile.type)) {
+        if (!allowedFormats.includes(uploadeFile.type)) {
             showRedPopup("Format Foto harus png, jpeg, jpg !");
             return;
         }
     }
+    
     showLoading();
     const formData = new FormData();
     formData.append("_method", 'PUT');
-    formData.append("uuid", uuid);
     formData.append("nama_lengkap", nama);
     formData.append("jenis_kelamin", inp_jenis_kelamin);
-    formData.append("kategori", inp_kategori);
     formData.append("no_telpon", nomer);
-    formData.append("email_konsultasi", inpEmails);
-    formData.append("alamat", alamat);
+    formData.append("email", inpEmails);
+    formData.append("status", status);
+    formData.append("tanggal", tanggal);
+    formData.append("id_transaksi", users.id);
+    
     if (uploadeFile) {
-        formData.append("foto", uploadeFile);
+        formData.append("bukti_pembayaran", uploadeFile);
     }
+    
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", reff + "/update");
+    xhr.open("POST", "/transaksi/update");
     xhr.setRequestHeader("X-CSRF-TOKEN", csrfToken);
     xhr.onload = function () {
         if (xhr.status === 200) {
@@ -135,7 +161,7 @@ editForm.onsubmit = function(event){
             var response = JSON.parse(xhr.responseText);
             showGreenPopup(response);
             setTimeout(() => {
-                window.location.href = reff;
+                window.location.href = '/transaksi';
             }, 2000);
         } else {
             closeLoading();
@@ -149,4 +175,4 @@ editForm.onsubmit = function(event){
     };
     xhr.send(formData);
     return false;
-};
+}; 

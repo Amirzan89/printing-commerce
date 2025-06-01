@@ -55,21 +55,6 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::delete('/delete',[PesananController::class,'deletePesanan']);
     });
 
-    //API only transaksi route
-    Route::group(['prefix'=>'/transaksi'], function(){
-        //page transaksi
-        Route::get('/',[ShowTransaksiController::class,'showAll']);
-        Route::get('/detail/{any}',[ShowTransaksiController::class,'showDetail']);
-        Route::get('/tambah',[ShowTransaksiController::class,'showTambah']);
-        Route::get('/edit/{any}',[ShowTransaksiController::class,'showEdit']);
-        Route::get('/edit', function(){
-            return redirect('/transaksi');
-        });
-        // route for transaksi
-        Route::post('/create',[TransaksiController::class,'createTransaksi']);
-        Route::put('/update',[TransaksiController::class,'updateTransaksi']);
-        Route::delete('/delete',[TransaksiController::class,'deleteTransaksi']);
-    });
 
     //API only metode pembayaran route
     Route::group(['prefix'=>'/metode-pembayaran'], function(){
@@ -87,20 +72,16 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::delete('/delete',[MetodePembayaranController::class,'deleteMPembayaran']);
     });
 
-    //API only metode pembayaran route
+    //API only transaksi route
     Route::group(['prefix'=>'/transaksi'], function(){
         //page transaksi
         Route::get('/',[ShowTransaksiController::class,'showAll']);
         Route::get('/detail/{any}',[ShowTransaksiController::class,'showDetail']);
-        Route::get('/tambah',[ShowTransaksiController::class,'showTambah']);
-        Route::get('/edit/{any}',[ShowTransaksiController::class,'showEdit']);
-        Route::get('/edit', function(){
+        Route::get('/detail', function(){
             return redirect('/transaksi');
         });
         // route for transaksi
-        // Route::post('/create',[TransaksiController::class,'createTransaksi']);
-        // Route::put('/update',[TransaksiController::class,'updateTransaksi']);
-        // Route::delete('/delete',[TransaksiController::class,'deleteTransaksi']);
+        Route::post('/update',[ShowTransaksiController::class,'validateTransaksi']);
     });
 
     //API only user route

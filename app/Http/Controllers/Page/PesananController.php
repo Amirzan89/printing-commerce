@@ -17,13 +17,18 @@ class PesananController extends Controller
         if (!$request->has('status')) {
             return redirect('/pesanan?status='.$status);
         }
+        // if(in_array($status, ['menunggu', 'proses', 'dikerjakan', 'revisi'])){
+        //     $orderBy = 'asc';
+        // }else{
+        //     $orderBy = 'desc';
+        // }
+        $orderBy = 'asc';
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'dataPesanan' => Pesanan::select('pesanan.uuid', 'nama_jasa', 'status')->join('jasa', 'jasa.id_jasa', '=', 'pesanan.id_jasa')->where('status', $status)->get(),
+            'dataPesanan' => Pesanan::select('pesanan.uuid', 'nama_user', 'status', 'estimasi_waktu', 'nama_editor')->join('jasa', 'jasa.id_jasa', '=', 'pesanan.id_jasa')->join('users', 'users.id_user', '=', 'pesanan.id_user')->join('editor', 'editor.id_editor', '=', 'pesanan.id_editor')->orderBy('pesanan.created_at', $orderBy)->where('status', $status)->get(),
             'headerData' => UtilityController::getHeaderData(),
             'currentStatus' => $status,
         ];
-        
         return view('page.pesanan.data',$dataShow);
     }
     public function showTambah(Request $request){

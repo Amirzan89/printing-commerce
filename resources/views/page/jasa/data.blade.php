@@ -243,10 +243,6 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <p class="mb-0 fw-normal">{{ $data['kategori']}}</p>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <a href="/jasa/edit/{{ $data['uuid'] }}?detail=true" class="btn btn-info btn-detail m-1">
-                                                    <img src="{{ asset($tPath.'assets2/icon/detail.svg') }}" alt="">
-                                                    <span>Detail</span>
-                                                </a>
                                                 <a href="/jasa/edit/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1">
                                                     <img src="{{ asset($tPath.'assets2/icon/edit.svg') }}" alt="">
                                                     <span>Edit</span>

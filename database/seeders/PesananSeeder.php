@@ -28,6 +28,7 @@ class PesananSeeder extends Seeder
                 'id_user' => $jsonData['user'][rand(0, 40)],
                 'id_jasa' => $jsonData['jasa'][rand(0, 2)],
                 'id_paket_jasa' => $jsonData['paket_jasa'][rand(0, 5)],
+                'id_editor' => $jsonData['editor'][rand(0, 4)],
                 'created_at' => $now,
                 'updated_at' => $now
             ]);
@@ -37,6 +38,7 @@ class PesananSeeder extends Seeder
             $jsonData['pesanan'] = [];
         }
         $jsonData['pesanan'] = array_merge($jsonData['pesanan'], $idPesanans);
+        $idPesananFiles = [];
         for($i = 1; $i <= 100; $i++){
             $idPesananFile = PesananFile::insertGetId([
                 'file_path' => 'pathhhh',

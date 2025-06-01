@@ -15,24 +15,33 @@ class TransaksiController extends Controller
         $dataShow = [
             'headerData' => UtilityController::getHeaderData(),
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'transaksiData' => Transaksi::with(['toMetodePembayaran', 'toPesanan'])
-                ->orderBy('created_at', 'desc')
-                ->get(),
+            'transaksiData' => Transaksi::select('order_id', 'users.nama_user', 'metode_pembayaran.nama_metode_pembayaran', 'transaksi.status')
+                ->join('pesanan', 'transaksi.id_pesanan', '=', 'pesanan.id_pesanan')
+                ->join('users', 'pesanan.id_user', '=', 'users.id_user')
+                ->join('metode_pembayaran', 'transaksi.id_metode_pembayaran', '=', 'metode_pembayaran.id_metode_pembayaran')
+                ->orderBy('transaksi.created_at', 'desc')
+                ->get()
+                ->map(function($item) {
+                    $item->status = ucwords(str_replace('_', ' ', $item->status));
+                    return $item;
+                }),
             'totalPending' => Transaksi::where('status', 'menunggu_konfirmasi')->count(),
             'totalCompleted' => Transaksi::where('status', 'lunas')->count(),
         ];
         return view('page.transaksi.data',$dataShow);
     }
-    
     public function showDetail(Request $request, $orderId){
-        $transaksi = Transaksi::with(['toMetodePembayaran', 'toPesanan'])
+        $transaksi = Transaksi::select('order_id', 'transaksi.status', 'bukti_pembayaran', 'waktu_pembayaran', 'expired_at', 'transaksi.created_at', 'transaksi.updated_at', 'users.nama_user', 'metode_pembayaran.nama_metode_pembayaran')
             ->where('order_id', $orderId)
+            ->join('pesanan', 'transaksi.id_pesanan', '=', 'pesanan.id_pesanan')
+            ->join('users', 'pesanan.id_user', '=', 'users.id_user')
+            ->join('metode_pembayaran', 'transaksi.id_metode_pembayaran', '=', 'metode_pembayaran.id_metode_pembayaran')
             ->first();
-            
+        // echo json_encode($transaksi);
+        // exit();
         if (!$transaksi) {
             return redirect('/transaksi')->with('error', 'Data Transaksi tidak ditemukan');
         }
-        
         // Get order and user information
         $pesanan = $transaksi->toPesanan;
         $user = null;
@@ -43,92 +52,22 @@ class TransaksiController extends Controller
         $dataShow = [
             'headerData' => UtilityController::getHeaderData(),
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'transaksi' => $transaksi,
-            'pesanan' => $pesanan,
-            'user' => $user,
-            'metodePembayaran' => $transaksi->toMetodePembayaran,
-            'isExpired' => Carbon::now()->isAfter($transaksi->expired_at),
-            'timeSincePayment' => $transaksi->waktu_pembayaran ? Carbon::parse($transaksi->waktu_pembayaran)->diffForHumans() : null,
+            'transaksiData' => $transaksi,
         ];
         
         return view('page.transaksi.detail', $dataShow);
     }
 
-    public function showEdit(Request $request, $orderId){
-        $transaksi = Transaksi::with(['toMetodePembayaran', 'toPesanan'])
-            ->where('order_id', $orderId)
-            ->first();
-            
-        if (!$transaksi) {
-            return redirect('/transaksi')->with('error', 'Data Transaksi tidak ditemukan');
-        }
+    // public function showTambah(Request $request){
+    //     $dataShow = [
+    //         'headerData' => UtilityController::getHeaderData(),
+    //         'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
+    //         'metodePembayaran' => MetodePembayaran::all(),
+    //         'pesanan' => Pesanan::where('status_pembayaran', 'belum_bayar')->get(),
+    //     ];
         
-        $dataShow = [
-            'headerData' => UtilityController::getHeaderData(),
-            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'transaksi' => $transaksi,
-            'pesanan' => $transaksi->toPesanan,
-            'metodePembayaran' => MetodePembayaran::all(),
-        ];
-        
-        return view('page.transaksi.edit', $dataShow);
-    }
-    
-    public function showTambah(Request $request){
-        $dataShow = [
-            'headerData' => UtilityController::getHeaderData(),
-            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'metodePembayaran' => MetodePembayaran::all(),
-            'pesanan' => Pesanan::where('status_pembayaran', 'belum_bayar')->get(),
-        ];
-        
-        return view('page.transaksi.tambah', $dataShow);
-    }
-    
-    public function showDashboard(Request $request){
-        $today = Carbon::today();
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
-        
-        // Get transaction statistics
-        $stats = [
-            'total_transactions' => Transaksi::count(),
-            'pending_confirmation' => Transaksi::where('status', 'menunggu_konfirmasi')->count(),
-            'confirmed_today' => Transaksi::where('status', 'lunas')
-                ->whereDate('updated_at', $today)
-                ->count(),
-            'monthly_revenue' => Transaksi::where('status', 'lunas')
-                ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
-                ->sum('jumlah'),
-            'expired_transactions' => Transaksi::where('status', 'belum_bayar')
-                ->where('expired_at', '<', Carbon::now())
-                ->count()
-        ];
-        
-        // Get recent transactions
-        $recentTransactions = Transaksi::with(['toMetodePembayaran', 'toPesanan'])
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get();
-            
-        // Get pending transactions
-        $pendingTransactions = Transaksi::with(['toMetodePembayaran', 'toPesanan'])
-            ->where('status', 'menunggu_konfirmasi')
-            ->orderBy('waktu_pembayaran', 'asc')
-            ->limit(5)
-            ->get();
-        
-        $dataShow = [
-            'headerData' => UtilityController::getHeaderData(),
-            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'stats' => $stats,
-            'recentTransactions' => $recentTransactions,
-            'pendingTransactions' => $pendingTransactions,
-        ];
-        
-        return view('page.transaksi.dashboard', $dataShow);
-    }
-    
+    //     return view('page.transaksi.tambah', $dataShow);
+    // }
     public function showReports(Request $request){
         // Get filter parameters
         $startDate = $request->input('start_date', Carbon::now()->subDays(30)->format('Y-m-d'));

@@ -269,11 +269,14 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <h6 class="fw-semibold mb-0">{{ $no++ }}</h6>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <span class="fw-normal">{{ $data['judul'] }}
+                                                <span class="fw-normal">{{ $data['nama_user'] }}
                                                 </span>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <p class="mb-0 fw-normal">{{ $data['rentang_usia']}}</p>
+                                                <p class="mb-0 fw-normal">{{ $data['estimasi_waktu']}}</p>
+                                            </td>
+                                            <td class="border-bottom-0">
+                                                <p class="mb-0 fw-normal">{{ $data['nama_editor']}}</p>
                                             </td>
                                             <td class="border-bottom-0">
                                                 <a href="/disi/edit/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1">

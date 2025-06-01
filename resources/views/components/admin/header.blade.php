@@ -22,19 +22,40 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link nav-icon-hover rounded-pill" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="{{ asset($tPath.'assets2/icon/header/notification.png') }}" alt="">
+                        {{-- @if(count($headerData) > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ count($headerData) }}
+                            </span>
+                        @endif --}}
                     </a>
                     <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2" style="width: 70vw;">
-                        <ul class="message-body row gap-3">
-                            @foreach ($headerData as $iHeaderData)
-                                <li class="col-12 d-flex align-items-center gap-4 p-2">
-                                    <img src="{{ asset($tPath.'assets2/img/profile.png') }}" alt="Profile" id="top_bar" class="rounded-circle foto_admin" style="width: 50px; height: 50px;">
-                                    <div>
-                                        <h5>{{ $iHeaderData['nama_editor']}}</h5>
-                                        <p>{{ $iHeaderData['deskripsi_pengerjaan']}}</p>
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
+                        <div class="message-body">
+                            <h5 class="py-2 px-3 border-bottom">Notifikasi Pesanan Masuk</h5>
+                            @if(count($headerData) > 0)
+                                <ul class="row gap-3 px-3">
+                                    @foreach ($headerData as $pesanan)
+                                        <li class="col-12 d-flex align-items-center gap-3 p-3 border-bottom">
+                                            <img src="{{ asset($tPath.'assets2/img/profile.png') }}" alt="Profile" class="rounded-circle" style="width: 50px; height: 50px;">
+                                            <div class="w-100">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h5 class="mb-0">{{ $pesanan->toUser->nama_user ?? 'User' }}</h5>
+                                                    <small class="text-muted">{{ $pesanan->created_at->diffForHumans() }}</small>
+                                                </div>
+                                                <p class="mb-1">{{ $pesanan->toJasa->nama_jasa ?? 'Jasa Design' }} | {{ $pesanan->toJasa->kategori ?? 'Basic' }}</p>
+                                                <p class="text-truncate mb-0" style="max-width: 90%;">{{ $pesanan->deskripsi }}</p>
+                                                <div class="mt-2">
+                                                    <a href="/pesanan/edit/{{ $pesanan->uuid }}" class="btn btn-sm btn-primary">Lihat Detail</a>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <div class="text-center py-4">
+                                    <p>Tidak ada pesanan masuk baru</p>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </li>
                 <a class="nav-link" href="/chat" class="btn btn-outline-primary mx-3 mt-2 d-block">

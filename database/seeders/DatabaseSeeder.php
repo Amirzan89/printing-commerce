@@ -32,9 +32,10 @@ class DatabaseSeeder extends Seeder
         $this->call(MetodePembayaranSeeder::class);
         $this->call(JasaSeeder::class);
         $this->call(JasaImageSeeder::class);
-        $this->call(PesananSeeder::class);
-        $this->call(TransaksiSeeder::class);
         $this->call(EditorSeeder::class);
+        $this->call(PesananSeeder::class);
+        $this->call(RiwayatEditorSeeder::class);
+        $this->call(TransaksiSeeder::class);
         $this->call(ReviewSeeder::class);
         unlink(self::$tempFile);
         if(is_dir($directory) && count(scandir($directory)) === 2){

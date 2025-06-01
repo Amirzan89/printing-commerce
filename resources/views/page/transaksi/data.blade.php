@@ -42,7 +42,7 @@ $tPath = app()->environment('local') ? '' : '';
         display: flex;
         flex-direction: row;
     }
-    .btn-edit,
+    .btn-detail,
     .btn-delete{
         padding: 0px;
         display: flex;
@@ -53,7 +53,7 @@ $tPath = app()->environment('local') ? '' : '';
         border: none;
         font-size: 17px;
     }
-    .btn-edit img,
+    .btn-detail img,
     .btn-delete img{
         width: 24px;
         height: 24px;
@@ -72,13 +72,13 @@ $tPath = app()->environment('local') ? '' : '';
             width: 25px;
             height: 25px;
         }
-        .btn-edit,
+        .btn-detail,
         .btn-delete{
             width: 90px;
             height: 40px;
             font-size: 16px;
         }
-        .btn-edit img,
+        .btn-detail img,
         .btn-delete img{
             width: 22px;
             height: 22px;
@@ -109,13 +109,13 @@ $tPath = app()->environment('local') ? '' : '';
         td:last-child {
             flex-direction: column;
         }
-        .btn-edit,
+        .btn-detail,
         .btn-delete{
             width: 90px;
             height: 40px;
             font-size: 15px;
         }
-        .btn-edit img,
+        .btn-detail img,
         .btn-delete img{
             width: 21px;
             height: 21px;
@@ -146,13 +146,13 @@ $tPath = app()->environment('local') ? '' : '';
         td:last-child {
             flex-direction: column;
         }
-        .btn-edit,
+        .btn-detail,
         .btn-delete{
             width: 80px;
             height: 37px;
             font-size: 14px;
         }
-        .btn-edit img,
+        .btn-detail img,
         .btn-delete img{
             width: 19px;
             height: 19px;
@@ -182,7 +182,7 @@ $tPath = app()->environment('local') ? '' : '';
         data-sidebar-position="fixed" data-header-position="fixed">
         <!-- Sidebar Start -->
         @php
-            $nav = 'metode-pembayaran';
+            $nav = 'transaksi';
         @endphp
         @include('components.admin.sidebar')
         <!--  Sidebar End -->
@@ -193,15 +193,11 @@ $tPath = app()->environment('local') ? '' : '';
             <!--  Header End -->
             <div class="container-fluid">
                 <div class="pagetitle">
-                    <h1>Kelola Metode Pembayaran</h1>
+                    <h1>Kelola Transaksi</h1>
                 </div>
                 <div class="d-flex align-items-stretch">
                     <div class="card w-100">
                         <div class="card-body p-4">
-                            <a href="/metode-pembayaran/tambah" class="btn btn-success" id="btnTambah">
-                                <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="">
-                                <span>Tambah Metode Pembayaran</span>
-                            </a>
                             <div class="table-responsive">
                                 <table class="table mb-0 align-middle">
                                     <thead class="text-dark fs-4">
@@ -210,7 +206,16 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <h6 class="fw-semibold mb-0">No</h6>
                                             </th>
                                             <th class="border-bottom-0">
-                                                <h6 class="fw-semibold mb-0">Nama Rekening</h6>
+                                                <h6 class="fw-semibold mb-0">Nama User</h6>
+                                            </th>
+                                            <th class="border-bottom-0">
+                                                <h6 class="fw-semibold mb-0">Metode Pembayaran</h6>
+                                            </th>
+                                            <th class="border-bottom-0">
+                                                <h6 class="fw-semibold mb-0">Status</h6>
+                                            </th>
+                                            <th class="border-bottom-0">
+                                                <h6 class="fw-semibold mb-0">Aksi</h6>
                                             </th>
                                         </tr>
                                     </thead>
@@ -222,15 +227,23 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <h6 class="fw-semibold mb-0">{{ $no++ }}</h6>
                                             </td>
                                             <td class="border-bottom-0">
+                                                <span class="fw-normal">{{ $data['nama_user'] }}
+                                                </span>
+                                            </td>
+                                            <td class="border-bottom-0">
                                                 <span class="fw-normal">{{ $data['nama_metode_pembayaran'] }}
                                                 </span>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <a href="/metode-pembayaran/edit/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1">
-                                                    <img src="{{ asset($tPath.'assets2/icon/edit.svg') }}" alt="">
-                                                    <span>Edit</span>
+                                                <span class="fw-normal">{{ $data['status'] }}
+                                                </span>
+                                            </td>
+                                            <td class="border-bottom-0">
+                                                <a href="/transaksi/detail/{{ $data['order_id'] }}" class="btn btn-warning btn-detail m-1">
+                                                    <img src="{{ asset($tPath.'assets2/icon/detail.svg') }}" alt="">
+                                                    <span>Detail</span>
                                                 </a>
-                                                <button type="button" class="btn btn-danger btn-delete m-1" onclick="showModalDelete('{{ $data['uuid'] }}')">
+                                                <button type="button" class="btn btn-danger btn-delete m-1" onclick="showModalDelete('{{ $data['order_id'] }}')">
                                                     <img src="{{ asset($tPath.'assets2/icon/delete.svg') }}" alt="">
                                                     <span>Hapus</span>
                                                 </button>

@@ -1,7 +1,5 @@
 <?php
 $tPath = app()->environment('local') ? '' : '';
-$isDetailMode = request()->has('detail') && request()->detail == 'true';
-$pageTitle = $isDetailMode ? 'Detail Kelola Jasa' : 'Edit Jasa';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -9,7 +7,7 @@ $pageTitle = $isDetailMode ? 'Detail Kelola Jasa' : 'Edit Jasa';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $pageTitle }} | TATA</title>
+    <title>Edit Jasa | TATA</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset($tPath.'img/icon/icon.png') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
@@ -189,13 +187,6 @@ $pageTitle = $isDetailMode ? 'Detail Kelola Jasa' : 'Edit Jasa';
             margin-bottom: 10px;
         }
         
-        .edit-only {
-            display: {{ $isDetailMode ? 'none' : 'block' }};
-        }
-        
-        .detail-only {
-            display: {{ $isDetailMode ? 'block' : 'none' }};
-        }
     </style>
 </head>
 
@@ -216,7 +207,6 @@ $pageTitle = $isDetailMode ? 'Detail Kelola Jasa' : 'Edit Jasa';
     var userAuth = @json($userAuth);
     var uuid = "{{ $jasa['uuid'] }}";
     var dataFetch = {!! json_encode($jasa) !!};
-    var isDetailMode = {{ $isDetailMode ? 'true' : 'false' }};
     </script>
     <!--  Body Wrapper -->
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
@@ -234,34 +224,20 @@ $pageTitle = $isDetailMode ? 'Detail Kelola Jasa' : 'Edit Jasa';
             <!--  Header End -->
             <div class="container-fluid" style="background-color: #F6F9FF">
                 <div class="pagetitle">
-                    <h1>{{ $pageTitle }}</h1>
+                    <h1>Edit Jasa</h1>
                 </div>
                 <div class="d-flex align-items-stretch"
                     style="background-color: #ffffff; border-radius: 20px; box-shadow: rgba(145,158,171,0.2) 0px 0px 2px 0px, rgba(145,158,171,0.12) 0px 12px 24px -4px;">
-                    
-                    <div class="mode-toggle">
-                        <div class="detail-only">
-                            <a href="/jasa/edit/{{ $jasa['uuid'] }}" class="btn btn-warning">
-                                <i class="fas fa-edit"></i> Mode Edit
-                            </a>
-                        </div>
-                        <div class="edit-only">
-                            <a href="/jasa/edit/{{ $jasa['uuid'] }}?detail=true" class="btn btn-info">
-                                <i class="fas fa-eye"></i> Mode Detail
-                            </a>
-                        </div>
-                    </div>
-                    
                     <form id="editForm" enctype="multipart/form-data">
                         <input type="hidden" name="id_jasa" value="{{ $jasa['uuid'] }}">
                         
                         <div class="form-section-header">
                             <label for="inpThumbnail">Gambar Produk</label>
-                            <div class="edit-only">
+                            {{-- <div class="edit-only">
                                 <button type="button" class="btn btn-success btn-sm" onclick="document.getElementById('inpThumbnail').click()">
                                     <i class="fas fa-plus"></i> Tambah Baru
                                 </button>
-                            </div>
+                            </div> --}}
                         </div>
                         
                         <!-- Carousel for images -->
@@ -309,12 +285,12 @@ $pageTitle = $isDetailMode ? 'Detail Kelola Jasa' : 'Edit Jasa';
                         
                         <div class="crow">
                             <label for="inpDeskripsi">Deskripsi Produk</label>
-                            <textarea name="deskripsi_paket_jasa" id="inpDeskripsi" placeholder="Masukkan Deskripsi Jasa" class="" style="height:120px" {{ $isDetailMode ? 'disabled' : '' }}>{{ $jasa['deskripsi_paket_jasa'] ?? '' }}</textarea>
+                            <textarea name="deskripsi_paket_jasa" id="inpDeskripsi" placeholder="Masukkan Deskripsi Jasa" class="" style="height:120px">{{ $jasa['deskripsi_paket_jasa'] ?? '' }}</textarea>
                         </div>
                         
                         <div class="crow">
                             <label for="inpKelasJasa">Kelas Jasa</label>
-                            <select class="" aria-label="Default select example" id="inpKelasJasa" name="kategori" {{ $isDetailMode ? 'disabled' : '' }}>
+                            <select class="" aria-label="Default select example" id="inpKelasJasa" name="kategori">
                                 <option value="">Pilih Kelas Jasa</option>
                                 <option value="printing" {{ $jasa['kategori'] == 'printing' ? 'selected' : '' }}>Printing</option>
                                 <option value="desain" {{ $jasa['kategori'] == 'desain' ? 'selected' : '' }}>Desain</option>
@@ -324,32 +300,32 @@ $pageTitle = $isDetailMode ? 'Detail Kelola Jasa' : 'Edit Jasa';
                         
                         <div class="crow">
                             <label for="inpJudul">Nama Jasa</label>
-                            <input type="text" id="inpJudul" name="nama_jasa" value="{{ $jasa['nama_jasa'] }}" {{ $isDetailMode ? 'disabled' : '' }}>
+                            <input type="text" id="inpJudul" name="nama_jasa" value="{{ $jasa['nama_jasa'] }}">
                         </div>
                         
                         <div class="crow">
                             <label for="inpNamaPaket">Nama Paket Jasa</label>
-                            <input type="text" id="inpNamaPaket" name="nama_paket_jasa" value="{{ $jasa['nama_paket_jasa'] ?? '' }}" {{ $isDetailMode ? 'disabled' : '' }}>
+                            <input type="text" id="inpNamaPaket" name="nama_paket_jasa" value="{{ $jasa['nama_paket_jasa'] ?? '' }}">
                         </div>
                         
                         <div class="crow">
                             <label for="inpHarga">Harga Jasa</label>
-                            <input type="number" id="inpHarga" name="harga_paket_jasa" value="{{ $jasa['harga_paket_jasa'] ?? '' }}" {{ $isDetailMode ? 'disabled' : '' }}>
+                            <input type="number" id="inpHarga" name="harga_paket_jasa" value="{{ $jasa['harga_paket_jasa'] ?? '' }}">
                         </div>
                         
                         <div class="crow">
                             <label for="inpFitur">Deskripsi Singkat</label>
-                            <textarea name="fitur" id="inpFitur" placeholder="Masukkan Fitur" class="" style="height:120px" {{ $isDetailMode ? 'disabled' : '' }}>{{ $jasa['fitur'] ?? '' }}</textarea>
+                            <textarea name="fitur" id="inpFitur" placeholder="Masukkan Fitur" class="" style="height:120px">{{ $jasa['fitur'] ?? '' }}</textarea>
                         </div>
                         
                         <div class="crow">
                             <label for="inpWaktuPengerjaan">Waktu Pengerjaan</label>
-                            <input type="date" id="inpWaktuPengerjaan" name="waktu_pengerjaan" value="{{ isset($jasa['waktu_pengerjaan']) ? date('Y-m-d', strtotime($jasa['waktu_pengerjaan'])) : '' }}" {{ $isDetailMode ? 'disabled' : '' }}>
+                            <input type="date" id="inpWaktuPengerjaan" name="waktu_pengerjaan" value="{{ isset($jasa['waktu_pengerjaan']) ? date('Y-m-d', strtotime($jasa['waktu_pengerjaan'])) : '' }}">
                         </div>
                         
                         <div class="crow">
                             <label for="inpTotalRevisi">Total Revisi</label>
-                            <input type="number" id="inpTotalRevisi" name="maksimal_revisi" value="{{ $jasa['maksimal_revisi'] ?? '' }}" {{ $isDetailMode ? 'disabled' : '' }}>
+                            <input type="number" id="inpTotalRevisi" name="maksimal_revisi" value="{{ $jasa['maksimal_revisi'] ?? '' }}">
                         </div>
                         
                         <div class="crow">
@@ -358,11 +334,6 @@ $pageTitle = $isDetailMode ? 'Detail Kelola Jasa' : 'Edit Jasa';
                                     <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="" width="30" height="30">
                                     <span>Simpan</span>
                                 </button>
-                            </div>
-                            <div class="detail-only">
-                                <a href="/jasa/edit/{{ $jasa['uuid'] }}" class="btn btn-warning">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
                             </div>
                             <a href="/jasa" class="btn btn-danger">Kembali</a>
                         </div>
