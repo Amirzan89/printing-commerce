@@ -3,6 +3,7 @@ namespace Database\Seeders;
 use App\Models\Editor;
 use App\Models\RiwayatEditor;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 class EditorSeeder extends Seeder
 {
     private static $tempFile;
@@ -15,6 +16,7 @@ class EditorSeeder extends Seeder
         for($i = 1; $i <= 5; $i++){
             $nama = "Editor " . $i . "@gmail.com";
             $idEditor = Editor::insertGetId([
+                'uuid' => Str::uuid(),
                 'nama_editor' => $nama,
                 'jenis_kelamin' => ['laki-laki', 'perempuan'][rand(0, 1)],
                 'no_telpon' => '0855'.mt_rand(00000000,99999999),

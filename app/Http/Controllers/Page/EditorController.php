@@ -4,35 +4,35 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Controllers\UtilityController;
 use App\Models\Admin;
-use App\Models\Jasa;
+use App\Models\Editor;
 class EditorController extends Controller
 {
     public function showAll(Request $request){
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'jasaData' => Jasa::select('')->get(),
+            'editorData' => Editor::all(),
             'headerData' => UtilityController::getHeaderData(),
         ];
-        return view('page.jasa.data',$dataShow);
+        return view('page.editor.data',$dataShow);
     }
     public function showTambah(Request $request){
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
             'headerData' => UtilityController::getHeaderData(),
         ];
-        return view('page.jasa.tambah',$dataShow);
+        return view('page.editor.tambah',$dataShow);
     }
-    public function showEdit(Request $request, $uuid){
-        $jasaData = jasa::select('uuid','nama_lengkap', '')->whereNotIn('role', ['jasa'])->whereRaw("BINARY uuid = ?",[$uuid])->first();
-        if(is_null($jasaData)){
-            return redirect('/jasa')->with('error', 'Data jasa tidak ditemukan');
+    public function showEdit(Request $request, $id){
+        $editorData = Editor::where('uuid', $id)->first();
+        if(is_null($editorData)){
+            return redirect('/editor')->with('error', 'Data editor tidak ditemukan');
         }
         $dataShow = [
-            'userAuth' => array_merge(jasa::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'jasaData' => $jasaData,
+            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
+            'editorData' => $editorData,
             'headerData' => UtilityController::getHeaderData(),
         ];
-        return view('page.jasa.edit',$dataShow);
+        return view('page.editor.edit',$dataShow);
     }
 }
 ?>

@@ -7,7 +7,7 @@ $tPath = app()->environment('local') ? '' : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Admin | TATA</title>
+    <title>Tambah Editor | TATA</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset($tPath.'img/icon/icon.png') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
@@ -30,7 +30,7 @@ $tPath = app()->environment('local') ? '' : '';
     @endif
     <script>
     const domain = window.location.protocol + '//' + window.location.hostname + ":" + window.location.port;
-    const reff = '/admin';
+    const reff = '/editor';
     var csrfToken = "{{ csrf_token() }}";
     var userAuth = @json($userAuth);
     </script>
@@ -50,12 +50,12 @@ $tPath = app()->environment('local') ? '' : '';
             <!--  Header End -->
             <div class="container-fluid">
                 <div class="pagetitle">
-                    <h1>Tambah Admin</h1>
+                    <h1>Tambah Editor</h1>
                     <nav>
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="/dashboard">Beranda</a></li>
-                            <li class="breadcrumb-item"><a href="/admin">Kelola Admin</a></li>
-                            <li class="breadcrumb-item">Tambah Admin</li>
+                            <li class="breadcrumb-item"><a href="/editor">Kelola Editor</a></li>
+                            <li class="breadcrumb-item">Tambah Editor</li>
                         </ol>
                     </nav>
                 </div>
@@ -87,22 +87,6 @@ $tPath = app()->environment('local') ? '' : '';
                             <div style="flex: 1">
                                 <label for="">Nomer Telepon</label>
                                 <input type="text" id="inpNomerTelepon">
-                            </div>
-                        </div>
-                        <div class="crow">
-                            <div>
-                                <label for="">Email</label>
-                                <input type="text" id="inpEmail">
-                            </div>
-                            <div>
-                                <label for="">Password</label>
-                                <div style="position: relative">
-                                    <input type="password" id="inpPassword" style="padding-right: 45px;" oninput="showEyePass()">
-                                    <div id="iconPass" onclick="showPass()" style="display: none;">
-                                        <img src="{{ asset($tPath.'assets2/icon/eye-slash.svg') }}" alt="" id="passClose">
-                                        <img src="{{ asset($tPath.'assets2/icon/eye.svg') }}" alt="" id="passShow" style="display: none">
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         <div class="img" onclick="handleFileClick()" ondragover="handleDragOver(event)"

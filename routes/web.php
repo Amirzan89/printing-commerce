@@ -10,7 +10,7 @@ use App\Http\Controllers\Services\TransaksiController;
 use App\Http\Controllers\Services\ReviewController;
 use App\Http\Controllers\Services\AdminController;
 use App\Http\Controllers\Services\LoginController;
-
+use App\Http\Controllers\Services\EditorController;
 use App\Http\Controllers\Page\PublicController AS ShowHomeController;
 use App\Http\Controllers\Page\JasaController AS ShowJasaController;
 use App\Http\Controllers\Page\PesananController AS ShowPesananController;
@@ -18,7 +18,7 @@ use App\Http\Controllers\Page\MetodePembayaranController AS ShowMetodePembayaran
 use App\Http\Controllers\Page\TransaksiController AS ShowTransaksiController;
 use App\Http\Controllers\Page\ReviewController AS ShowReviewController;
 use App\Http\Controllers\Page\AdminController AS ShowAdminController;
-
+use App\Http\Controllers\Page\EditorController AS ShowEditorController;
 Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
     //API only jasa route
     Route::group(['prefix'=>'/jasa'], function(){
@@ -81,6 +81,22 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::post('/create',[MetodePembayaranController::class,'createMepe']);
         Route::put('/update',[MetodePembayaranController::class,'updateMepe']);
         Route::delete('/delete',[MetodePembayaranController::class,'deleteMepe']);
+    });
+
+    //API only editor route
+    Route::group(['prefix'=>'/editor'], function(){
+        //page editor
+        Route::get('/',[ShowEditorController::class,'showAll']);
+        Route::get('/detail/{any}',[ShowEditorController::class,'showDetail']);
+        Route::get('/tambah',[ShowEditorController::class,'showTambah']);
+        Route::get('/edit/{any}',[ShowEditorController::class,'showEdit']);
+        Route::get('/edit', function(){
+            return redirect('/editor');
+        });
+        // route for editor
+        Route::post('/create',[EditorController::class,'createEditor']);
+        Route::put('/update',[EditorController::class,'updateEditor']);
+        Route::delete('/delete',[EditorController::class,'deleteEditor']);
     });
 
     Route::group(['prefix'=>'/admin'], function(){

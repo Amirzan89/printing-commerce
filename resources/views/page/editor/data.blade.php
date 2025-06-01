@@ -7,7 +7,7 @@ $tPath = app()->environment('local') ? '' : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Admin | TATA</title>
+    <title>Data Editor | TATA</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset($tPath.'assets2/icon/icon.png') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
@@ -173,7 +173,7 @@ $tPath = app()->environment('local') ? '' : '';
     @endif
     <script>
     const domain = window.location.protocol + '//' + window.location.hostname + ":" + window.location.port;
-    const reff = '/admin';
+    const reff = '/editor';
     var csrfToken = "{{ csrf_token() }}";
     var userAuth = @json($userAuth);
     </script>
@@ -182,7 +182,7 @@ $tPath = app()->environment('local') ? '' : '';
         data-sidebar-position="fixed" data-header-position="fixed">
         <!-- Sidebar Start -->
         @php
-            $nav = 'admin';
+            $nav = 'editor';
         @endphp
         @include('components.admin.sidebar')
         <!--  Sidebar End -->
@@ -193,30 +193,33 @@ $tPath = app()->environment('local') ? '' : '';
             <!--  Header End -->
             <div class="container-fluid">
                 <div class="pagetitle">
-                    <h1>Kelola Admin</h1>
+                    <h1>Kelola Editor</h1>
                 </div>
                 <div class="d-flex align-items-stretch">
                     <div class="card w-100">
                         <div class="card-body p-4">
-                            <a href="/admin/tambah" class="btn btn-success" id="btnTambah">
-                                <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="">
-                                <span>Tambah Admin</span>
-                            </a>
+                            <div class="d-flex justify-content-end">
+                                <a href="{{ url('/editor/tambah') }}" class="btn btn-primary" id="btnTambah">
+                                    <img src="{{ asset($tPath.'assets2/icon/add.png') }}" alt="">
+                                    Tambah Editor
+                                </a>
+                            </div>
+                            <h5 class="card-title fw-semibold mb-4">Daftar Editor</h5>
                             <div class="table-responsive">
-                                <table class="table mb-0 align-middle">
+                                <table class="table text-nowrap mb-0 align-middle">
                                     <thead class="text-dark fs-4">
                                         <tr>
                                             <th class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">No</h6>
                                             </th>
                                             <th class="border-bottom-0">
-                                                <h6 class="fw-semibold mb-0">Nama Lengkap</h6>
+                                                <h6 class="fw-semibold mb-0">Nama Editor</h6>
                                             </th>
                                             <th class="border-bottom-0">
-                                                <h6 class="fw-semibold mb-0">Role</h6>
+                                                <h6 class="fw-semibold mb-0">Jenis Kelamin</h6>
                                             </th>
                                             <th class="border-bottom-0">
-                                                <h6 class="fw-semibold mb-0">Email</h6>
+                                                <h6 class="fw-semibold mb-0">No Telepon</h6>
                                             </th>
                                             <th class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">Aksi</h6>
@@ -224,30 +227,30 @@ $tPath = app()->environment('local') ? '' : '';
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @php $no = 1; @endphp
-                                        @foreach ($adminData as $data)
+                                        @foreach($editorData as $key => $editor)
                                         <tr>
                                             <td class="border-bottom-0">
-                                                <h6 class="fw-semibold mb-0">{{ $no++ }}</h6>
+                                                <h6 class="fw-semibold mb-0">{{ $key + 1 }}</h6>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <span class="fw-normal">{{ $data['nama_admin'] }}
-                                                </span>
+                                                <h6 class="fw-semibold mb-1">{{ $editor->nama_editor }}</h6>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <p class="mb-0 fw-normal">{{ $data['role']}}</p>
+                                                <p class="mb-0 fw-normal">{{ $editor->jenis_kelamin ?: '-' }}</p>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <p class="mb-0 fw-normal">{{ $data['email']}}</p>
+                                                <p class="mb-0 fw-normal">{{ $editor->no_telpon ?: '-' }}</p>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <a href="/admin/edit/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1">
-                                                    <img src="{{ asset($tPath.'assets2/icon/edit.svg') }}" alt="">
-                                                    <span>Edit</span>
+                                                <a href="{{ url('/editor/edit/'.$editor->uuid) }}"
+                                                    class="btn btn-primary m-1 btn-edit">
+                                                    <img src="{{ asset($tPath.'assets2/icon/edit.png') }}" alt="">
+                                                    Edit
                                                 </a>
-                                                <button type="button" class="btn btn-danger btn-delete m-1" onclick="showModalDelete('{{ $data['uuid'] }}')">
-                                                    <img src="{{ asset($tPath.'assets2/icon/delete.svg') }}" alt="">
-                                                    <span>Hapus</span>
+                                                <button type="button" onclick="showModalDelete('{{ $editor->uuid }}')"
+                                                    class="btn btn-primary m-1 btn-delete">
+                                                    <img src="{{ asset($tPath.'assets2/icon/delete.png') }}" alt="">
+                                                    Hapus
                                                 </button>
                                             </td>
                                         </tr>
@@ -258,25 +261,22 @@ $tPath = app()->environment('local') ? '' : '';
                         </div>
                     </div>
                 </div>
-                @include('components.admin.footer')
             </div>
         </div>
     </div>
     @php
-    $modalDelete = 'admin';
+    $modalDelete = 'editor';
     @endphp
     @include('components.admin.modalDelete')
     @include('components.preloader')
     <div id="greenPopup" style="display:none"></div>
     <div id="redPopup" style="display:none"></div>
-    <script src="{{ asset($tPath.'assets/libs/jquery/dist/jquery.min.js') }}"></script>
+    <script src="{{ asset($tPath.'assets/libs/jquery/dist/jquery.min.js') }}"></div>
     <script src="{{ asset($tPath.'assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/sidebarmenu.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/app.min.js') }}"></script>
-    <script src="{{ asset($tPath.'assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
-    <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
-    <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/page/modalDelete.js') }}"></script>
+    <script src="{{ asset($tPath.'assets2/js/page/editor/data.js') }}"></script>
 </body>
 
 </html>

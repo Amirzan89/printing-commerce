@@ -49,6 +49,14 @@
                 </a>
             </li>
 
+            <li class="sidebar-item {{ $nav == 'editor' ? 'selected' : ''}}">
+                <a class="sidebar-link {{ $nav == 'editor' ? 'active' : ''}}" href="/editor"
+                    aria-expanded="false">
+                    <img src="{{ asset($tPath.'assets2/icon/sidebar/editor.svg') }}" alt="" width="30" height="30" class="white">
+                    <span class="hide-menu text-white">Kelola Editor</span>
+                </a>
+            </li>
+
             @if($userAuth['role'] == 'super_admin')
             <li class="sidebar-item {{ $nav == 'admin' ? 'selected' : ''}}">
                 <a class="sidebar-link {{ $nav == 'admin' ? 'active' : ''}}"" href=" /admin" aria-expanded="false">

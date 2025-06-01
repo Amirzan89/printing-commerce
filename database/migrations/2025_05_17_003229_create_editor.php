@@ -8,9 +8,12 @@ return new class extends Migration
     {
         Schema::create('editor', function (Blueprint $table) {
             $table->id('id_editor');
+            $table->string('uuid')->unique();
             $table->string('nama_editor', 50);
             $table->enum('jenis_kelamin',['laki-laki','perempuan'])->nullable();
             $table->string('no_telpon', 15)->nullable();
+            $table->string('foto')->nullable();
+            $table->timestamps();
         });
     }
 
