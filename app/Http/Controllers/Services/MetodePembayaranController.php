@@ -6,12 +6,13 @@ use Illuminate\Http\Request;
 use App\Models\Admin;
 use App\Models\MetodePembayaran;
 use App\Models\PaketJasa;
+use Illuminate\Support\Str;
 class MetodePembayaranController extends Controller
 {
     public function createMPembayaran(Request $rt){
         $v = Validator::make($rt->only('nama_metode_pembayaran', 'no_metode_pembayaran', 'deskripsi_1', 'deskripsi_2', 'thumbnail', 'icon'), [
             'nama_metode_pembayaran' => 'required|min:3|max:12',
-            'no_metode_pembayaran' => 'required|min:3|max:20',
+            'no_metode_pembayaran' => 'required|min:3|max:20|regex:/^[0-9]+$/',
             'deskripsi_1' => 'required|max:500',
             'deskripsi_2' => 'required|max:500',
             'thumbnail' => 'required|image|mimes:jpeg,png,jpg|max:5120',
@@ -23,6 +24,7 @@ class MetodePembayaranController extends Controller
             'no_metode_pembayaran.required' => 'Nomor Metode Pembayaran wajib di isi',
             'no_metode_pembayaran.min' => 'Nomor Metode Pembayaran minimal 3 karakter',
             'no_metode_pembayaran.max' => 'Nomor Metode Pembayaran maksimal 20 karakter',
+            'no_metode_pembayaran.regex' => 'Nomor Metode Pembayaran hanya boleh berisi angka',
             'deskripsi_1.required' => 'Deskripsi 1 Metode Pembayaran wajib di isi',
             'deskripsi_1.max' => 'Deskripsi 1 Metode Pembayaran maksimal 500 karakter',
             'deskripsi_2.required' => 'Deskripsi 2 Metode Pembayaran wajib di isi',
@@ -44,13 +46,28 @@ class MetodePembayaranController extends Controller
             }
             return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
         }
+
+        // Handle file uploads
+        if($rt->hasFile('thumbnail')){
+            $thumbnailFile = $rt->file('thumbnail');
+            $thumbnailFilename = $thumbnailFile->hashName();
+            $thumbnailFile->move(public_path('assets3/img/metode-pembayaran/'), $thumbnailFilename);
+        }
+
+        if($rt->hasFile('icon')){
+            $iconFile = $rt->file('icon');
+            $iconFilename = $iconFile->hashName();
+            $iconFile->move(public_path('assets3/img/metode-pembayaran/'), $iconFilename);
+        }
+
         $ins = MetodePembayaran::insert([
+            'uuid' => Str::uuid(),
             'nama_metode_pembayaran' => $rt->input('nama_metode_pembayaran'),
             'no_metode_pembayaran' => $rt->input('no_metode_pembayaran'),
             'deskripsi_1' => $rt->input('deskripsi_1'),
             'deskripsi_2' => $rt->input('deskripsi_2'),
-            'thumbnail' => $rt->input('thumbnail'),
-            'icon' => $rt->input('icon'),
+            'thumbnail' => $thumbnailFilename ?? null,
+            'icon' => $iconFilename ?? null,
         ]);
         if(!$ins){
             return response()->json(['status'=>'error','message'=>'Gagal menambahkan data Metode Pembayaran'], 500);
@@ -61,11 +78,11 @@ class MetodePembayaranController extends Controller
         $v = Validator::make($rt->only('id_metode_pembayaran', 'nama_metode_pembayaran', 'no_metode_pembayaran', 'deskripsi_1', 'deskripsi_2', 'thumbnail', 'icon'), [
             'id_metode_pembayaran' => 'required',
             'nama_metode_pembayaran' => 'required|min:3|max:12',
-            'no_metode_pembayaran' => 'required|min:3|max:20',
+            'no_metode_pembayaran' => 'required|min:3|max:20|regex:/^[0-9]+$/',
             'deskripsi_1' => 'required|max:500',
             'deskripsi_2' => 'required|max:500',
-            'thumbnail' => 'required|image|mimes:jpeg,png,jpg|max:5120',
-            'icon' => 'required|image|mimes:jpeg,png,jpg|max:5120',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'icon' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ], [
             'id_metode_pembayaran.required' => 'ID Metode Pembayaran wajib di isi',
             'nama_metode_pembayaran.required' => 'Nama Metode Pembayaran wajib di isi',
@@ -74,15 +91,14 @@ class MetodePembayaranController extends Controller
             'no_metode_pembayaran.required' => 'Nomor Metode Pembayaran wajib di isi',
             'no_metode_pembayaran.min' => 'Nomor Metode Pembayaran minimal 3 karakter',
             'no_metode_pembayaran.max' => 'Nomor Metode Pembayaran maksimal 20 karakter',
+            'no_metode_pembayaran.regex' => 'Nomor Metode Pembayaran hanya boleh berisi angka',
             'deskripsi_1.required' => 'Deskripsi 1 Metode Pembayaran wajib di isi',
             'deskripsi_1.max' => 'Deskripsi 1 Metode Pembayaran maksimal 500 karakter',
             'deskripsi_2.required' => 'Deskripsi 2 Metode Pembayaran wajib di isi',
             'deskripsi_2.max' => 'Deskripsi 2 Metode Pembayaran maksimal 500 karakter',
-            'thumbnail.required' => 'Thumbnail wajib di isi',
             'thumbnail.image' => 'Thumbnail harus berupa gambar',
             'thumbnail.mimes' => 'Format Thumbnail Metode Pembayaran tidak valid. Gunakan format jpeg, png, jpg',
             'thumbnail.max' => 'Ukuran Thumbnail Metode Pembayaran tidak boleh lebih dari 5MB',
-            'icon.required' => 'Icon Metode Pembayaran wajib di isi',
             'icon.image' => 'Icon Metode Pembayaran harus berupa gambar',
             'icon.mimes' => 'Format Icon Metode Pembayaran tidak valid. Gunakan format jpeg, png, jpg',
             'icon.max' => 'Ukuran Icon Metode Pembayaran tidak boleh lebih dari 5MB',
@@ -95,40 +111,57 @@ class MetodePembayaranController extends Controller
             }
             return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
         }
-        $mepe = MetodePembayaran::select('thumbnail')->where('id_metode_pembayaran', $rt->input('id_metode_pembayaran'))->firstOrFail();
-        $paketJasa = PaketJasa::where('id_metode_pembayaran', $rt->input('id_metode_pembayaran'))->firstOrFail();
+
+        $metodePembayaran = MetodePembayaran::where('uuid', $rt->input('id_metode_pembayaran'))->first();
+        if (!$metodePembayaran) {
+            return response()->json(['status'=>'error','message'=>'Metode Pembayaran tidak ditemukan'], 404);
+        }
+        
+        $thumbnailFilename = $metodePembayaran->thumbnail;
+        $iconFilename = $metodePembayaran->icon;
+
         if($rt->hasFile('thumbnail')){
-            $fi = $rt->file('thumbnail');
-            if(!($fi->isValid() && in_array($fi->extension(), ['jpeg', 'png', 'jpg']))){
+            $thumbnailFile = $rt->file('thumbnail');
+            if(!($thumbnailFile->isValid() && in_array($thumbnailFile->extension(), ['jpeg', 'png', 'jpg']))){
                 return response()->json(['status'=>'error','message'=>'Format Thumbnail tidak valid. Gunakan format jpeg, png, jpg'], 400);
             }
-            $ftd = public_path('assets3/img/metode-pembayaran/') . $mepe['thumbnail'];
-            if(file_exists($ftd) && !is_dir($ftd)){
-                unlink($ftd);
+            
+            // Delete old file if exists
+            $oldThumbnailPath = public_path('assets3/img/metode-pembayaran/') . $metodePembayaran->thumbnail;
+            if(file_exists($oldThumbnailPath) && !is_dir($oldThumbnailPath)){
+                unlink($oldThumbnailPath);
             }
-            $ft = $fi->hashName();
-            $fi->move(public_path('assets3/img/metode-pembayaran/'), $ft);
+            
+            $thumbnailFilename = $thumbnailFile->hashName();
+            $thumbnailFile->move(public_path('assets3/img/metode-pembayaran/'), $thumbnailFilename);
         }
+
         if($rt->hasFile('icon')){
-            $fi = $rt->file('icon');
-            if(!($fi->isValid() && in_array($fi->extension(), ['jpeg', 'png', 'jpg']))){
+            $iconFile = $rt->file('icon');
+            if(!($iconFile->isValid() && in_array($iconFile->extension(), ['jpeg', 'png', 'jpg']))){
                 return response()->json(['status'=>'error','message'=>'Format Icon tidak valid. Gunakan format jpeg, png, jpg'], 400);
             }
-            $ftd = public_path('assets3/img/metode-pembayaran/') . $mepe['icon'];
-            if(file_exists($ftd) && !is_dir($ftd)){
-                unlink($ftd);
+            
+            // Delete old file if exists
+            $oldIconPath = public_path('assets3/img/metode-pembayaran/') . $metodePembayaran->icon;
+            if(file_exists($oldIconPath) && !is_dir($oldIconPath)){
+                unlink($oldIconPath);
             }
-            $fc = $fi->hashName();
-            $fi->move(public_path('assets3/img/metode-pembayaran/'), $fc);
+            
+            $iconFilename = $iconFile->hashName();
+            $iconFile->move(public_path('assets3/img/metode-pembayaran/'), $iconFilename);
         }
-        $uM = $mepe->update([
+
+        $result = $metodePembayaran->update([
             'nama_metode_pembayaran' => $rt->input('nama_metode_pembayaran'),
+            'no_metode_pembayaran' => $rt->input('no_metode_pembayaran'),
             'deskripsi_1' => $rt->input('deskripsi_1'),
             'deskripsi_2' => $rt->input('deskripsi_2'),
-            'thumbnail' => $rt->hasFile('thumbnail') ? $ft : $mepe['thumbnail'],
-            'icon' => $rt->hasFile('icon') ? $fc : $mepe['icon'],
+            'thumbnail' => $thumbnailFilename,
+            'icon' => $iconFilename,
         ]);
-        if (!$uM){
+
+        if (!$result){
             return response()->json(['status' => 'error', 'message' => 'Gagal memperbarui data Metode Pembayaran'], 500);
         }
         return response()->json(['status' =>'success','message'=>'Data Metode Pembayaran berhasil di perbarui']);
@@ -147,8 +180,16 @@ class MetodePembayaranController extends Controller
             }
             return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
         }
-        MetodePembayaran::where('id_metode_pembayaran',$rt->input('id_metode_pembayaran'))->firstOrFail();
-        if(!MetodePembayaran::where('id_metode_pembayaran',$rt->input('id_metode_pembayaran'))->delete()){
+        $metodePembayaran = MetodePembayaran::where('uuid',$rt->input('id_metode_pembayaran'))->firstOrFail();
+        $ftd = public_path('assets3/img/metode-pembayaran/') . $metodePembayaran['thumbnail'];
+        if (file_exists($ftd) && !is_dir($ftd)){
+            unlink($ftd);
+        }
+        $ftd = public_path('assets3/img/metode-pembayaran/') . $metodePembayaran['icon'];
+        if (file_exists($ftd) && !is_dir($ftd)){
+            unlink($ftd);
+        }
+        if(!MetodePembayaran::where('uuid',$rt->input('id_metode_pembayaran'))->delete()){
             return response()->json(['status' => 'error', 'message' => 'Gagal menghapus data Metode Pembayaran'], 500);
         }
         return response()->json(['status' => 'success', 'message' => 'Data Metode Pembayaran berhasil dihapus']);

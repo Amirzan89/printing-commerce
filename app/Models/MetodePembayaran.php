@@ -11,7 +11,7 @@ class MetodePembayaran extends Model
     protected $keyType = 'integer';
     public $timestamps = false;
     protected $fillable = [
-        'nama_metode_pembayaran', 'nomor_metode_pembayaran', 'deskripsi_1', 'deskripsi_2', 'thumbnail', 'icon'
+        'uuid', 'nama_metode_pembayaran', 'no_metode_pembayaran', 'deskripsi_1', 'deskripsi_2', 'thumbnail', 'icon'
     ];
     public function fromTransaksi()
     {

@@ -82,9 +82,25 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
             return redirect('/metode-pembayaran');
         });
         // route for metode pembayaran
-        Route::post('/create',[MetodePembayaranController::class,'createMepe']);
-        Route::put('/update',[MetodePembayaranController::class,'updateMepe']);
-        Route::delete('/delete',[MetodePembayaranController::class,'deleteMepe']);
+        Route::post('/create',[MetodePembayaranController::class,'createMPembayaran']);
+        Route::put('/update',[MetodePembayaranController::class,'updateMPembayaran']);
+        Route::delete('/delete',[MetodePembayaranController::class,'deleteMPembayaran']);
+    });
+
+    //API only metode pembayaran route
+    Route::group(['prefix'=>'/transaksi'], function(){
+        //page transaksi
+        Route::get('/',[ShowTransaksiController::class,'showAll']);
+        Route::get('/detail/{any}',[ShowTransaksiController::class,'showDetail']);
+        Route::get('/tambah',[ShowTransaksiController::class,'showTambah']);
+        Route::get('/edit/{any}',[ShowTransaksiController::class,'showEdit']);
+        Route::get('/edit', function(){
+            return redirect('/transaksi');
+        });
+        // route for transaksi
+        // Route::post('/create',[TransaksiController::class,'createTransaksi']);
+        // Route::put('/update',[TransaksiController::class,'updateTransaksi']);
+        // Route::delete('/delete',[TransaksiController::class,'deleteTransaksi']);
     });
 
     //API only user route

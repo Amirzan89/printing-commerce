@@ -277,19 +277,5 @@ class AdminController extends Controller
         $rt->user();
         return response()->json(['status' => 'success', 'message' => '']);
     }
-    public function getAdminData(Request $rt) {
-        $adminData = Admin::select('admin.uuid', 'admin.nama_admin', 'auth.email', 'auth.role')
-            ->join('auth', 'admin.id_auth', '=', 'auth.id_auth')
-            ->get()
-            ->map(function($item) {
-                $item->formatted_role = $this->formatRole($item->role);
-                return $item;
-            });
-            
-        return response()->json([
-            'status' => 'success',
-            'data' => $adminData
-        ]);
-    }
 }
 ?>

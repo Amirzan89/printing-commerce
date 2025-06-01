@@ -2,34 +2,28 @@
 namespace App\Http\Controllers\Page;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Admin;
 use App\Http\Controllers\UtilityController;
-use App\Http\Controllers\Services\TransaksiController AS ServiceTransaksiController;
+use App\Models\Transaksi;
 class TransaksiController extends Controller
 {
-    public function showData(Request $request){
+    public function showAll(Request $request){
         $dataShow = [
-            'dataTransaksi' => app()->make(ServiceTransaksiController::class)->dataCacheFile(null, 'get_limit',null, ['uuid', 'judul','rentang_usia']),
-            'userAuth' => $request->input('user_auth'),
             'headerData' => UtilityController::getHeaderData(),
+            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
+            'transaksiData' => Transaksi::select('uuid','nama_transaksi')->get(),
         ];
         return view('page.transaksi.data',$dataShow);
     }
-    public function showTambah(Request $request){
-        $dataShow = [
-            'userAuth' => $request->input('user_auth'),
-            'headerData' => UtilityController::getHeaderData(),
-        ];
-        return view('page.transaksi.tambah',$dataShow);
-    }
     public function showEdit(Request $request, $uuid){
-        $disi = app()->make(ServiceTransaksiController::class)->dataCacheFile(['uuid' => $uuid], 'get_limit', 1, ['uuid', 'judul', 'deskripsi', 'rentang_usia', 'foto', 'link_video']);
-        if (is_null($disi)) {
-            return redirect('/disi')->with('error', 'Data Transaksi tidak ditemukan');
+        $transaksiData = Transaksi::select('uuid','nama_transaksi', '')->whereRaw("BINARY uuid = ?",[$uuid])->first();
+        if(is_null($transaksiData)){
+            return redirect('/transaksi')->with('error', 'Data Transaksi tidak ditemukan');
         }
         $dataShow = [
-            'disi' => $disi[0],
-            'userAuth' => $request->input('user_auth'),
             'headerData' => UtilityController::getHeaderData(),
+            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
+            'transaksiData' => $transaksiData,
         ];
         return view('page.transaksi.edit',$dataShow);
     }
