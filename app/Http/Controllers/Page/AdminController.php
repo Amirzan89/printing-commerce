@@ -74,23 +74,25 @@ class AdminController extends Controller
         ];
         return view('page.dashboard',$dataShow);
     }
-    // public function showProfile(Request $request){
-    //     $dataShow = [
-    //         'userAuth' => $request->user(),
-    //     ];
-    //     return view('page.profile',$dataShow);
-    // }
+    public function showProfile(Request $request){
+        $dataShow = [
+            'userAuth' => $request->user(),
+        ];
+        return view('page.profile',$dataShow);
+    }
     //only admin
     public function showAll(Request $request){
         $adminData = Admin::select('admin.uuid', 'admin.nama_admin', 'auth.email', 'auth.role')->join('auth', 'admin.id_auth', '=', 'auth.id_auth')->whereNotIn('auth.role', ['admin', 'super admin'])->whereNotIn('auth.id_auth', $request->user()['id_auth'])->get();
         $dataShow = [
-            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
             'adminData' => $adminData ?? [],
+            'headerData' => UtilityController::getHeaderData(),
+            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
         ];
         return view('page.admin.data',$dataShow);
     }
     public function showTambah(Request $request){
         $dataShow = [
+            'headerData' => UtilityController::getHeaderData(),
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
         ];
         return view('page.admin.tambah',$dataShow);
@@ -101,8 +103,9 @@ class AdminController extends Controller
             return redirect('/admin')->with('error', 'Data Admin tidak ditemukan');
         }
         $dataShow = [
-            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
             'adminData' => $adminData,
+            'headerData' => UtilityController::getHeaderData(),
+            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
         ];
         return view('page.admin.edit',$dataShow);
     }

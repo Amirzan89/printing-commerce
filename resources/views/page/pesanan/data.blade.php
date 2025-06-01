@@ -31,6 +31,19 @@ $tPath = app()->environment('local') ? '' : '';
         width: 30px;
         height: 30px;
     }
+    /* Status filter styles */
+    .status-filters .btn {
+        font-size: 14px;
+        padding: 6px 15px;
+        transition: all 0.3s ease;
+    }
+    .status-filters .btn-outline-primary {
+        background-color: white;
+    }
+    .status-filters .btn-primary {
+        font-weight: 600;
+    }
+    
     th {
         white-space: nowrap;
     }
@@ -72,6 +85,10 @@ $tPath = app()->environment('local') ? '' : '';
             width: 26px;
             height: 26px;
         }
+        .status-filters .btn {
+            font-size: 13px;
+            padding: 5px 12px;
+        }
         .btn-edit,
         .btn-delete{
             width: 90px;
@@ -93,6 +110,10 @@ $tPath = app()->environment('local') ? '' : '';
         #btnTambah img{
             width: 23px;
             height: 23px;
+        }
+        .status-filters .btn {
+            font-size: 12px;
+            padding: 4px 10px;
         }
         .table{
             margin-top: 7px;
@@ -130,6 +151,11 @@ $tPath = app()->environment('local') ? '' : '';
         #btnTambah img{
             width: 20px;
             height: 20px;
+        }
+        .status-filters .btn {
+            font-size: 11px;
+            padding: 3px 8px;
+            margin-bottom: 5px;
         }
         .table{
             margin-top: 7px;
@@ -176,6 +202,9 @@ $tPath = app()->environment('local') ? '' : '';
     const reff = '/pesanan';
     var csrfToken = "{{ csrf_token() }}";
     var userAuth = @json($userAuth);
+    @if(isset($default_url) && $default_url)
+    history.replaceState(null, document.title, "{{ $default_url }}");
+    @endif
     </script>
     <!--  Body Wrapper -->
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
@@ -195,6 +224,19 @@ $tPath = app()->environment('local') ? '' : '';
                 <div class="pagetitle">
                     <h1>Kelola Pesanan</h1>
                 </div>
+                
+                <!-- Status filter buttons -->
+                <div class="status-filters mb-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ url('/pesanan?status=menunggu') }}" class="btn {{ $currentStatus == 'menunggu' ? 'btn-primary' : 'btn-outline-primary' }}">Menunggu</a>
+                        <a href="{{ url('/pesanan?status=proses') }}" class="btn {{ $currentStatus == 'proses' ? 'btn-primary' : 'btn-outline-primary' }}">Proses</a>
+                        <a href="{{ url('/pesanan?status=dikerjakan') }}" class="btn {{ $currentStatus == 'dikerjakan' ? 'btn-primary' : 'btn-outline-primary' }}">Dikerjakan</a>
+                        <a href="{{ url('/pesanan?status=revisi') }}" class="btn {{ $currentStatus == 'revisi' ? 'btn-primary' : 'btn-outline-primary' }}">Revisi</a>
+                        <a href="{{ url('/pesanan?status=selesai') }}" class="btn {{ $currentStatus == 'selesai' ? 'btn-primary' : 'btn-outline-primary' }}">Selesai</a>
+                        <a href="{{ url('/pesanan?status=dibatalkan') }}" class="btn {{ $currentStatus == 'dibatalkan' ? 'btn-primary' : 'btn-outline-primary' }}">Dibatalkan</a>
+                    </div>
+                </div>
+                
                 <div class="d-flex align-items-stretch">
                     <div class="card w-100">
                         <div class="card-body p-4" style="box-shadow: rgba(145,158,171,0.2) 0px 0px 2px 0px, rgba(145,158,171,0.12) 0px 12px 24px -4px;">

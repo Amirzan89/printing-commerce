@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
         $this->call(UserSeeder::class);
         $this->call(MetodePembayaranSeeder::class);
         $this->call(JasaSeeder::class);
+        $this->call(JasaImageSeeder::class);
         $this->call(PesananSeeder::class);
         $this->call(TransaksiSeeder::class);
         $this->call(EditorSeeder::class);

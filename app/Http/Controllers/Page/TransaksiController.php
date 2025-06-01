@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Page;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Controllers\UtilityController;
 use App\Http\Controllers\Services\TransaksiController AS ServiceTransaksiController;
 class TransaksiController extends Controller
 {
@@ -9,12 +10,14 @@ class TransaksiController extends Controller
         $dataShow = [
             'dataTransaksi' => app()->make(ServiceTransaksiController::class)->dataCacheFile(null, 'get_limit',null, ['uuid', 'judul','rentang_usia']),
             'userAuth' => $request->input('user_auth'),
+            'headerData' => UtilityController::getHeaderData(),
         ];
         return view('page.transaksi.data',$dataShow);
     }
     public function showTambah(Request $request){
         $dataShow = [
             'userAuth' => $request->input('user_auth'),
+            'headerData' => UtilityController::getHeaderData(),
         ];
         return view('page.transaksi.tambah',$dataShow);
     }
@@ -26,6 +29,7 @@ class TransaksiController extends Controller
         $dataShow = [
             'disi' => $disi[0],
             'userAuth' => $request->input('user_auth'),
+            'headerData' => UtilityController::getHeaderData(),
         ];
         return view('page.transaksi.edit',$dataShow);
     }

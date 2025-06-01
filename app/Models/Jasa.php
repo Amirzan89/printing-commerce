@@ -17,4 +17,9 @@ class Jasa extends Model
     {
         return $this->hasMany(PaketJasa::class, 'id_paket_jasa');
     }
+    
+    public function images()
+    {
+        return $this->hasMany(JasaImage::class, 'id_jasa', 'id_jasa');
+    }
 }

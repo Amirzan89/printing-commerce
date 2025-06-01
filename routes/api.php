@@ -29,7 +29,7 @@ Route::group(['prefix'=>'/mobile','middleware'=>'authMobile','authorized'],funct
         Route::get('/tambah',[PesananController::class,'showTambah']);
         Route::get('/edit/{any}',[PesananController::class,'showEdit']);
         Route::get('/edit', function(){
-            return view('page.admin.data');
+            return redirect('/pesanan');
         });
         Route::post('/create',[PesananController::class,'createPesanan']);
         Route::put('/update',[PesananController::class,'updatePesanan']);
@@ -43,7 +43,7 @@ Route::group(['prefix'=>'/mobile','middleware'=>'authMobile','authorized'],funct
         Route::get('/tambah',[TransaksiController::class,'showTambah']);
         Route::get('/edit/{any}',[TransaksiController::class,'showEdit']);
         Route::get('/edit', function(){
-            return view('page.admin.data');
+            return redirect('/transaksi');
         });
         Route::post('/create',[TransaksiController::class,'createTransaksi']);
         Route::put('/update',[TransaksiController::class,'updateTransaksi']);
@@ -57,7 +57,7 @@ Route::group(['prefix'=>'/mobile','middleware'=>'authMobile','authorized'],funct
         Route::get('/tambah',[MetodePembayaranController::class,'showTambah']);
         Route::get('/edit/{any}',[MetodePembayaranController::class,'showEdit']);
         Route::get('/edit', function(){
-            return view('page.admin.data');
+            return redirect('/metode-pembayaran');
         });
         Route::post('/create',[MetodePembayaranController::class,'createMPembayaran']);
         Route::put('/update',[MetodePembayaranController::class,'updateMPembayaran']);

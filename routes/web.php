@@ -23,17 +23,16 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
     //API only jasa route
     Route::group(['prefix'=>'/jasa'], function(){
         //page jasa
-        Route::get('/',[ShowJasaController::class,'showAll']);
-        Route::get('/detail/{any}',[ShowJasaController::class,'showDetail']);
-        Route::get('/tambah',[ShowJasaController::class,'showTambah']);
-        Route::get('/edit/{any}',[ShowJasaController::class,'showEdit']);
+        Route::get('/',[ShowJasaController::class,'showAll'])->name('jasa.index');
+        Route::get('/tambah',[ShowJasaController::class,'showTambah'])->name('jasa.create');
+        Route::get('/edit/{any}',[ShowJasaController::class,'showEdit'])->name('jasa.edit');
         Route::get('/edit', function(){
-            return view('page.admin.data');
+            return redirect('/jasa');
         });
         // route for jasa
-        Route::post('/create',[JasaController::class,'createJasa']);
-        Route::put('/update',[JasaController::class,'updateJasa']);
-        Route::delete('/delete',[JasaController::class,'deleteJasa']);
+        Route::post('/create',[JasaController::class,'createJasa'])->name('api.jasa.store');
+        Route::put('/update',[JasaController::class,'updateJasa'])->name('api.jasa.update');
+        Route::delete('/delete',[JasaController::class,'deleteJasa'])->name('api.jasa.destroy');
     });
 
     //API only pesanan route
@@ -44,7 +43,7 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::get('/tambah',[ShowPesananController::class,'showTambah']);
         Route::get('/edit/{any}',[ShowPesananController::class,'showEdit']);
         Route::get('/edit', function(){
-            return view('page.admin.data');
+            return redirect('/pesanan');
         });
         // route for pesanan
         Route::post('/create',[PesananController::class,'createPesanan']);
@@ -60,7 +59,7 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::get('/tambah',[ShowTransaksiController::class,'showTambah']);
         Route::get('/edit/{any}',[ShowTransaksiController::class,'showEdit']);
         Route::get('/edit', function(){
-            return view('page.admin.data');
+            return redirect('/transaksi');
         });
         // route for transaksi
         Route::post('/create',[TransaksiController::class,'createTransaksi']);
@@ -76,7 +75,7 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::get('/tambah',[ShowMetodePembayaranController::class,'showTambah']);
         Route::get('/edit/{any}',[ShowMetodePembayaranController::class,'showEdit']);
         Route::get('/edit', function(){
-            return view('page.admin.data');
+            return redirect('/metode-pembayaran');
         });
         // route for metode pembayaran
         Route::post('/create',[MetodePembayaranController::class,'createMepe']);
@@ -90,7 +89,7 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::get('/tambah',[ShowAdminController::class,'showTambah']);
         Route::get('/edit/{any}',[ShowAdminController::class,'showEdit']);
         Route::get('/edit', function(){
-            return view('page.admin.data');
+            return redirect('/admin');
         });
         // route for admin
         Route::post('/create',[AdminController::class,'createAdmin']);

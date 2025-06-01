@@ -43,7 +43,8 @@ $tPath = app()->environment('local') ? '' : '';
         flex-direction: row;
     }
     .btn-edit,
-    .btn-delete{
+    .btn-delete,
+    .btn-detail{
         padding: 0px;
         display: flex;
         width: 100px;
@@ -54,7 +55,8 @@ $tPath = app()->environment('local') ? '' : '';
         font-size: 17px;
     }
     .btn-edit img,
-    .btn-delete img{
+    .btn-delete img,
+    .btn-detail img{
         width: 24px;
         height: 24px;
     }
@@ -73,13 +75,15 @@ $tPath = app()->environment('local') ? '' : '';
             height: 26px;
         }
         .btn-edit,
-        .btn-delete{
+        .btn-delete,
+        .btn-detail{
             width: 90px;
             height: 40px;
             font-size: 16px;
         }
         .btn-edit img,
-        .btn-delete img{
+        .btn-delete img,
+        .btn-detail img{
             width: 22px;
             height: 22px;
         }
@@ -110,13 +114,15 @@ $tPath = app()->environment('local') ? '' : '';
             flex-direction: column;
         }
         .btn-edit,
-        .btn-delete{
+        .btn-delete,
+        .btn-detail{
             width: 90px;
             height: 40px;
             font-size: 15px;
         }
         .btn-edit img,
-        .btn-delete img{
+        .btn-delete img,
+        .btn-detail img{
             width: 21px;
             height: 21px;
         }
@@ -147,13 +153,15 @@ $tPath = app()->environment('local') ? '' : '';
             flex-direction: column;
         }
         .btn-edit,
-        .btn-delete{
+        .btn-delete,
+        .btn-detail{
             width: 80px;
             height: 37px;
             font-size: 14px;
         }
         .btn-edit img,
-        .btn-delete img{
+        .btn-delete img,
+        .btn-detail img{
             width: 19px;
             height: 19px;
         }
@@ -235,6 +243,10 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <p class="mb-0 fw-normal">{{ $data['kategori']}}</p>
                                             </td>
                                             <td class="border-bottom-0">
+                                                <a href="/jasa/edit/{{ $data['uuid'] }}?detail=true" class="btn btn-info btn-detail m-1">
+                                                    <img src="{{ asset($tPath.'assets2/icon/detail.svg') }}" alt="">
+                                                    <span>Detail</span>
+                                                </a>
                                                 <a href="/jasa/edit/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1">
                                                     <img src="{{ asset($tPath.'assets2/icon/edit.svg') }}" alt="">
                                                     <span>Edit</span>
