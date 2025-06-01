@@ -70,10 +70,7 @@ class AdminController extends Controller
                 }),
             'monthly_sales' => $salesData,
             'headerData' => UtilityController::getHeaderData(),
-            'userAuth' => array_merge(
-                Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), 
-                ['role' => $request->user()['role'], 'formatted_role' => $this->formatRole($request->user()['role'])]
-            ),
+            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
         ];
         return view('page.dashboard',$dataShow);
     }
@@ -87,7 +84,7 @@ class AdminController extends Controller
     public function showAll(Request $request){
         $adminData = Admin::select('admin.uuid', 'admin.nama_admin', 'auth.email', 'auth.role')
             ->join('auth', 'admin.id_auth', '=', 'auth.id_auth')
-            ->whereNotIn('auth.role', ['admin', 'super admin'])
+            ->whereNotIn('auth.role', ['super_admin', 'admin_chat', 'admin_pemesanan'])
             ->whereNotIn('auth.id_auth', [$request->user()['id_auth']])
             ->get()
             ->map(function($item) {

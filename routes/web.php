@@ -11,6 +11,8 @@ use App\Http\Controllers\Services\ReviewController;
 use App\Http\Controllers\Services\AdminController;
 use App\Http\Controllers\Services\LoginController;
 use App\Http\Controllers\Services\EditorController;
+use App\Http\Controllers\Mobile\UserController;
+
 use App\Http\Controllers\Page\PublicController AS ShowHomeController;
 use App\Http\Controllers\Page\JasaController AS ShowJasaController;
 use App\Http\Controllers\Page\PesananController AS ShowPesananController;
@@ -19,6 +21,8 @@ use App\Http\Controllers\Page\TransaksiController AS ShowTransaksiController;
 use App\Http\Controllers\Page\ReviewController AS ShowReviewController;
 use App\Http\Controllers\Page\AdminController AS ShowAdminController;
 use App\Http\Controllers\Page\EditorController AS ShowEditorController;
+use App\Http\Controllers\Page\UserController AS ShowUserController;
+
 Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
     //API only jasa route
     Route::group(['prefix'=>'/jasa'], function(){
@@ -83,6 +87,20 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::delete('/delete',[MetodePembayaranController::class,'deleteMepe']);
     });
 
+    //API only user route
+    Route::group(['prefix'=>'/user'], function(){
+        //page user
+        Route::get('/',[ShowUserController::class,'showAll']);
+        Route::get('/detail/{any}',[ShowUserController::class,'showDetail']);
+        Route::get('/tambah',[ShowUserController::class,'showTambah']);
+        Route::get('/edit', function(){
+            return redirect('/user');
+        });
+        // route for user
+        Route::post('/create',[UserController::class,'createUser']);
+        Route::delete('/delete',[UserController::class,'deleteUser']);
+    });
+
     //API only editor route
     Route::group(['prefix'=>'/editor'], function(){
         //page editor
@@ -115,9 +133,6 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
             Route::put('/profile', [AdminController::class, 'updateProfile']);
             Route::put('/password', [AdminController::class, 'updatePassword']);
         });
-    });
-    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-        return $request->user();
     });
     Route::get('/dashboard',[ShowAdminController::class,'showDashboard']);
     Route::get('/profile',[ShowAdminController::class,'showProfile']);

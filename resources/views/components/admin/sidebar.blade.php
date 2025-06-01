@@ -49,6 +49,14 @@
                 </a>
             </li>
 
+            <li class="sidebar-item {{ $nav == 'user' ? 'selected' : ''}}">
+                <a class="sidebar-link {{ $nav == 'user' ? 'active' : ''}}" href="/user"
+                    aria-expanded="false">
+                    <img src="{{ asset($tPath.'assets2/icon/sidebar/user.svg') }}" alt="" width="30" height="30" class="white">
+                    <span class="hide-menu text-white">Kelola User</span>
+                </a>
+            </li>
+
             <li class="sidebar-item {{ $nav == 'editor' ? 'selected' : ''}}">
                 <a class="sidebar-link {{ $nav == 'editor' ? 'active' : ''}}" href="/editor"
                     aria-expanded="false">
