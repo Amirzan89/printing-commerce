@@ -50,13 +50,6 @@ $tPath = app()->environment('local') ? '' : '';
             <div class="container-fluid" style="background-color: #F6F9FF">
                 <div class="pagetitle mt-2 mt-sm-3 mt-md-3 mt-lg-4 mb-2 mb-sm-3 mb-md-3 mb-lg-4">
                     <h1>Tambah User</h1>
-                    <nav>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="/dashboard">Beranda</a></li>
-                            <li class="breadcrumb-item"><a href="/user">Kelola User</a></li>
-                            <li class="breadcrumb-item">Tambah User</li>
-                        </ol>
-                    </nav>
                 </div>
                 <div class="container py-4">
                     <div class="card">

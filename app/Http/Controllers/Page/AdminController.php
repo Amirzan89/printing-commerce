@@ -106,7 +106,7 @@ class AdminController extends Controller
         return view('page.admin.tambah',$dataShow);
     }
     public function showEdit(Request $request, $uuid){
-        $adminData = Admin::select('uuid','nama_admin', 'role', 'email', 'foto')->whereNotIn('role', ['admin'])->whereRaw("BINARY uuid = ?",[$uuid])->join('auth', 'admin.id_auth', '=', 'auth.id_auth')->first();
+        $adminData = Admin::select('uuid','nama_admin', 'role', 'email')->whereNotIn('role', ['admin'])->whereRaw("BINARY uuid = ?",[$uuid])->join('auth', 'admin.id_auth', '=', 'auth.id_auth')->first();
         if(is_null($adminData)){
             return redirect('/admin')->with('error', 'Data Admin tidak ditemukan');
         }

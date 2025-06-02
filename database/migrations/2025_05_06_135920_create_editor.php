@@ -12,7 +12,6 @@ return new class extends Migration
             $table->string('nama_editor', 50);
             $table->enum('jenis_kelamin',['laki-laki','perempuan'])->nullable();
             $table->string('no_telpon', 15)->nullable();
-            $table->string('foto')->nullable();
             $table->timestamps();
         });
     }

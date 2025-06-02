@@ -10,7 +10,7 @@ use App\Models\Admin;
 class AdminController extends Controller
 {
     public function createAdmin(Request $rt){
-        $validator = Validator::make($rt->only('email', 'nama_admin', 'role', 'password', 'foto'), [
+        $validator = Validator::make($rt->only('email', 'nama_admin', 'role', 'password'), [
             'email'=>'required|email',
             'nama_admin' => 'required|min:3|max:50',
             'role' => 'required|in:super_admin,admin_chat,admin_pemesanan',
@@ -21,7 +21,6 @@ class AdminController extends Controller
                 'max:25',
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\p{P}\p{S}])[\p{L}\p{N}\p{P}\p{S}]+$/u',
             ],
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ],[
             'email.required'=>'Email wajib di isi',
             'email.email'=>'Email yang anda masukkan invalid',
@@ -34,9 +33,6 @@ class AdminController extends Controller
             'password.min'=>'Password minimal 8 karakter',
             'password.max'=>'Password maksimal 25 karakter',
             'password.regex'=>'Password terdiri dari 1 huruf besar, huruf kecil, angka dan karakter unik',
-            'foto.image' => 'Foto Admin harus berupa gambar',
-            'foto.mimes' => 'Format foto admin tidak valid. Gunakan format jpeg, png, jpg',
-            'foto.max' => 'Ukuran foto admin tidak boleh lebih dari 5MB',
         ]);
         if($validator->fails()){
             $errors = [];
@@ -49,14 +45,6 @@ class AdminController extends Controller
         if(Auth::select("email")->whereRaw("BINARY email = ?",[$rt->input('email')])->exists()){
             return response()->json(['status'=>'error','message'=>'Email sudah digunakan'],400);
         }
-        if($rt->hasFile('foto')){
-            $fi = $rt->file('foto');
-            if(!($fi->isValid() && in_array($fi->extension(), ['jpeg', 'png', 'jpg']))){
-                return response()->json(['status'=>'error','message'=>'Format Foto tidak valid. Gunakan format jpeg, png, jpg'], 400);
-            }
-            $fh = $fi->hashName();
-            $fi->move(public_path('assets3/img/admin/'), $fh);
-        }
         $idAuth = Auth::insertGetId([
             'email' => $rt->input('email'),
             'password' => Hash::make($rt->input('password')),
@@ -65,7 +53,6 @@ class AdminController extends Controller
         $ins = Admin::insert([
             'uuid' =>  Str::uuid(),
             'nama_admin' => $rt->input('nama_admin'),
-            'foto' => $rt->hasFile('foto') ? $fh : '',
             'id_auth' => $idAuth,
         ]);
         if(!$ins){
@@ -74,7 +61,7 @@ class AdminController extends Controller
         return response()->json(['status'=>'success','message'=>'Data Admin berhasil ditambahkan']);
     }
     public function updateAdmin(Request $rt){
-        $validator = Validator::make($rt->only('uuid', 'email','nama_admin', 'role', 'password','foto'), [
+        $validator = Validator::make($rt->only('uuid', 'email','nama_admin', 'role', 'password'), [
             'uuid'=>'required|email',
             'email'=>'nullable|email',
             'nama_admin' => 'required|min:3|max:50',
@@ -86,7 +73,6 @@ class AdminController extends Controller
                 'max:25',
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\p{P}\p{S}])[\p{L}\p{N}\p{P}\p{S}]+$/u',
             ],
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ],[
             'uuid.required'=>'Admin ID wajib di isi',
             'email.email'=>'Email yang anda masukkan invalid',
@@ -98,9 +84,6 @@ class AdminController extends Controller
             'password.min'=>'Password minimal 8 karakter',
             'password.max'=>'Password maksimal 50 karakter',
             'password.regex'=>'Password terdiri dari 1 huruf besar, huruf kecil, angka dan karakter unik',
-            'foto.image' => 'Foto Admin harus berupa gambar',
-            'foto.mimes' => 'Format foto admin tidak valid. Gunakan format jpeg, png, jpg',
-            'foto.max' => 'Ukuran foto admin tidak boleh lebih dari 5MB',
         ]);
         if($validator->fails()){
             $errors = [];
@@ -117,18 +100,6 @@ class AdminController extends Controller
         if(!is_null($rt->input('role')) && !empty($rt->input('role')) && !in_array($rt->input('role'), ['super_admin', 'admin_chat', 'admin_pemesanan'])){
             return response()->json(['status' => 'error', 'message' => 'Invalid Role'], 400);
         }
-        if($rt->hasFile('foto')){
-            $fi = $rt->file('foto');
-            if(!($fi->isValid() && in_array($fi->extension(), ['jpeg', 'png', 'jpg']))){
-                return response()->json(['status'=>'error','message'=>'Format Foto tidak valid. Gunakan format jpeg, png, jpg'], 400);
-            }
-            $ftd = public_path('assets3/img/admin/') . $admin['foto'];
-            if(file_exists($ftd) && !is_dir($ftd)){
-                unlink($ftd);
-            }
-            $fh = $fi->hashName();
-            $fi->move(public_path('assets3/img/admin/'), $fh);
-        }
         $uT = Auth::where('id_auth', $admin['id_auth'])->update([
             'email' => (empty($rt->input('email')) || is_null($rt->input('email'))) ? $admin['email'] : $rt->input('email'),
             'password' => (empty($rt->input('password')) || is_null($rt->input('password'))) ? $admin['password']: Hash::make($rt->input('password')),
@@ -136,7 +107,6 @@ class AdminController extends Controller
         ]);
         $uA = Admin::where('id_auth', $admin['id_auth'])->update([
             'nama_admin'=>$rt->input('nama_admin'),
-            'foto' => $rt->hasFile('foto') ? $fh : $admin['foto'],
         ]);
         if(!$uT || !$uA){
             return response()->json(['status' => 'error', 'message' => 'Gagal memperbarui data Admin'], 500);
@@ -144,18 +114,14 @@ class AdminController extends Controller
         return response()->json(['status'=>'success','message'=>'Data Admin berhasil diperbarui']);
     }
     public function updateProfile(Request $rt){
-        $validator = Validator::make($rt->only('email', 'nama_admin', 'foto'),
+        $validator = Validator::make($rt->only('email', 'nama_admin'),
             [
                 'email'=>'nullable|email',
                 'nama_admin' => 'required|max:50',
-                'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             ],[
                 'email.email'=>'Email yang anda masukkan invalid',
                 'nama_admin.required' => 'Nama admin wajib di isi',
                 'nama_admin.max' => 'Nama admin maksimal 50 karakter',
-                'foto.image' => 'Foto Admin harus berupa gambar',
-                'foto.mimes' => 'Format foto admin tidak valid. Gunakan format jpeg, png, jpg',
-                'foto.max' => 'Ukuran foto admin tidak boleh lebih dari 5MB',
             ],
         );
         if ($validator->fails()){
@@ -170,24 +136,11 @@ class AdminController extends Controller
         if(!is_null($rt->input('email') || !empty($rt->input('email'))) && $rt->input('email') != $rt->user()['email'] && Admin::whereRaw("BINARY email = ?",[$rt->input('email')])->exists()){
             return response()->json(['status' => 'error', 'message' => 'Email sudah digunakan'], 400);
         }
-        if($rt->hasFile('foto')){
-            $fi = $rt->file('foto');
-            if(!($fi->isValid() && in_array($fi->extension(), ['jpeg', 'png', 'jpg']))){
-                return response()->json(['status'=>'error','message'=>'Format Foto tidak valid. Gunakan format jpeg, png, jpg'], 400);
-            }
-            $ftd = public_path('assets3/img/admin/') . $profile['foto'];
-            if (file_exists($ftd) && !is_dir($ftd)){
-                unlink($ftd);
-            }
-            $fh = $fi->hashName();
-            $fi->move(public_path('assets3/img/admin/'), $fh);
-        }
         $updatedAuthProfile = Auth::where('id_auth',$rt->user()['id_auth'])->update([
             'email'=>(is_null($rt->input('email')) || empty($rt->input('email'))) ? $rt->user()['email'] : $rt->input('email'),
         ]);
         $updateProfile = Admin::where('id_auth',$rt->user()['id_auth'])->update([
             'nama_admin'=>$rt->input('nama_admin'),
-            'foto' => $rt->hasFile('foto') ? $fh : $profile['foto'],
         ]);
         if(!$updatedAuthProfile || !$updateProfile){
             return response()->json(['status' => 'error', 'message' => 'Gagal memperbarui data Admin'], 500);
@@ -262,11 +215,6 @@ class AdminController extends Controller
                 break;
             }
             return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
-        }
-        $admin = Admin::select('foto')->where('uuid',$rt->input('uuid'))->firstOrFail();
-        $ftd = public_path('assets3/img/admin/') . $admin['foto'];
-        if (file_exists($ftd) && !is_dir($ftd)){
-            unlink($ftd);
         }
         if(!Admin::where('uuid',$rt->input('uuid'))->delete()){
             return response()->json(['status' => 'error', 'message' => 'Gagal menghapus data Admin'], 500);

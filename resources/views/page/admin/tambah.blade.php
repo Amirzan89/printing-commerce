@@ -15,7 +15,67 @@ $tPath = app()->environment('local') ? '' : '';
     <link rel="stylesheet" href="{{ asset($tPath.'assets/css/styles.min.css') }}" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/popup.css') }}" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/preloader.css') }}" />
-    
+    <style>
+        .detail-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .detail-title {
+            font-size: 24px;
+            margin: 0;
+        }
+        .detail-subtitle {
+            color: #666;
+            margin: 5px 0 20px 0;
+        }
+        .detail-form {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-save {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+        }
+        .btn-cancel {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 
 <body>
@@ -48,77 +108,64 @@ $tPath = app()->environment('local') ? '' : '';
             <!--  Header Start -->
             @include('components.admin.header')
             <!--  Header End -->
-            <div class="container-fluid" style="background-color: #F6F9FF">
-                <div class="pagetitle mt-2 mt-sm-3 mt-md-3 mt-lg-4 mb-2 mb-sm-3 mb-md-3 mb-lg-4">
-                    <h1>Tambah Admin</h1>
-                    <nav>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="/dashboard">Beranda</a></li>
-                            <li class="breadcrumb-item"><a href="/admin">Kelola Admin</a></li>
-                            <li class="breadcrumb-item">Tambah Admin</li>
-                        </ol>
-                    </nav>
-                </div>
-                <div class="d-flex align-items-stretch" style="background-color: #ffffff; border-radius: 20px;">
-                    <form id="tambahForm">
-                        <div class="crow">
-                            <label for="">Nama Lengkap</label>
-                            <input type="text" id="inpNama">
+            <div class="container-fluid">
+                <div class="detail-container">
+                    <div class="detail-header">
+                        <div>
+                            <h1 class="detail-title">Tambah Admin</h1>
                         </div>
-                        <div class="crow">
-                            <div style="width: 20%">
-                                <label for="">Jenis Kelamin</label>
-                                <select aria-label="Default select example" id="inpJenisKelamin">
-                                    <option value="" selected>Pilih Kelamin</option>
-                                    <option value="laki-laki">Laki-Laki</option>
-                                    <option value="perempuan">Perempuan</option>
-                                </select>
+                    </div>
+
+                    <div class="detail-form">
+                        <form id="tambahForm" class="needs-validation" novalidate>
+                            <div class="form-group">
+                                <label for="inpNama">Nama Admin</label>
+                                <input type="text" class="form-control" id="inpNama" required maxlength="50">
+                                <div class="invalid-feedback">
+                                    Nama admin harus diisi
+                                </div>
                             </div>
-                            <div style="width: 25%">
-                                <label>Role</label>
-                                <select name="role" aria-label="Default select example" id="inpRole">
-                                    <option value="" disabled selected>Pilih Role</option>
+
+                            <div class="form-group">
+                                <label for="inpEmail">Email</label>
+                                <input type="email" class="form-control" id="inpEmail" required maxlength="45">
+                                <div class="invalid-feedback">
+                                    Email harus diisi dengan format yang benar
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="inpPassword">Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="inpPassword" required minlength="8">
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="fas fa-eye-slash" id="eyeIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Password harus diisi minimal 8 karakter
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="inpRole">Role</label>
+                                <select class="form-control" id="inpRole" required>
+                                    <option value="" selected disabled>Pilih Role</option>
                                     <option value="super_admin">Super Admin</option>
                                     <option value="admin_chat">Admin Chat</option>
                                     <option value="admin_pemesanan">Admin Pemesanan</option>
                                 </select>
-                            </div>
-                            <div style="flex: 1">
-                                <label for="">Nomer Telepon</label>
-                                <input type="text" id="inpNomerTelepon">
-                            </div>
-                        </div>
-                        <div class="crow">
-                            <div>
-                                <label for="">Email</label>
-                                <input type="text" id="inpEmail">
-                            </div>
-                            <div>
-                                <label for="">Password</label>
-                                <div style="position: relative">
-                                    <input type="password" id="inpPassword" style="padding-right: 45px;" oninput="showEyePass()">
-                                    <div id="iconPass" onclick="showPass()" style="display: none;">
-                                        <img src="{{ asset($tPath.'assets2/icon/eye-slash.svg') }}" alt="" id="passClose">
-                                        <img src="{{ asset($tPath.'assets2/icon/eye.svg') }}" alt="" id="passShow" style="display: none">
-                                    </div>
+                                <div class="invalid-feedback">
+                                    Role harus dipilih
                                 </div>
                             </div>
-                        </div>
-                        <div class="img" onclick="handleFileClick()" ondragover="handleDragOver(event)"
-                            ondrop="handleDrop(event)">
-                            <img src="{{ asset($tPath.'assets2/icon/upload.svg') }}" alt="" id="icon">
-                            <span>Pilih File atau Jatuhkan File</span>
-                            <input type="file" id="inpFoto" hidden onchange="handleFileChange(event)">
-                            <img src="" alt="" id="file" style="display:none">
-                        </div>
-                        <div class="crow">
-                            <a href="/admin" class="btn btn-danger">Kembali</a>
-                            <button type="submit" class="btn btn-success">
-                                <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="" width="30" height="30">
-                                <span>Tambah</span>
-                            </button>
-                        </div>
-                    </form>
+
+                            <div class="action-buttons">
+                                <a href="/admin" class="btn btn-cancel">Cancel</a>
+                                <button type="submit" class="btn btn-save">Save</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 @include('components.admin.footer')
             </div>
@@ -131,9 +178,25 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/sidebarmenu.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/app.min.js') }}"></script>
-    <script src="{{ asset($tPath.'assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
-    <script src="{{ asset($tPath.'assets2/js/page/tambahAdmin.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
+    <script src="{{ asset($tPath.'assets2/js/page/tambahAdmin.js') }}"></script>
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('inpPassword');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            }
+        });
+    </script>
 </body>
 </html>
