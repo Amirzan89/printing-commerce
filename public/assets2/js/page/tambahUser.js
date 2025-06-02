@@ -1,22 +1,50 @@
 const tambahForm = document.getElementById("tambahForm");
 const inpNama = document.getElementById("inpNama");
 const inpJenisKelamin = document.getElementById("inpJenisKelamin");
-const inpKategori = document.getElementById("inpKategori");
 const inpNomerTelepon = document.getElementById("inpNomerTelepon");
 const inpEmail = document.getElementById("inpEmail");
-const inpAlamat = document.getElementById("inpAlamat");
+const iconPass = document.getElementById("iconPass");
+const inpPassword = document.getElementById("inpPassword");
 const inpFoto = document.getElementById("inpFoto");
 const allowedFormats = ["image/jpeg", "image/png"];
 let uploadeFile = null;
+var isPasswordShow = false;
+
+// Utility Functions
 function showLoading() {
     document.querySelector("div#preloader").style.display = "block";
 }
+
 function closeLoading() {
     document.querySelector("div#preloader").style.display = "none";
 }
+function showEyePass(){
+    if(inpPassword.value == '' || inpPassword.value == null){
+        iconPass.style.display = 'none';
+    }else{
+        iconPass.style.display = 'block';
+    }
+}
+// Password Toggle Functions
+function showPass(){
+    if(isPasswordShow){
+        inpPassword.type = 'password';
+        document.getElementById('passClose').style.display = 'block';
+        document.getElementById('passShow').style.display = 'none';
+        isPasswordShow = false;
+    }else{
+        inpPassword.type = 'text';
+        document.getElementById('passClose').style.display = 'none';
+        document.getElementById('passShow').style.display = 'block';
+        isPasswordShow = true;
+    }
+}
+
+// File Handling Functions
 function handleFileClick() {
     inpFoto.click();
 }
+
 function handleFileChange(event) {
     const file = event.target.files[0];
     if (file) {
@@ -29,14 +57,18 @@ function handleFileChange(event) {
         fileReader.onload = function() {
             document.getElementById('file').src = fileReader.result;
             document.getElementById('file').style.display = 'block';
-            document.querySelector('div.img').style.border = 'none';
+            document.querySelector('.dropzone-container').style.border = 'none';
+            document.querySelector('.dropzone-container img#icon').style.display = 'none';
+            document.querySelector('.dropzone-container p').style.display = 'none';
         };
         fileReader.readAsDataURL(uploadeFile);
     }
 }
+
 function handleDragOver(event) {
     event.preventDefault();
 }
+
 function handleDrop(event) {
     event.preventDefault();
     const file = event.dataTransfer.files[0];
@@ -50,36 +82,71 @@ function handleDrop(event) {
         reader.onload = function(event) {
             document.getElementById('file').src = event.target.result;
             document.getElementById('file').style.display = 'block';
-            document.querySelector('div.img').style.border = 'none';
+            document.querySelector('.dropzone-container').style.border = 'none';
+            document.querySelector('.dropzone-container img#icon').style.display = 'none';
+            document.querySelector('.dropzone-container p').style.display = 'none';
         };
         reader.readAsDataURL(file);
-        fileImg = file;
     }
 }
+
+// Validation Functions
 function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 }
+
+function validatePassword(password) {
+    if (password === '') {
+        showRedPopup('Password harus diisi !');
+        return false;
+    }
+    if (password.length < 8) {
+        showRedPopup('Password minimal 8 karakter !');
+        return false;
+    }
+    if (!/[A-Z]/.test(password)) {
+        showRedPopup('Password minimal ada 1 huruf kapital !');
+        return false;
+    }
+    if (!/[a-z]/.test(password)) {
+        showRedPopup('Password minimal ada 1 huruf kecil !');
+        return false;
+    }
+    if (!/\d/.test(password)) {
+        showRedPopup('Password minimal ada 1 angka !');
+        return false;
+    }
+    if (!/[!@#$%^&*]/.test(password)) {
+        showRedPopup('Password minimal ada 1 karakter unik !');
+        return false;
+    }
+    return true;
+}
+
+// Form Submission
 tambahForm.onsubmit = function(event){
     event.preventDefault();
+    
+    // Get form values
     const nama = inpNama.value.trim();
     const inp_jenis_kelamin = inpJenisKelamin.value.trim();
-    const inp_kategori = inpKategori.value.trim();
     const nomer = inpNomerTelepon.value.trim();
     const inpEmails = inpEmail.value.trim();
-    const alamat = inpAlamat.value.trim();
+    const password = inpPassword.value.trim();
+
+    // Validate required fields
     if(nama === "") {
         showRedPopup("Nama Lengkap harus diisi !");
         return;
     }
+
     if(inp_jenis_kelamin === "") {
         showRedPopup("Jenis Kelamin harus diisi !");
         return;
     }
-    if(inp_kategori === "") {
-        showRedPopup("Kategori harus diisi !");
-        return;
-    }
+
+    // Validate phone number
     if(nomer === "") {
         showRedPopup("Nomer Telepon harus diisi !");
         return;
@@ -93,6 +160,8 @@ tambahForm.onsubmit = function(event){
         showRedPopup("Nomer Telepon harus terdiri dari 11-13 digit angka !");
         return;
     }
+
+    // Validate email
     if(inpEmails === "") {
         showRedPopup("Email harus diisi !");
         return;
@@ -101,48 +170,56 @@ tambahForm.onsubmit = function(event){
         showRedPopup('Format Email salah !');
         return;
     }
-    if(alamat === "") {
-        showRedPopup("Alamat harus diisi !");
+
+    // Validate password
+    if (!validatePassword(password)) {
         return;
     }
-    if (!uploadeFile) {
-        showRedPopup("Foto harus dipilih !");
-        return;
-    }
-    if(!allowedFormats.includes(uploadeFile.type)) {
+
+    // Validate file if uploaded
+    if (uploadeFile && !allowedFormats.includes(uploadeFile.type)) {
         showRedPopup("Format Foto harus png, jpeg, jpg !");
         return;
     }
+
+    // Prepare form data
     showLoading();
     const formData = new FormData();
     formData.append("nama_lengkap", nama);
     formData.append("jenis_kelamin", inp_jenis_kelamin);
-    formData.append("kategori", inp_kategori);
     formData.append("no_telpon", nomer);
-    formData.append("email_konsultasi", inpEmails);
-    formData.append("alamat", alamat);
-    formData.append("foto", uploadeFile);
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", reff + "/tambah");
-    xhr.setRequestHeader("X-CSRF-TOKEN", csrfToken);
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            closeLoading();
-            var response = JSON.parse(xhr.responseText);
-            showGreenPopup(response);
+    formData.append("email_user", inpEmails);
+    formData.append("password", password);
+    
+    if (uploadeFile) {
+        formData.append("foto", uploadeFile);
+    }
+
+    // Send request
+    fetch('/user/tambah', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        closeLoading();
+        if (data.success) {
+            showGreenPopup(data.message || "User berhasil ditambahkan!");
             setTimeout(() => {
-                window.location.href = reff;
+                window.location.href = '/user';
             }, 2000);
         } else {
-            closeLoading();
-            var response = JSON.parse(xhr.responseText);
-            showRedPopup(response);
+            showRedPopup(data.message || "Gagal menambahkan user!");
         }
-    };
-    xhr.onerror = function () {
+    })
+    .catch(error => {
         closeLoading();
-        showRedPopup("Error occurred during the request.");
-    };
-    xhr.send(formData);
+        console.error('Error:', error);
+        showRedPopup("Terjadi kesalahan saat mengirim data.");
+    });
+
     return false;
-};
+}; 

@@ -15,7 +15,6 @@ $tPath = app()->environment('local') ? '' : '';
     <link rel="stylesheet" href="{{ asset($tPath.'assets/css/styles.min.css') }}" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/popup.css') }}" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/preloader.css') }}" />
-    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/page/tambahAdmin.css') }}" />
 </head>
 
 <body>
@@ -99,7 +98,7 @@ $tPath = app()->environment('local') ? '' : '';
                         <div class="crow">
                             <a href="/admin" class="btn btn-danger">Kembali</a>
                             <button type="submit" class="btn btn-success">
-                                <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="" width="30" height="30">
+                                <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="" width="30px" height="30px">
                                 <span>Tambah</span>
                             </button>
                         </div>

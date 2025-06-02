@@ -15,7 +15,7 @@ $tPath = app()->environment('local') ? '' : '';
     <link rel="stylesheet" href="{{ asset($tPath.'assets/css/styles.min.css') }}" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/popup.css') }}" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/preloader.css') }}" />
-    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/page/tambahAdmin.css') }}" />
+    
 </head>
 
 <body>

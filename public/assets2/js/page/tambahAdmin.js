@@ -23,6 +23,7 @@ function showEyePass(){
         iconPass.style.display = 'block';
     }
 }
+
 function showPass(){
     if(isPasswordShow){
         inpPassword.type = 'password';
