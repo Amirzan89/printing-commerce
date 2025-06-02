@@ -177,5 +177,7 @@ Route::group(['middleware' => 'admin.guest'], function(){
     // Route::get('/template', function(){
     //     return view('page.template');
     // });
-    Route::get('/',[ShowHomeController::class,'showHome']);
+    Route::get('/', function(){
+        return redirect('/login');
+    });
 });

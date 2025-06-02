@@ -20,31 +20,26 @@
         <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
                 <li class="nav-item dropdown">
-                    <a class="nav-link nav-icon-hover rounded-pill" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="{{ asset($tPath.'assets2/icon/header/notification.png') }}" alt="">
-                        {{-- @if(count($headerData) > 0)
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {{ count($headerData) }}
-                            </span>
-                        @endif --}}
+                    <a class="nav-link nav-icon-hover rounded-pill" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown" aria-expanded="false" style="padding-top: 4px; padding-bottom: 4px; padding-left: 12px; padding-right: 12px;">
+                        <img src="{{ asset($tPath.'assets2/icon/header/notification.png') }}" alt="" style="width: 42px; height: 42px;">
                     </a>
                     <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2" style="width: 70vw;">
                         <div class="message-body">
                             <h5 class="py-2 px-3 border-bottom">Notifikasi Pesanan Masuk</h5>
                             @if(count($headerData) > 0)
-                                <ul class="row gap-3 px-3">
+                                <ul class="row gap-3 px-3" style="height: 300px; overflow-y: auto;">
                                     @foreach ($headerData as $pesanan)
                                         <li class="col-12 d-flex align-items-center gap-3 p-3 border-bottom">
-                                            <img src="{{ asset($tPath.'assets2/img/profile.png') }}" alt="Profile" class="rounded-circle" style="width: 50px; height: 50px;">
+                                            {{-- <img src="{{ asset($tPath.'assets3/img/pesanan'.$pesanan->toJasa->foto_jasa) }}" alt="Profile" class="rounded-circle" style="width: 30px; height: 30px;"> --}}
+                                            <img src="{{ asset($tPath.'assets3/img/pesanan/1.jpg') }}" alt="Profile" class="rounded-circle" style="width: 35px; height: 35px;">
                                             <div class="w-100">
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <h5 class="mb-0">{{ $pesanan->toUser->nama_user ?? 'User' }}</h5>
                                                     <small class="text-muted">{{ $pesanan->created_at->diffForHumans() }}</small>
                                                 </div>
                                                 <p class="mb-1">{{ $pesanan->toJasa->nama_jasa ?? 'Jasa Design' }} | {{ $pesanan->toJasa->kategori ?? 'Basic' }}</p>
-                                                <p class="text-truncate mb-0" style="max-width: 90%;">{{ $pesanan->deskripsi }}</p>
-                                                <div class="mt-2">
-                                                    <a href="/pesanan/edit/{{ $pesanan->uuid }}" class="btn btn-sm btn-primary">Lihat Detail</a>
+                                                <div style="max-width: 90%;">
+                                                    <p class="mb-0">{{ $pesanan->deskripsi }}</p>
                                                 </div>
                                             </div>
                                         </li>
@@ -60,7 +55,7 @@
                 </li>
                 <a class="nav-link" href="/chat" class="btn btn-outline-primary mx-3 mt-2 d-block">
                     <div class="rounded-pill">
-                        <img src="{{ asset($tPath.'assets2/icon/header/chat.png') }}" alt="">
+                        <img src="{{ asset($tPath.'assets2/icon/header/chat.png') }}" alt="" style="width: 42px; height: 42px;">
                     </div>
                 </a>
             </ul>

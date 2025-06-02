@@ -50,7 +50,7 @@ $tPath = app()->environment('local') ? '' : '';
             @include('components.admin.header')
             <!--  Header End -->
             <div class="container-fluid">
-                <div class="pagetitle">
+                <div class="pagetitle mt-3 mt-md-4 mt-lg-5">
                     <h1>Edit Admin</h1>
                     <nav>
                         <ol class="breadcrumb">

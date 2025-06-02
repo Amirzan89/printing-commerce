@@ -1,11 +1,13 @@
 <?php
 ?>
-<aside class="left-sidebar" style="background-color: #38AD5E;">
+<aside class="left-sidebar sidebar-dark-primary col-auto" style="background-color: #38AD5E; height: 100vh;">
     <!-- Sidebar scroll-->
-    <div class="brand-logo d-flex align-items-center justify-content-center">
-        <a href="/dashboard" class="text-nowrap logo-img position-relative">
-            <img src="{{ asset($tPath.'assets2/img/logo.png') }}" alt="" class="position-relative" style="width: 180px; height:100px; left: 50%; transform: translate(-50%, 0%);"></img>
-            <span class="hide-menu position-absolute text-white text-decoration-none" style="top: 87%; left: 50%; transform: translate(-50%, -50%); font-size:15px; font-weight:600;">Solusi Cerdas Design Cepat</span>
+    <div class="brand-logo d-flex align-items-center justify-content-center py-3">
+        <a href="/dashboard" class="text-nowrap logo-img w-100 text-center position-relative">
+            <img src="{{ asset($tPath.'assets2/img/logo.png') }}" alt="" class="img-fluid" style="max-width: 100%; width: 180px; height: 100px; left: 50%; margin-right: auto">
+            <div class="logo-tagline-container" style="position: absolute; bottom: -30px; left: 0; width: 100%; padding-bottom: 15px;">
+                <div class="logo-tagline text-white text-decoration-none text-center mx-auto" style="font-size: 14px; font-weight:600; width: 90%; word-wrap: break-word; word-break: break-word; line-height: 1.3; min-height: fit-content;">Solusi Cerdas Design Cepat</div>
+            </div>
         </a>
         <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
             <i class="ti ti-x fs-8"></i>
@@ -13,81 +15,165 @@
     </div>
     <!-- End Sidebar scroll-->
     <!-- Sidebar navigation-->
-    <nav class="sidebar-nav scroll-sidebar" data-simplebar="" style="margin-top: 40px">
-        <ul id="sidebarnav" style="display:flex; flex-direction: column; gap: 2px;">
-            <li class="sidebar-item {{ $nav == 'dashboard' ? 'selected' : ''}}">
-                <a class="sidebar-link {{ $nav == 'dashboard' ? 'active' : ''}}" href="/dashboard"
+    <nav class="sidebar-nav scroll-sidebar mt-4" data-simplebar="" style="height: 70%;">
+        <ul id="sidebarnav" class="nav flex-column gap-1 p-0">
+            <li class="nav-item sidebar-item {{ $nav == 'dashboard' ? 'selected' : ''}}">
+                <a class="nav-link sidebar-link {{ $nav == 'dashboard' ? 'active' : ''}} d-flex align-items-center py-2" href="/dashboard"
                     aria-expanded="false">
-                    <img src="{{ asset($tPath.'assets2/icon/sidebar/dashboard.svg') }}" alt="" width="30" height="30" class="white">
+                    <span class="icon-holder me-2">
+                        <img src="{{ asset($tPath.'assets2/icon/sidebar/dashboard.svg') }}" alt="Dashboard" class="white img-fluid" style="width: 26px; height: 26px;">
+                    </span>
                     <span class="hide-menu text-white">Dashboard</span>
                 </a>
             </li>
             @if($userAuth['role'] == 'super_admin' || $userAuth['role'] == 'admin')
-            <li class="sidebar-item {{ $nav == 'jasa' ? 'selected' : ''}}">
-                <a class="sidebar-link {{ $nav == 'jasa' ? 'active' : ''}}" href="/jasa" aria-expanded="false">
-                    <img src="{{ asset($tPath.'assets2/icon/sidebar/jasa.svg') }}" alt="" width="30" height="30" class="white">
+            <li class="nav-item sidebar-item {{ $nav == 'jasa' ? 'selected' : ''}}">
+                <a class="nav-link sidebar-link {{ $nav == 'jasa' ? 'active' : ''}} d-flex align-items-center py-2" href="/jasa" aria-expanded="false">
+                    <span class="icon-holder me-2">
+                        <img src="{{ asset($tPath.'assets2/icon/sidebar/jasa.svg') }}" alt="Jasa" class="white img-fluid" style="width: 26px; height: 26px;">
+                    </span>
                     <span class="hide-menu text-white">Kelola Jasa</span>
                 </a>
             </li>
             @endif
 
             @if($userAuth['role'] == 'super_admin' || $userAuth['role'] == 'admin')
-            <li class="sidebar-item {{ $nav == 'pesanan' ? 'selected' : ''}}">
-                <a class="sidebar-link {{ $nav == 'pesanan' ? 'active' : ''}}" href="/pesanan"
+            <li class="nav-item sidebar-item {{ $nav == 'pesanan' ? 'selected' : ''}}">
+                <a class="nav-link sidebar-link {{ $nav == 'pesanan' ? 'active' : ''}} d-flex align-items-center py-2" href="/pesanan"
                     aria-expanded="false">
-                    <img src="{{ asset($tPath.'assets2/icon/sidebar/pesanan.svg') }}" alt="" width="30" height="30" class="white">
+                    <span class="icon-holder me-2">
+                        <img src="{{ asset($tPath.'assets2/icon/sidebar/pesanan.svg') }}" alt="Pesanan" class="white img-fluid" style="width: 26px; height: 26px;">
+                    </span>
                     <span class="hide-menu text-white">Kelola Pesanan</span>
                 </a>
             </li>
             @endif
 
-            <li class="sidebar-item {{ $nav == 'metode-pembayaran' ? 'selected' : ''}}">
-                <a class="sidebar-link {{ $nav == 'metode-pembayaran' ? 'active' : ''}}" href="/metode-pembayaran"
+            <li class="nav-item sidebar-item {{ $nav == 'metode-pembayaran' ? 'selected' : ''}}">
+                <a class="nav-link sidebar-link {{ $nav == 'metode-pembayaran' ? 'active' : ''}} d-flex align-items-center py-2" href="/metode-pembayaran"
                     aria-expanded="false">
-                    <img src="{{ asset($tPath.'assets2/icon/sidebar/metode-pembayaran.svg') }}" alt="" width="30" height="30" class="white">
+                    <span class="icon-holder me-2">
+                        <img src="{{ asset($tPath.'assets2/icon/sidebar/metode-pembayaran.svg') }}" alt="Metode Pembayaran" class="white img-fluid" style="width: 26px; height: 26px;">
+                    </span>
                     <span class="hide-menu text-white">Metode Pembayaran</span>
                 </a>
             </li>
 
-            <li class="sidebar-item {{ $nav == 'transaksi' ? 'selected' : ''}}">
-                <a class="sidebar-link {{ $nav == 'transaksi' ? 'active' : ''}}" href="/transaksi"
+            <li class="nav-item sidebar-item {{ $nav == 'transaksi' ? 'selected' : ''}}">
+                <a class="nav-link sidebar-link {{ $nav == 'transaksi' ? 'active' : ''}} d-flex align-items-center py-2" href="/transaksi"
                     aria-expanded="false">
-                    <img src="{{ asset($tPath.'assets2/icon/sidebar/transaksi.svg') }}" alt="" width="30" height="30" class="white">
+                    <span class="icon-holder me-2">
+                        <img src="{{ asset($tPath.'assets2/icon/sidebar/transaksi.svg') }}" alt="Transaksi" class="white img-fluid" style="width: 26px; height: 26px;">
+                    </span>
                     <span class="hide-menu text-white">Transaksi</span>
                 </a>
             </li>
 
-            <li class="sidebar-item {{ $nav == 'user' ? 'selected' : ''}}">
-                <a class="sidebar-link {{ $nav == 'user' ? 'active' : ''}}" href="/user"
+            <li class="nav-item sidebar-item {{ $nav == 'user' ? 'selected' : ''}}">
+                <a class="nav-link sidebar-link {{ $nav == 'user' ? 'active' : ''}} d-flex align-items-center py-2" href="/user"
                     aria-expanded="false">
-                    <img src="{{ asset($tPath.'assets2/icon/sidebar/user.svg') }}" alt="" width="30" height="30" class="white">
+                    <span class="icon-holder me-2">
+                        <img src="{{ asset($tPath.'assets2/icon/sidebar/user.svg') }}" alt="User" class="white img-fluid" style="width: 26px; height: 26px;">
+                    </span>
                     <span class="hide-menu text-white">Kelola User</span>
                 </a>
             </li>
 
-            <li class="sidebar-item {{ $nav == 'editor' ? 'selected' : ''}}">
-                <a class="sidebar-link {{ $nav == 'editor' ? 'active' : ''}}" href="/editor"
+            <li class="nav-item sidebar-item {{ $nav == 'editor' ? 'selected' : ''}}">
+                <a class="nav-link sidebar-link {{ $nav == 'editor' ? 'active' : ''}} d-flex align-items-center py-2" href="/editor"
                     aria-expanded="false">
-                    <img src="{{ asset($tPath.'assets2/icon/sidebar/editor.svg') }}" alt="" width="30" height="30" class="white">
+                    <span class="icon-holder me-2">
+                        <img src="{{ asset($tPath.'assets2/icon/sidebar/editor.svg') }}" alt="Editor" class="white img-fluid" style="width: 26px; height: 26px;">
+                    </span>
                     <span class="hide-menu text-white">Kelola Editor</span>
                 </a>
             </li>
 
             @if($userAuth['role'] == 'super_admin')
-            <li class="sidebar-item {{ $nav == 'admin' ? 'selected' : ''}}">
-                <a class="sidebar-link {{ $nav == 'admin' ? 'active' : ''}}"" href=" /admin" aria-expanded="false">
-                    <img src="{{ asset($tPath.'assets2/icon/sidebar/admin.svg') }}" alt="" width="30" height="30" class="white">
+            <li class="nav-item sidebar-item {{ $nav == 'admin' ? 'selected' : ''}}">
+                <a class="nav-link sidebar-link {{ $nav == 'admin' ? 'active' : ''}} d-flex align-items-center py-2" href="/admin" aria-expanded="false">
+                    <span class="icon-holder me-2">
+                        <img src="{{ asset($tPath.'assets2/icon/sidebar/admin.svg') }}" alt="Admin" class="white img-fluid" style="width: 26px; height: 26px;">
+                    </span>
                     <span class="hide-menu text-white">Kelola Admin</span>
                 </a>
             </li>
             @endif
         </ul>
+        <!-- End Sidebar navigation -->
     </nav>
-    <!-- End Sidebar navigation -->
-    <div class="sidebar-footer">
-        <a href="#" class="btn btn-outline-primary mx-3 mt-2 d-block" onclick="logout()">Logout</a>
-    </div>
+    <div class="" style="position: relative; margin-top: 50px; width: 100%;">
+            <button class="btn w-100" onclick="logout()" style="outline: none; border: none; background-color: transparent;">
+                <img src="{{ asset($tPath.'assets2/icon/sidebar/logout.svg') }}" alt="Logout" class="white img-fluid" style="width: 26px; height: 26px;">
+                <span class="hide-menu text-white">Logout</span>
+            </button>
+        </div>
 </aside>
+
+<style>
+/* Responsive sidebar with consistent text size */
+.hide-menu {
+    font-size: 14px;
+}
+
+.logo-tagline {
+    font-size: 14px;
+    height: auto;
+}
+
+.logo-tagline-container {
+    height: auto;
+}
+
+@media (max-width: 1199.98px) {
+    .left-sidebar {
+        width: 250px;
+    }
+    .hide-menu {
+        font-size: 14px;
+    }
+    .icon-holder img {
+        width: 22px !important;
+        height: 22px !important;
+    }
+    .logo-tagline {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .left-sidebar {
+        width: 220px;
+    }
+    .hide-menu {
+        font-size: 13px;
+    }
+    .icon-holder img {
+        width: 20px !important;
+        height: 20px !important;
+    }
+    .logo-tagline {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .left-sidebar {
+        width: 190px;
+    }
+    .hide-menu {
+        font-size: 12px;
+    }
+    .icon-holder img {
+        width: 18px !important;
+        height: 18px !important;
+    }
+    .logo-tagline {
+        font-size: 11px;
+    }
+}
+</style>
+
 <script>
     const sidebarItems = document.querySelectorAll('.sidebar-item');
     sidebarItems.forEach(function(item){
@@ -108,16 +194,12 @@
     });
     function logout(){
         var xhr = new XMLHttpRequest();
-        var requestBody = {
-            email: email,
-            number:number
-        };
         //open the request
         xhr.open('POST', "/admin/logout");
         xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
         xhr.setRequestHeader('Content-Type', 'application/json');
         //send the form data
-        xhr.send(JSON.stringify(requestBody));
+        xhr.send({});
         xhr.onreadystatechange = function() {
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {

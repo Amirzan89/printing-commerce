@@ -126,7 +126,7 @@ $tPath = app()->environment('local') ? '' : '';
             @include('components.admin.header')
             <!--  Header End -->
             <div class="container-fluid" style="background-color: #F6F9FF">
-                <div class="pagetitle">
+                <div class="pagetitle mt-2 mt-sm-3 mt-md-3 mt-lg-4 mb-2 mb-sm-3 mb-md-3 mb-lg-4">
                     <h1>Tambah Jasa</h1>
                 </div>
                 <div class="d-flex align-items-stretch"
