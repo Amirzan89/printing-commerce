@@ -2,10 +2,11 @@
 namespace App\Http\Controllers\Page;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\UtilityController;
 use App\Models\Admin;
 use App\Models\Pesanan;
+use App\Models\Editor;
+use Carbon\Carbon;
 class PesananController extends Controller
 {
     public function showAll(Request $request){
@@ -31,24 +32,41 @@ class PesananController extends Controller
         ];
         return view('page.pesanan.data',$dataShow);
     }
-    public function showTambah(Request $request){
-        $dataShow = [
-            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'headerData' => UtilityController::getHeaderData(),
-        ];
-        return view('page.pesanan.tambah',$dataShow);
-    }
-    public function showEdit(Request $request, $uuid){
-        $pesananData = Pesanan::select('uuid','nama_jasa', 'status')->whereNotIn('role', ['pesanan'])->whereRaw("BINARY uuid = ?",[$uuid])->first();
-        if(is_null($pesananData)){
+    public function showDetail(Request $request, $uuid){
+        $pesanan = Pesanan::with([
+            'toUser',
+            'toJasa',
+            'toEditor',
+            'toPaketJasa',
+            'fromPesananFile'
+        ])->where('uuid', $uuid)->first();
+        if (!$pesanan) {
             return redirect('/pesanan')->with('error', 'Data Pesanan tidak ditemukan');
         }
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-            'pesananData' => $pesananData,
+            'pesananData' => [
+                'uuid' => $pesanan->uuid,
+                'nama_pelanggan' => $pesanan->toUser->nama_user ?? '-',
+                'jenis_jasa' => $pesanan->toJasa->nama_jasa ?? '-',
+                'kelas_jasa' => $pesanan->toPaketJasa->nama_paket_jasa ?? '-',
+                'sisa_revisi' => $pesanan->jumlah_revisi ?? '0',
+                'deskripsi' => $pesanan->deskripsi ?? '-',
+                'gambar_referensi' => $pesanan->fromPesananFile->where('status', 'preview')->first()->file_path ?? null,
+                'estimasi_waktu' => [
+                    'dari' => $pesanan->estimasi_waktu ? Carbon::parse($pesanan->estimasi_waktu)->format('Y-m-d') : null,
+                    'sampai' => $pesanan->estimasi_waktu ? Carbon::parse($pesanan->estimasi_waktu)->addDays($pesanan->toPaketJasa->waktu_pengerjaan ?? 0)->format('Y-m-d') : null
+                ],
+                'editor' => [
+                    'id' => $pesanan->toEditor->id_editor ?? null,
+                    'nama' => $pesanan->toEditor->nama_editor ?? '-'
+                ],
+                'status' => ucfirst($pesanan->status)
+            ],
             'headerData' => UtilityController::getHeaderData(),
+            'editorList' => Editor::select('id_editor', 'nama_editor')->get()
         ];
-        return view('page.pesanan.edit',$dataShow);
+        return view('page.pesanan.detail', $dataShow);
     }
 }
 ?>

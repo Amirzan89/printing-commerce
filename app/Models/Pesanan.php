@@ -11,7 +11,7 @@ class Pesanan extends Model
     protected $keyType = 'integer';
     public $timestamps = true;
     protected $fillable = [
-        'uuid', 'deskripsi', 'status', 'status_pembayaran', 'total_harga', 'estimasi_waktu', 'jumlah_revisi', 'id_user', 'id_jasa', 'id_paket_jasa'
+        'uuid', 'deskripsi', 'status', 'status_pembayaran', 'total_harga', 'estimasi_waktu', 'jumlah_revisi', 'id_user', 'id_jasa', 'id_paket_jasa', 'id_editor'
     ];
     protected $casts = [
         'estimasi_waktu' => 'datetime',
@@ -44,6 +44,10 @@ class Pesanan extends Model
     }
     public function toPaketJasa()
     {
-        return $this->belongsTo(Jasa::class, 'id_paket_jasa');
+        return $this->belongsTo(PaketJasa::class, 'id_paket_jasa');
+    }
+    public function toEditor()
+    {
+        return $this->belongsTo(Editor::class, 'id_editor');
     }
 }
