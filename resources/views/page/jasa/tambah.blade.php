@@ -20,6 +20,104 @@ $tPath = app()->environment('local') ? '' : '';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css" />
     <style>
+        .container-fluid {
+            background-color: #F6F9FF;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            padding: 24px;
+        }
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 12px;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+        .form-control:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76,175,80,0.1);
+        }
+        .image-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .gallery-item {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .add-image-btn {
+            width: 150px;
+            height: 150px;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        .add-image-btn:hover {
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+        .btn-primary {
+            background: #4CAF50;
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            color: #333;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .btn-add-new {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
         .image-preview-container {
             display: flex;
             flex-wrap: wrap;
@@ -125,96 +223,67 @@ $tPath = app()->environment('local') ? '' : '';
             <!--  Header Start -->
             @include('components.admin.header')
             <!--  Header End -->
-            <div class="container-fluid" style="background-color: #F6F9FF">
-                <div class="pagetitle mt-2 mt-sm-3 mt-md-3 mt-lg-4 mb-2 mb-sm-3 mb-md-3 mb-lg-4">
-                    <h1>Tambah Jasa</h1>
-                </div>
-                <div class="d-flex align-items-stretch"
-                    style="background-color: #ffffff; border-radius: 20px; box-shadow: rgba(145,158,171,0.2) 0px 0px 2px 0px, rgba(145,158,171,0.12) 0px 12px 24px -4px;">
-                    <form id="tambahForm" enctype="multipart/form-data">
-                        <div class="crow">
-                            <label for="inpThumbnail">Thumbnail Jasa</label>
+            <div class="container-fluid">
+                <div class="card">
+                    <form id="tambahForm">
+                        <div class="section-title">
+                            <h5>Gambar Produk</h5>
+                            <button type="button" class="btn-add-new" onclick="document.getElementById('inpImages').click()">
+                                <i class="fas fa-plus"></i> Tambah Baru
+                            </button>
                         </div>
-                        <div class="thumbnail-container">
-                            <div class="img" onclick="handleThumbnailClick()" ondragover="handleDragOver(event)"
-                                ondrop="handleThumbnailDrop(event)">
-                                <img src="{{ asset($tPath.'assets2/icon/upload.svg') }}" alt="" id="thumbnailIcon">
-                                <span>Pilih File atau Jatuhkan File</span>
-                                <input type="file" id="inpThumbnail" name="thumbnail_jasa" hidden onchange="handleThumbnailChange(event)">
-                                <img src="" alt="" id="thumbnailPreview" style="display:none">
-                            </div>
-                        </div>
-                        
-                        <div class="crow">
-                            <label for="inpImages">Galeri Gambar (Opsional)</label>
-                        </div>
-                        <div class="image-preview-container" id="imagePreviewContainer">
-                            <div class="upload-placeholder" onclick="document.getElementById('inpImages').click()">
+
+                        <div class="image-gallery" id="imageGallery">
+                            <div class="add-image-btn" onclick="document.getElementById('inpImages').click()">
                                 <i class="fas fa-plus"></i>
                                 <span>Tambah Gambar</span>
                             </div>
                         </div>
                         <input type="file" id="inpImages" name="images[]" hidden multiple onchange="handleImagesChange(event)">
-                        
-                        <!-- Preview Carousel -->
-                        <div class="crow">
-                            <label>Preview Carousel</label>
+
+                        <div class="form-group">
+                            <label class="form-label">Deskripsi Produk</label>
+                            <textarea class="form-control" name="deskripsi_paket_jasa" rows="4" placeholder="Masukkan deskripsi produk"></textarea>
                         </div>
-                        <div class="carousel-container">
-                            <div class="carousel" id="imageCarousel">
-                                <div class="carousel-slide">
-                                    <img src="{{ asset($tPath.'assets2/icon/image-placeholder.svg') }}" alt="Placeholder">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="crow">
-                            <label for="inpJudul">Nama Jasa</label>
-                            <input type="text" id="inpJudul" name="nama_jasa">
-                        </div>
-                        <div class="crow">
-                            <label for="inpDeskripsi">Deskripsi Jasa</label>
-                            <textarea name="deskripsi_paket_jasa" id="inpDeskripsi" placeholder="Masukkan Deskripsi Jasa" class="" style="height:120px"></textarea>
-                        </div>
-                        <div class="crow">
-                            <label for="inpKelasJasa">Kelas Jasa</label>
-                            <select class="" aria-label="Default select example" id="inpKelasJasa" name="kategori">
-                                <option value="" selected>Pilih Kelas Jasa</option>
+
+                        <div class="form-group">
+                            <label class="form-label">Kelas Jasa</label>
+                            <select class="form-control" name="kategori">
+                                <option value="">Pilih Kelas Jasa</option>
                                 <option value="printing">Printing</option>
                                 <option value="desain">Desain</option>
                             </select>
+                            <small class="text-muted">Ketika dipilih yang bawah baru muncul</small>
                         </div>
-                        <div class="crow">
-                            <label for="inpNamaPaket">Nama Paket Jasa</label>
-                            <input type="text" id="inpNamaPaket" name="nama_paket_jasa">
+
+                        <div class="form-group">
+                            <label class="form-label">Harga Jasa</label>
+                            <input type="number" class="form-control" name="harga_paket_jasa" placeholder="Masukkan harga jasa">
                         </div>
-                        <div class="crow">
-                            <label for="inpHarga">Harga Jasa</label>
-                            <input type="number" id="inpHarga" name="harga_paket_jasa">
+
+                        <div class="form-group">
+                            <label class="form-label">Deskripsi Singkat</label>
+                            <textarea class="form-control" name="fitur" rows="3" placeholder="Masukkan deskripsi singkat"></textarea>
                         </div>
-                        <div class="crow">
-                            <label for="inpWaktuPengerjaan">Waktu Pengerjaan</label>
-                            <input type="date" id="inpWaktuPengerjaan" name="waktu_pengerjaan" value="{{ date('Y-m-d') }}">
+
+                        <div class="form-group">
+                            <label class="form-label">Waktu Pengerjaan</label>
+                            <input type="text" class="form-control" name="waktu_pengerjaan" placeholder="Isi waktu pengerjaan">
                         </div>
-                        <div class="crow">
-                            <label for="inpTotalRevisi">Total Revisi</label>
-                            <input type="number" id="inpTotalRevisi" name="maksimal_revisi">
+
+                        <div class="form-group">
+                            <label class="form-label">Total Revisi</label>
+                            <input type="number" class="form-control" name="maksimal_revisi" placeholder="Masukkan jumlah revisi">
                         </div>
-                        <div class="crow">
-                            <label for="inpFitur">Fitur</label>
-                            <textarea name="fitur" id="inpFitur" placeholder="Masukkan Fitur" class="" style="height:120px"></textarea>
-                        </div>
-                        <div class="crow">
-                            <button type="submit" class="btn btn-success">
-                                <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="" width="30" height="30">
-                                <span>Tambah</span>
-                            </button>
-                            <a href="/jasa" class="btn btn-danger">Kembali</a>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn-secondary" onclick="window.location.href='/jasa'">Cancel</button>
+                            <button type="submit" class="btn-primary">Save</button>
                         </div>
                     </form>
                 </div>
-                @include('components.admin.footer')
             </div>
+            @include('components.admin.footer')
         </div>
     </div>
     @include('components.preloader')
@@ -229,169 +298,41 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
     <script>
-        // Thumbnail handling
-        function handleThumbnailClick() {
-            document.getElementById('inpThumbnail').click();
-        }
-        
-        function handleDragOver(event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-        
-        function handleThumbnailDrop(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            
-            if (event.dataTransfer.files.length) {
-                const file = event.dataTransfer.files[0];
-                if (file.type.match('image.*')) {
-                    document.getElementById('inpThumbnail').files = event.dataTransfer.files;
-                    previewThumbnail(file);
-                }
-            }
-        }
-        
-        function handleThumbnailChange(event) {
-            if (event.target.files.length) {
-                previewThumbnail(event.target.files[0]);
-            }
-        }
-        
-        function previewThumbnail(file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const thumbnailPreview = document.getElementById('thumbnailPreview');
-                const thumbnailIcon = document.getElementById('thumbnailIcon');
-                
-                thumbnailPreview.src = e.target.result;
-                thumbnailPreview.style.display = 'block';
-                thumbnailIcon.style.display = 'none';
-                
-                // Add to carousel
-                updateCarousel();
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        // Multiple images handling
         function handleImagesChange(event) {
-            if (event.target.files.length) {
-                for (let i = 0; i < event.target.files.length; i++) {
-                    previewImage(event.target.files[i]);
-                }
-                updateCarousel();
-            }
-        }
-        
-        function previewImage(file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const container = document.getElementById('imagePreviewContainer');
-                const previewDiv = document.createElement('div');
-                previewDiv.className = 'image-preview';
-                
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.alt = 'Preview';
-                
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'remove-image';
-                removeBtn.innerHTML = '×';
-                removeBtn.onclick = function() {
-                    container.removeChild(previewDiv);
-                    updateCarousel();
+            const files = event.target.files;
+            const gallery = document.getElementById('imageGallery');
+            const addButton = gallery.querySelector('.add-image-btn');
+
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const galleryItem = document.createElement('div');
+                    galleryItem.className = 'gallery-item';
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-btn';
+                    removeBtn.innerHTML = '×';
+                    removeBtn.onclick = function() {
+                        gallery.removeChild(galleryItem);
+                    };
+                    
+                    galleryItem.appendChild(img);
+                    galleryItem.appendChild(removeBtn);
+                    gallery.insertBefore(galleryItem, addButton);
                 };
-                
-                previewDiv.appendChild(img);
-                previewDiv.appendChild(removeBtn);
-                
-                // Insert before the "+" placeholder
-                container.insertBefore(previewDiv, container.firstChild);
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        // Carousel functionality
-        function initCarousel() {
-            $('#imageCarousel').slick({
-                dots: true,
-                infinite: true,
-                speed: 500,
-                slidesToShow: 1,
-                slidesToScroll: 1,
-                autoplay: true,
-                autoplaySpeed: 3000
-            });
-        }
-        
-        function updateCarousel() {
-            // Destroy existing carousel if it exists
-            if ($('#imageCarousel').hasClass('slick-initialized')) {
-                $('#imageCarousel').slick('unslick');
+                reader.readAsDataURL(file);
             }
-            
-            // Clear carousel
-            $('#imageCarousel').empty();
-            
-            // Add thumbnail to carousel if it exists
-            const thumbnailPreview = document.getElementById('thumbnailPreview');
-            if (thumbnailPreview.style.display !== 'none' && thumbnailPreview.src) {
-                const slide = document.createElement('div');
-                slide.className = 'carousel-slide';
-                const img = document.createElement('img');
-                img.src = thumbnailPreview.src;
-                img.alt = 'Thumbnail';
-                slide.appendChild(img);
-                $('#imageCarousel').append(slide);
-            }
-            
-            // Add all other images to carousel
-            const previews = document.querySelectorAll('.image-preview img');
-            previews.forEach(preview => {
-                const slide = document.createElement('div');
-                slide.className = 'carousel-slide';
-                const img = document.createElement('img');
-                img.src = preview.src;
-                img.alt = 'Gallery Image';
-                slide.appendChild(img);
-                $('#imageCarousel').append(slide);
-            });
-            
-            // If no images, add placeholder
-            if (thumbnailPreview.style.display === 'none' && previews.length === 0) {
-                const slide = document.createElement('div');
-                slide.className = 'carousel-slide';
-                const img = document.createElement('img');
-                img.src = "{{ asset($tPath.'assets2/icon/image-placeholder.svg') }}";
-                img.alt = 'Placeholder';
-                slide.appendChild(img);
-                $('#imageCarousel').append(slide);
-            }
-            
-            // Reinitialize carousel
-            initCarousel();
         }
-        
-        // Form submission
+
         $(document).ready(function() {
-            initCarousel();
-            
             $('#tambahForm').submit(function(e) {
                 e.preventDefault();
-                
-                // Show preloader
                 $('#preloader').show();
-                
+
                 const formData = new FormData(this);
-                
-                // Add all selected images
-                const imageInput = document.getElementById('inpImages');
-                if (imageInput.files.length > 0) {
-                    for (let i = 0; i < imageInput.files.length; i++) {
-                        formData.append('images[]', imageInput.files[i]);
-                    }
-                }
                 
                 $.ajax({
                     url: domain + '/api/jasa/create',
