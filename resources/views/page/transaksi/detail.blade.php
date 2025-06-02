@@ -7,7 +7,7 @@ $tPath = app()->environment('local') ? '' : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Transaksi | TATA</title>
+    <title>Detail Pembayaran | TATA</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset($tPath.'img/icon/icon.png') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
@@ -15,7 +15,104 @@ $tPath = app()->environment('local') ? '' : '';
     <link rel="stylesheet" href="{{ asset($tPath.'assets/css/styles.min.css') }}" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/popup.css') }}" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/preloader.css') }}" />
-    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/page/editAdmin.css') }}" />
+    <style>
+        .detail-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .detail-title {
+            font-size: 24px;
+            margin: 0;
+        }
+        .detail-subtitle {
+            color: #666;
+            margin: 5px 0 20px 0;
+        }
+        .detail-form {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        .form-control:disabled {
+            background-color: #e9ecef;
+        }
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .price-item {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .price-item p {
+            margin: 0;
+            font-weight: 500;
+        }
+        .banner-section {
+            margin: 20px 0;
+        }
+        .banner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .banner-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .banner-input {
+            width: 100%;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-save {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+        }
+        .btn-cancel {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 
 <body>
@@ -33,7 +130,7 @@ $tPath = app()->environment('local') ? '' : '';
     const reff = '/transaksi';
     var csrfToken = "{{ csrf_token() }}";
     var userAuth = @json($userAuth);
-    var users = {!! json_encode($transaksiData) !!};
+    var transaksi = @json($transaksiData);
     </script>
     <!--  Body Wrapper -->
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
@@ -49,72 +146,73 @@ $tPath = app()->environment('local') ? '' : '';
             <!--  Header Start -->
             @include('components.admin.header')
             <!--  Header End -->
-            <div class="container-fluid" style="background-color: #F6F9FF">
-                <div class="pagetitle mt-2 mt-sm-3 mt-md-3 mt-lg-4 mb-2 mb-sm-3 mb-md-3 mb-lg-4">
-                    <h1>Edit Transaksi</h1>
-                    <nav>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="/dashboard">Beranda</a></li>
-                            <li class="breadcrumb-item"><a href="/transaksi">Kelola Transaksi</a></li>
-                            <li class="breadcrumb-item">Edit Transaksi</li>
-                        </ol>
-                    </nav>
-                </div>
-                <div class="d-flex align-items-stretch" style="background-color: #ffffff; border-radius: 20px;">
-                    <form id="editForm">
-                        <div class="crow">
-                            <label for="inpNama">Nama Lengkap</label>
-                            <input type="text" id="inpNama" value="{{ $transaksiData['nama_lengkap']}}">
+            <div class="container-fluid">
+                <div class="detail-container">
+                    <div class="detail-header">
+                        <div>
+                            <h1 class="detail-title">Detail Pembayaran</h1>
+                            <p class="detail-subtitle">{{ $transaksiData['nama_metode_pembayaran'] ?? 'Tidak Ada Metode Pembayaran' }}</p>
                         </div>
-                        <div class="crow">
-                            <label for="inpJenisKelamin">Jenis Kelamin</label>
-                            <select id="inpJenisKelamin">
-                                <option value="Laki-laki" {{ $transaksiData['jenis_kelamin'] == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-                                <option value="Perempuan" {{ $transaksiData['jenis_kelamin'] == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+                    </div>
+
+                    <div class="detail-form">
+                        <div class="form-group">
+                            <label>Nomor Rekening</label>
+                            <input type="text" class="form-control" value="{{ $transaksiData['no_rekening'] ?? 5252522424 }}" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Harga Jasa</label>
+                            <select class="form-control" disabled>
+                                <option>Regular</option>
                             </select>
                         </div>
-                        <div class="crow">
-                            <label for="inpEmail">Email</label>
-                            <input type="email" id="inpEmail" value="{{ $transaksiData['email']}}">
-                        </div>
-                        <div class="crow">
-                            <label for="inpNomerTelepon">Nomor Telepon</label>
-                            <input type="text" id="inpNomerTelepon" value="{{ $transaksiData['no_telpon'] ?? '' }}">
-                        </div>
-                        <div class="crow">
-                            <label for="inpStatus">Status Transaksi</label>
-                            <select id="inpStatus">
-                                <option value="Menunggu Pembayaran" {{ $transaksiData['status'] == 'Menunggu Pembayaran' ? 'selected' : '' }}>Menunggu Pembayaran</option>
-                                <option value="Proses" {{ $transaksiData['status'] == 'Proses' ? 'selected' : '' }}>Proses</option>
-                                <option value="Selesai" {{ $transaksiData['status'] == 'Selesai' ? 'selected' : '' }}>Selesai</option>
-                                <option value="Dibatalkan" {{ $transaksiData['status'] == 'Dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
-                            </select>
-                        </div>
-                        <div class="crow">
-                            <label for="inpTanggal">Tanggal Transaksi</label>
-                            <input type="datetime-local" id="inpTanggal" value="{{ $transaksiData['tanggal'] ?? '' }}">
-                        </div>
-                        <div class="crow">
-                            <label>Bukti Pembayaran</label>
-                            <div class="img" onclick="handleFileClick()" ondragover="handleDragOver(event)"
-                                ondrop="handleDrop(event)"
-                                style="{{ $transaksiData['bukti_pembayaran'] ? '' : 'border: 4px dashed #b1b1b1;'}}">
-                                <img src="{{ asset($tPath.'img/icon/upload.svg') }}" alt="" id="icon" style="{{ $transaksiData['bukti_pembayaran'] ? 'display: none;' : '' }}">
-                                <span style="{{ $transaksiData['bukti_pembayaran'] ? 'display: none;' : '' }}">Pilih File atau Jatuhkan File</span>
-                                <input type="file" id="inpFoto" hidden onchange="handleFileChange(event)">
-                                @if($transaksiData['bukti_pembayaran'])
-                                    <img src="{{ asset($tPath . $transaksiData['bukti_pembayaran']) }}" alt="Bukti Pembayaran" id="file" class="foto_admin" onerror="imgError('file')">
-                                @endif
+
+                        <div class="price-grid">
+                            <div class="price-item">
+                                <p>Desain Logo</p>
+                                <p>150.000</p>
+                            </div>
+                            <div class="price-item">
+                                <p>Desain Poster</p>
+                                <p>150.000</p>
+                            </div>
+                            <div class="price-item">
+                                <p>Desain Banner</p>
+                                <p>150.000</p>
                             </div>
                         </div>
-                        <div class="crow">
-                            <a href="/transaksi" class="btn btn-danger">Kembali</a>
-                            <button type="submit" class="btn btn-success">
-                                <img src="{{ asset($tPath.'img/icon/edit.svg') }}" alt="">
-                                <span>Simpan Perubahan</span>
-                            </button>
+
+                        <div class="banner-section">
+                            <div class="banner-header">
+                                <h5>Cetak Banner</h5>
+                                <p>Total Harga: Rp {{ number_format($transaksiData['total_pembayaran'] ?? 150000, 0, ',', '.') }}</p>
+                            </div>
+                            <div class="banner-grid">
+                                <div>
+                                    <label>Bahan Banner</label>
+                                    <select class="form-control" disabled>
+                                        <option>Flexi China</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Ukuran</label>
+                                    <select class="form-control" disabled>
+                                        <option>1 x 2 m</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Total Harga</label>
+                                    <input type="text" class="form-control" value="200.000" disabled>
+                                </div>
+                            </div>
                         </div>
-                    </form>
+
+                        <div class="action-buttons">
+                            <a href="/transaksi" class="btn btn-cancel">Cancel</a>
+                            <button type="submit" class="btn btn-save">Save</button>
+                        </div>
+                    </div>
                 </div>
                 @include('components.admin.footer')
             </div>
@@ -129,8 +227,7 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets/js/app.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
-    <script src="{{ asset($tPath.'assets2/js/page/editTransaksi.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
+    <script src="{{ asset($tPath.'assets2/js/page/detailTransaksi.js') }}"></script>
 </body>
-
 </html>

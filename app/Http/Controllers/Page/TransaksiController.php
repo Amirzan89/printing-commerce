@@ -54,7 +54,8 @@ class TransaksiController extends Controller
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
             'transaksiData' => $transaksi,
         ];
-        
+        // echo json_encode($dataShow);
+        // exit();
         return view('page.transaksi.detail', $dataShow);
     }
 
