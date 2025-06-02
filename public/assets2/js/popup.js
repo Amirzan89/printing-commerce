@@ -1,31 +1,26 @@
 const redPopup = document.querySelector("div#redPopup");
 const greenPopup = document.querySelector("div#greenPopup");
 var isPopupVisible = false;
-function showGreenPopup(data, div = null) {
+function showGreenPopup(message, div = null) {
     if (div == "dashboard") {
         greenPopup.innerHTML = `
             <div class="bg" onclick="closePopup('green',true)"></div>
             <div class="kotak">
-                <div class="bunder1"></div>
-                <div class="icon"><img src="${ window.location.origin + tPath }/assets2/img/icon/check.png" alt=""></div>
+                <img class="kotak" src="${ window.location.origin + tPath }/assets2/icon/popup/check.svg" alt="">
             </div>
-            <span class="closePopup" onclick="closePopup('green',true)">X</span>
-            <label>${data.message}</label>
+            <img class="closePopup" onclick="closePopup('green',true)" src="${ window.location.origin + tPath }/assets2/icon/popup/close.svg" alt="">
+            <label>${message}</label>
         `;
         greenPopup.style.display = "block";
         setTimeout(() => {
             dashboardPage();
         }, 2000);
     } else {
-        let dataa = JSON.stringify(data);
         greenPopup.innerHTML = `
                 <div class="bg" onclick="closePopup('green',true)"></div>
-                <div class="kotak">
-                    <div class=v"bunder1"></div>
-                    <div class="icon"><img src="${ window.location.origin + tPath }/assets2/img/icon/check.png" alt=""></div>
-                </div>
-                <span class="closePopup" onclick="closePopup('green',true)">X</span>
-                <label>${data.message}</label>
+                <img class="kotak" src="${ window.location.origin + tPath }/assets2/icon/popup/check.svg" alt="">
+                <img class="closePopup" onclick="closePopup('green',true)" src="${ window.location.origin + tPath }/assets2/icon/popup/close.svg" alt="">
+                <label>${message}</label>
             `;
         greenPopup.style.display = "block";
         setTimeout(() => {
@@ -33,16 +28,13 @@ function showGreenPopup(data, div = null) {
         }, 1000);
     }
 }
-function showRedPopup(data, div) {
+function showRedPopup(message, div) {
     if (div == "otp" && !isPopupVisible) {
         redPopup.innerHTML = `
             <div class="bg" onclick="closePopup('red',true)"></div>
-            <div class="kotak">
-                <div class="bunder1"></div>
-                <span>!</span>
-            </div>
-            <span class="closePopup" onclick="closePopup('red',true)">X</span>
-            <label>${data.message}</label>
+            <img class="kotak" onclick="closePopup('red', true)" src="${ window.location.origin + tPath }/assets2/icon/popup/error.svg" alt="">
+            <img class="closePopup" onclick="closePopup('red',true)" src="${ window.location.origin + tPath }/assets2/icon/popup/close.svg" alt="">
+            <label>${message}</label>
         `;
         redPopup.style.display = "block";
         showDiv(div);
@@ -52,15 +44,12 @@ function showRedPopup(data, div) {
             isPopupVisible = false;
         }, 1000);
     } else if (!isPopupVisible) {
-        if (data.message) {
+        if (message) {
             redPopup.innerHTML = `
                 <div class="bg" onclick="closePopup('red',true)"></div>
-                <div class="kotak">
-                    <div class="bunder1"></div>
-                    <span>!</span>
-                </div>
-                <span class="closePopup" onclick="closePopup('red',true)">X</span>
-                <label>${data.message}</label>
+                <img class="kotak" onclick="closePopup('red', true)" src="${ window.location.origin + tPath }/assets2/icon/popup/error.svg" alt="">
+                <img class="closePopup" onclick="closePopup('red',true)" src="${ window.location.origin + tPath }/assets2/icon/popup/close.svg" alt="">
+                <label>${message}</label>
             `;
             redPopup.style.display = "block";
             isPopupVisible = true;
@@ -71,11 +60,8 @@ function showRedPopup(data, div) {
         } else {
             redPopup.innerHTML = `
                 <div class="bg" onclick="closePopup('red',true)"></div>
-                <div class="kotak">
-                    <div class="bunder1"></div>
-                    <span>!</span>
-                </div>
-                <span class="closePopup" onclick="closePopup('red', true)">X</span>
+                <img class="kotak" onclick="closePopup('red', true)" src="${ window.location.origin + tPath }/assets2/icon/popup/error.svg" alt="">
+                <img class="closePopup" onclick="closePopup('red', true)" src="${ window.location.origin + tPath }/assets2/icon/popup/close.svg" alt="">
                 <label>${data}</label>
             `;
             redPopup.style.display = "block";

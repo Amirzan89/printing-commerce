@@ -13,53 +13,20 @@
     border-radius: 18px; 
 }
 #greenPopup .kotak, #redPopup .kotak{
-    width: 50px; 
-    height: 50px; 
+    width: 35px; 
+    height: 35px; 
     left: 5%; 
     top:50%;
     transform: translateY(-50%);
     position: absolute;
-    border-radius: 50%;
-}
-#greenPopup .kotak .bunder1, #redPopup .kotak .bunder1{
-    width: 25px; 
-    height: 25px; 
-    position: absolute; 
-    top:50%;
-    left:50%;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-}
-#greenPopup .kotak .icon {
-    position: absolute;
-    top:40%;
-    left:50%;
-    transform: translate(-50%, -50%);
-    width: 15px;
-    height: 15px;
-    display: inline-block; 
-    position: relative; 
-}
-#greenPopup .kotak .icon img {
-    width: 100%;
-    height: 100%; 
-}
-#redPopup .kotak span{
-    left:50%;
-    top:50%;
-    transform: translate(-50%, -50%);
-    position: absolute; 
-    font-size: 25px; 
-    font-family: Inter; 
-    font-weight: 400; 
 }
 #greenPopup .closePopup, #redPopup .closePopup{
     right: 5%; 
     top: 50%;
     transform: translateY(-50%); 
-    position: absolute; 
-    font-size: 25px;
-    font-weight: 600;
+    position: absolute;
+    width: 32px;
+    height: 32px;
     cursor: pointer;
 }
 #greenPopup label,#redPopup label{
@@ -78,25 +45,19 @@
 #redPopup .bg{
     background: #FFE1E1; 
 }
-#redPopup .kotak{
-    background: #FFBBBB; 
-}
-#redPopup .bg, #redPopup .kotak .bunder1{
+#redPopup .bg{
     border: 2px #FF0000 solid;
 }
-#redPopup .kotak span, #redPopup .closePopup, #redPopup label{
+#redPopup .closePopup, #redPopup label{
     color:#FF0000;
 }
 #greenPopup .bg{
     background: #ECFFEB; 
 }
-#greenPopup .kotak{
-    background: #bcffb7; 
-}
-#greenPopup .bg, #greenPopup .kotak .bunder1{
+#greenPopup .bg{
     border: 2px #01B701 solid;
 }
-#greenPopup .kotak span, #greenPopup .closePopup, #greenPopup label{
+#greenPopup .closePopup, #greenPopup label{
     color:#01B701;
 }
 @media (min-width: 700px) and (max-width: 1000px) {
@@ -108,24 +69,12 @@
         border-radius: 15px; 
     }
     #greenPopup .kotak, #redPopup .kotak{
-        width: 44px;
-        height: 44px;
-    }
-    #greenPopp .kotak .bunder1, #redPopup .kotak .bunder1{
-        width: 22px;
-        height: 22px;
-        border-width: 2px;
-    }
-    #greenPopup .kotak .icon{
-        width: 13px;
-        height: 13px;
-        top:35%;
-    }
-    #redPopup .kotak span{
-        font-size: 20px;
+        width: 30px;
+        height: 30px;
     }
     #greenPopup .closePopup, #redPopup .closePopup{
-        font-size: 20px;
+        width: 27px;
+        height: 27px;
     }
     #greenPopup label, #redPopup label{
         line-height: 27px;
@@ -142,24 +91,12 @@
         border-width: 1px;
     }
     #greenPopup .kotak, #redPopup .kotak{
-        width: 40px;
-        height: 40px;
-    }
-    #greenPopup .kotak .bunder1, #redPopup .kotak .bunder1{
-        width: 20px;
-        height: 20px;
-        border-width: 2px;
-    }
-    #greenPopup .kotak .icon{
-        width: 11px;
-        height: 11px;
-        top:30%;
-    }
-    #redPopup .kotak span{
-        font-size: 18px;
+        width: 28px;
+        height: 28px;
     }
     #greenPopup .closePopup, #redPopup .closePopup{
-        font-size: 18px;
+        width: 25px;
+        height: 25px;
     }
     #greenPopup label, #redPopup label{
         line-height: 20px;
@@ -176,24 +113,12 @@
         border-width: 1px;
     }
     #greenPopup .kotak, #redPopup .kotak{
-        width: 30px;
-        height: 30px;
-    }
-    #greenPopup .kotak .bunder1, #redPopup .kotak .bunder1{
-        width: 15px;
-        height: 15px;
-        border-width: 1px;
-    }
-    #greenPopup .kotak .icon{
-        width: 8px;
-        height: 8px;
-        top:20%;
-    }
-    #redPopup .kotak span{
-        font-size: 15px;
+        width: 23px;
+        height: 23px;
     }
     #greenPopup .closePopup, #redPopup .closePopup{
-        font-size: 15px;
+        width: 20px;
+        height: 20px;
     }
     #greenPopup label, #redPopup label{
         line-height: 13px;

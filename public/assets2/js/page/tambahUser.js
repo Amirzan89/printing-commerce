@@ -188,7 +188,7 @@ tambahForm.onsubmit = function(event){
     formData.append("nama_lengkap", nama);
     formData.append("jenis_kelamin", inp_jenis_kelamin);
     formData.append("no_telpon", nomer);
-    formData.append("email_user", inpEmails);
+    formData.append("email", inpEmails);
     formData.append("password", password);
     
     if (uploadeFile) {
@@ -196,7 +196,7 @@ tambahForm.onsubmit = function(event){
     }
 
     // Send request
-    fetch('/user/tambah', {
+    fetch('/user/create', {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': csrfToken
@@ -206,11 +206,11 @@ tambahForm.onsubmit = function(event){
     .then(response => response.json())
     .then(data => {
         closeLoading();
-        if (data.success) {
+        if (data.status === 'success'){
             showGreenPopup(data.message || "User berhasil ditambahkan!");
-            setTimeout(() => {
-                window.location.href = '/user';
-            }, 2000);
+            // setTimeout(() => {
+            //     window.location.href = '/user';
+            // }, 2000);
         } else {
             showRedPopup(data.message || "Gagal menambahkan user!");
         }

@@ -38,7 +38,7 @@ $tPath = app()->environment('local') ? '' : '';
         data-sidebar-position="fixed" data-header-position="fixed">
         <!-- Sidebar Start -->
         @php
-            $nav = 'admin';
+            $nav = 'user';
         @endphp
         @include('components.admin.sidebar')
         <!--  Sidebar End -->

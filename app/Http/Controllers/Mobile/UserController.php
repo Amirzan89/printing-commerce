@@ -132,9 +132,9 @@ class UserController extends Controller
 
     //from admin
     public function createUser(Request $rt){
-        $validator = Validator::make($rt->only('email', 'nama_user', 'jenis_kelamin', 'no_telpon', 'password', 'foto'), [
+        $validator = Validator::make($rt->only('email', 'nama_lengkap', 'jenis_kelamin', 'no_telpon', 'password', 'foto'), [
             'email'=>'required|email',
-            'nama_user' => 'required|min:3|max:50',
+            'nama_lengkap' => 'required|min:3|max:50',
             'jenis_kelamin' => 'required|in:laki-laki,perempuan',
             'no_telpon' => 'required|max:15',
             'password' => [
@@ -148,9 +148,9 @@ class UserController extends Controller
         ],[
             'email.required'=>'Email wajib di isi',
             'email.email'=>'Email yang anda masukkan invalid',
-            'nama_user.required' => 'Nama user wajib di isi',
-            'nama_user.min'=>'Nama user minimal 3 karakter',
-            'nama_user.max' => 'Nama user maksimal 50 karakter',
+            'nama_lengkap.required' => 'Nama user wajib di isi',
+            'nama_lengkap.min'=>'Nama user minimal 3 karakter',
+            'nama_lengkap.max' => 'Nama user maksimal 50 karakter',
             'password.required'=>'Password wajib di isi',
             'password.min'=>'Password minimal 8 karakter',
             'password.max'=>'Password maksimal 25 karakter',
@@ -185,7 +185,7 @@ class UserController extends Controller
         ]);
         $ins = User::insert([
             'uuid' =>  Str::uuid(),
-            'nama_user' => $rt->input('nama_user'),
+            'nama_user' => $rt->input('nama_lengkap'),
             'jenis_kelamin' => $rt->input('jenis_kelamin'),
             'no_telpon' => $rt->input('no_telpon'),
             'foto' => $rt->hasFile('foto') ? $fh : '',
