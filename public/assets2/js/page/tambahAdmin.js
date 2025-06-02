@@ -83,6 +83,33 @@ function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 }
+function validatePassword(password) {
+    if (password === '') {
+        showRedPopup('Password harus diisi !');
+        return false;
+    }
+    if (password.length < 8) {
+        showRedPopup('Password minimal 8 karakter !');
+        return false;
+    }
+    if (!/[A-Z]/.test(password)) {
+        showRedPopup('Password minimal ada 1 huruf kapital !');
+        return false;
+    }
+    if (!/[a-z]/.test(password)) {
+        showRedPopup('Password minimal ada 1 huruf kecil !');
+        return false;
+    }
+    if (!/\d/.test(password)) {
+        showRedPopup('Password minimal ada 1 angka !');
+        return false;
+    }
+    if (!/[!@#$%^&*]/.test(password)) {
+        showRedPopup('Password minimal ada 1 karakter unik !');
+        return false;
+    }
+    return true;
+}
 tambahForm.onsubmit = function(event){
     event.preventDefault();
     const nama = inpNama.value.trim();
@@ -124,28 +151,7 @@ tambahForm.onsubmit = function(event){
         showRedPopup('Format Email salah !');
         return;
     }
-    if (password === '') {
-        showRedPopup('Password harus diisi !');
-        return;
-    }
-    if (password.length < 8) {
-        showRedPopup('Password minimal 8 karakter !');
-        return;
-    }
-    if (!/[A-Z]/.test(password)) {
-        showRedPopup('Password minimal ada 1 huruf kapital !');
-        return;
-    }
-    if (!/[a-z]/.test(password)) {
-        showRedPopup('Password minimal ada 1 huruf kecil !');
-        return;
-    }
-    if (!/\d/.test(password)) {
-        showRedPopup('Password minimal ada 1 angka !');
-        return;
-    }
-    if (!/[!@#$%^&*]/.test(password)) {
-        showRedPopup('Password minimal ada 1 karakter unik !');
+    if (!validatePassword(password)) {
         return;
     }
     if (uploadeFile) {
@@ -165,27 +171,29 @@ tambahForm.onsubmit = function(event){
     if (uploadeFile) {
         formData.append("foto", uploadeFile);
     }
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/admin/tambah");
-    xhr.setRequestHeader("X-CSRF-TOKEN", csrfToken);
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            closeLoading();
-            var response = JSON.parse(xhr.responseText);
-            showGreenPopup(response);
+    fetch('/admin/create', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        closeLoading();
+        if(data.status === 'success') {
+            showGreenPopup('Admin berhasil ditambahkan !');
             setTimeout(() => {
                 window.location.href = '/admin';
             }, 2000);
         } else {
-            closeLoading();
-            var response = JSON.parse(xhr.responseText);
-            showRedPopup(response);
+            showRedPopup(data.message);
         }
-    };
-    xhr.onerror = function () {
+    })
+    .catch(error => {
         closeLoading();
-        showRedPopup("Error occurred during the request.");
-    };
-    xhr.send(formData);
+        showRedPopup('Terjadi kesalahan saat menambahkan admin !');
+        console.error('Error:', error);
+    });
     return false;
 };

@@ -80,37 +80,44 @@ function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 }
+function validatePassword(password) {
+    if (password === '') {
+        return true; // Password is optional in edit mode
+    }
+    if (password.length < 8) {
+        showRedPopup('Password minimal 8 karakter !');
+        return false;
+    }
+    if (!/[A-Z]/.test(password)) {
+        showRedPopup('Password minimal ada 1 huruf kapital !');
+        return false;
+    }
+    if (!/[a-z]/.test(password)) {
+        showRedPopup('Password minimal ada 1 huruf kecil !');
+        return false;
+    }
+    if (!/\d/.test(password)) {
+        showRedPopup('Password minimal ada 1 angka !');
+        return false;
+    }
+    if (!/[!@#$%^&*]/.test(password)) {
+        showRedPopup('Password minimal ada 1 karakter unik !');
+        return false;
+    }
+    return true;
+}
 editForm.onsubmit = function(event){
     event.preventDefault();
     const nama = inpNama.value.trim();
-    const nomer = inpNomerTelepon.value.trim();
-    const inp_jenis_kelamin = inpJenisKelamin.value.trim();
     const inp_role = inpRole.value.trim();
     const inpEmails = inpEmail.value.trim();
     const password = inpPassword.value.trim();
-    if (nama === users.nama_lengkap && nomer === users.no_telpon && inp_jenis_kelamin === users.jenis_kelamin && inp_role === users.role && inpEmails === users.email && password === '' && uploadeFile === null) {
+    if (nama === users.nama_lengkap && inp_role === users.role && inpEmails === users.email && password === '') {
         showRedPopup('Data belum diubah');
         return;
     }
     if(nama === "") {  
         showRedPopup("Nama Lengkap harus diisi !");
-        return;
-    }
-    if(inp_jenis_kelamin === "") {
-        showRedPopup("Jenis Kelamin harus diisi !");
-        return;
-    }
-    if(nomer === "") {
-        showRedPopup("Nomer Telepon harus diisi !");
-        return;
-    }else if(isNaN(nomer)) {
-        showRedPopup("Nomer Telepon harus angka !");
-        return;
-    }else if(!/^08\d+$/.test(nomer)) {
-        showRedPopup("Nomer Telepon harus dimulai dengan 08 !");
-        return;
-    }else if(!/^\d{11,13}$/.test(nomer)) {
-        showRedPopup("Nomer Telepon harus terdiri dari 11-13 digit angka !");
         return;
     }
     if(inp_role === "") {
@@ -125,27 +132,8 @@ editForm.onsubmit = function(event){
         showRedPopup('Format Email salah !');
         return;
     }
-    if (password !== '') {
-        if (password.length < 8) {
-            showRedPopup('Password minimal 8 karakter !');
-            return;
-        }
-        if (!/[A-Z]/.test(password)) {
-            showRedPopup('Password minimal ada 1 huruf kapital !');
-            return;
-        }
-        if (!/[a-z]/.test(password)) {
-            showRedPopup('Password minimal ada 1 huruf kecil !');
-            return;
-        }
-        if (!/\d/.test(password)) {
-            showRedPopup('Password minimal ada 1 angka !');
-            return;
-        }
-        if (!/[!@#$%^&*]/.test(password)) {
-            showRedPopup('Password minimal ada 1 karakter unik !');
-            return;
-        }
+    if (!validatePassword(password)) {
+        return;
     }
     if (uploadeFile) {
         if (!allowedFormats.includes(uploadeFile.type)) {
@@ -157,8 +145,6 @@ editForm.onsubmit = function(event){
     const formData = new FormData();
     formData.append("_method", 'PUT');
     formData.append("nama_lengkap", nama);
-    formData.append("jenis_kelamin", inp_jenis_kelamin);
-    formData.append("no_telpon", nomer);
     formData.append("role", inp_role);
     formData.append("email_admin_lama", users.email);
     formData.append("email_admin", inpEmails);
@@ -168,27 +154,29 @@ editForm.onsubmit = function(event){
     if (uploadeFile) {
         formData.append("foto", uploadeFile);
     }
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/admin/update");
-    xhr.setRequestHeader("X-CSRF-TOKEN", csrfToken);
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            closeLoading();
-            var response = JSON.parse(xhr.responseText);
-            showGreenPopup(response);
+    fetch(`/admin/update`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        closeLoading();
+        if(data.status === 'success') {
+            showGreenPopup('Admin berhasil diupdate !');
             setTimeout(() => {
                 window.location.href = '/admin';
             }, 2000);
         } else {
-            closeLoading();
-            var response = JSON.parse(xhr.responseText);
-            showRedPopup(response);
+            showRedPopup(data.message);
         }
-    };
-    xhr.onerror = function () {
+    })
+    .catch(error => {
         closeLoading();
-        showRedPopup("Error occurred during the request.");
-    };
-    xhr.send(formData);
+        showRedPopup('Terjadi kesalahan saat mengupdate admin !');
+        console.error('Error:', error);
+    });
     return false;
 };

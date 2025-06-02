@@ -53,7 +53,7 @@ class EditorController extends Controller
             'no_telpon' => 'nullable|max:15',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ], [
-            'id_editor.required' => 'ID Editor wajib di isigeege',
+            'id_editor.required' => 'ID Editor wajib di isi',
             'nama_editor.required' => 'Nama Editor wajib di isi',
             'nama_editor.min' => 'Nama Editor minimal 3 karakter',
             'nama_editor.max' => 'Nama Editor maksimal 50 karakter',

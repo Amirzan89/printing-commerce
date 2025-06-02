@@ -271,7 +271,6 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets/js/sidebarmenu.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/app.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/page/modalDelete.js') }}"></script>
-    <script src="{{ asset($tPath.'assets2/js/page/editor/data.js') }}"></script>
 </body>
 
 </html>
