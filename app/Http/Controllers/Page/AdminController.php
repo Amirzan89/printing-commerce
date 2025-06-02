@@ -84,14 +84,13 @@ class AdminController extends Controller
     public function showAll(Request $request){
         $adminData = Admin::select('admin.uuid', 'admin.nama_admin', 'auth.email', 'auth.role')
             ->join('auth', 'admin.id_auth', '=', 'auth.id_auth')
-            ->whereNotIn('auth.role', ['super_admin', 'admin_chat', 'admin_pemesanan'])
+            ->whereNotIn('auth.role', ['user'])
             ->whereNotIn('auth.id_auth', [$request->user()['id_auth']])
             ->get()
-            ->map(function($item) {
+            ->map(function($item){
                 $item->role = ucwords(str_replace('_', ' ', $item->role));
                 return $item;
             });
-            
         $dataShow = [
             'adminData' => $adminData ?? [],
             'headerData' => UtilityController::getHeaderData(),

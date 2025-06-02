@@ -205,11 +205,13 @@ $tPath = app()->environment('local') ? '' : '';
                 </div>
                 <div class="d-flex align-items-stretch">
                     <div class="card w-100">
-                        <div class="card-body p-4" style="box-shadow: rgba(145,158,171,0.2) 0px 0px 2px 0px, rgba(145,158,171,0.12) 0px 12px 24px -4px;">
-                            <a href="/jasa/tambah" class="btn btn-success" id="btnTambah">
-                                <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="">
-                                <span>Tambah Jasa</span>
-                            </a>
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-start">
+                                <a href="/jasa/tambah" class="btn btn-success d-flex align-items-center justify-content-center gap-2" id="btnTambah">
+                                    <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="Tambah" class="img-fluid" style="max-width: 19px;">
+                                    <span>Tambah Jasa</span>
+                                </a>
+                            </div>
                             <div class="table-responsive">
                                 <table class="table mb-0 align-middle">
                                     <thead class="text-dark fs-4">
@@ -243,13 +245,11 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <p class="mb-0 fw-normal">{{ $data['kategori']}}</p>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <a href="/jasa/edit/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1">
+                                                <a href="/jasa/edit/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1" style="width: fit-content; height: fit-content; padding: 12px;">
                                                     <img src="{{ asset($tPath.'assets2/icon/edit.svg') }}" alt="">
-                                                    <span>Edit</span>
                                                 </a>
-                                                <button type="button" class="btn btn-danger btn-delete m-1" onclick="showModalDelete('{{ $data['uuid'] }}')">
+                                                <button type="button" class="btn btn-danger btn-delete m-1" style="width: fit-content; height: fit-content; padding: 12px;" onclick="showModalDelete('{{ $data['uuid'] }}')">
                                                     <img src="{{ asset($tPath.'assets2/icon/delete.svg') }}" alt="">
-                                                    <span>Hapus</span>
                                                 </button>
                                             </td>
                                         </tr>

@@ -49,7 +49,7 @@ $tPath = app()->environment('local') ? '' : '';
             <!--  Header Start -->
             @include('components.admin.header')
             <!--  Header End -->
-            <div class="container-fluid">
+            <div class="container-fluid" style="background-color: #F6F9FF">
                 <div class="pagetitle mt-3 mt-md-4 mt-lg-5">
                     <h1>Edit Admin</h1>
                     <nav>

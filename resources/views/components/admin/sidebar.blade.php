@@ -102,8 +102,8 @@
         </ul>
         <!-- End Sidebar navigation -->
     </nav>
-    <div class="" style="position: relative; margin-top: 50px; width: 100%;">
-            <button class="btn w-100" onclick="logout()" style="outline: none; border: none; background-color: transparent;">
+    <div class="" style="position: relative; left: 50%; transform: translateX(-50%); margin-top: 50px; width: 88%;">
+            <button class="btn w-100 d-flex align-items-center justify-content-start gap-2" onclick="logout()" style="outline: none; border: none; background-color: transparent;">
                 <img src="{{ asset($tPath.'assets2/icon/sidebar/logout.svg') }}" alt="Logout" class="white img-fluid" style="width: 26px; height: 26px;">
                 <span class="hide-menu text-white">Logout</span>
             </button>

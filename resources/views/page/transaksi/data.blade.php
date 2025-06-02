@@ -191,7 +191,7 @@ $tPath = app()->environment('local') ? '' : '';
             <!--  Header Start -->
             @include('components.admin.header')
             <!--  Header End -->
-            <div class="container-fluid">
+            <div class="container-fluid" style="background-color: #F6F9FF">
                 <div class="pagetitle mt-2 mt-sm-3 mt-md-3 mt-lg-4 mb-2 mb-sm-3 mb-md-3 mb-lg-4">
                     <h1>Kelola Transaksi</h1>
                 </div>
@@ -239,13 +239,11 @@ $tPath = app()->environment('local') ? '' : '';
                                                 </span>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <a href="/transaksi/detail/{{ $data['order_id'] }}" class="btn btn-warning btn-detail m-1">
+                                                <a href="/transaksi/detail/{{ $data['order_id'] }}" class="btn btn-warning btn-detail m-1" style="width: fit-content; height: fit-content; padding: 12px;">
                                                     <img src="{{ asset($tPath.'assets2/icon/detail.svg') }}" alt="">
-                                                    <span>Detail</span>
                                                 </a>
-                                                <button type="button" class="btn btn-danger btn-delete m-1" onclick="showModalDelete('{{ $data['order_id'] }}')">
+                                                <button type="button" class="btn btn-danger btn-delete m-1" style="width: fit-content; height: fit-content; padding: 12px;" onclick="showModalDelete('{{ $data['order_id'] }}')">
                                                     <img src="{{ asset($tPath.'assets2/icon/delete.svg') }}" alt="">
-                                                    <span>Hapus</span>
                                                 </button>
                                             </td>
                                         </tr>

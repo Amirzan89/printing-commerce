@@ -228,12 +228,12 @@ $tPath = app()->environment('local') ? '' : '';
                 <!-- Status filter buttons -->
                 <div class="status-filters mb-3">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ url('/pesanan?status=menunggu') }}" class="btn {{ $currentStatus == 'menunggu' ? 'btn-primary' : 'btn-outline-primary' }}">Menunggu</a>
-                        <a href="{{ url('/pesanan?status=proses') }}" class="btn {{ $currentStatus == 'proses' ? 'btn-primary' : 'btn-outline-primary' }}">Proses</a>
-                        <a href="{{ url('/pesanan?status=dikerjakan') }}" class="btn {{ $currentStatus == 'dikerjakan' ? 'btn-primary' : 'btn-outline-primary' }}">Dikerjakan</a>
-                        <a href="{{ url('/pesanan?status=revisi') }}" class="btn {{ $currentStatus == 'revisi' ? 'btn-primary' : 'btn-outline-primary' }}">Revisi</a>
-                        <a href="{{ url('/pesanan?status=selesai') }}" class="btn {{ $currentStatus == 'selesai' ? 'btn-primary' : 'btn-outline-primary' }}">Selesai</a>
-                        <a href="{{ url('/pesanan?status=dibatalkan') }}" class="btn {{ $currentStatus == 'dibatalkan' ? 'btn-primary' : 'btn-outline-primary' }}">Dibatalkan</a>
+                        <a href="{{ url('/pesanan?status=menunggu') }}" class="btn {{ $currentStatus == 'menunggu' ? 'btn-secondary' : 'btn-outline-secondary' }}">Menunggu</a>
+                        <a href="{{ url('/pesanan?status=proses') }}" class="btn {{ $currentStatus == 'proses' ? 'btn-secondary' : 'btn-outline-secondary' }}">Proses</a>
+                        <a href="{{ url('/pesanan?status=dikerjakan') }}" class="btn {{ $currentStatus == 'dikerjakan' ? 'btn-secondary' : 'btn-outline-secondary' }}">Dikerjakan</a>
+                        <a href="{{ url('/pesanan?status=revisi') }}" class="btn {{ $currentStatus == 'revisi' ? 'btn-secondary' : 'btn-outline-secondary' }}">Revisi</a>
+                        <a href="{{ url('/pesanan?status=selesai') }}" class="btn {{ $currentStatus == 'selesai' ? 'btn-secondary' : 'btn-outline-secondary' }}">Selesai</a>
+                        <a href="{{ url('/pesanan?status=dibatalkan') }}" class="btn {{ $currentStatus == 'dibatalkan' ? 'btn-secondary' : 'btn-outline-secondary' }}">Dibatalkan</a>
                     </div>
                 </div>
                 
@@ -279,13 +279,11 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <p class="mb-0 fw-normal">{{ $data['nama_editor']}}</p>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <a href="/disi/edit/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1">
-                                                    <img src="{{ asset($tPath.'img/icon/edit.svg') }}" alt="">
-                                                    <span>Edit</span>
+                                                <a href="/pesanan/detail/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1" style="width: fit-content; height: fit-content; padding: 12px;">
+                                                    <img src="{{ asset($tPath.'assets2/icon/detail.svg') }}" alt="">
                                                 </a>
-                                                <button type="button" class="btn btn-danger btn-delete m-1" onclick="showModalDelete('{{ $data['uuid'] }}')">
-                                                    <img src="{{ asset($tPath.'img/icon/delete.svg') }}" alt="">
-                                                    <span>Hapus</span>
+                                                <button type="button" class="btn btn-danger btn-delete m-1" style="width: fit-content; height: fit-content; padding: 12px;" onclick="showModalDelete('{{ $data['uuid'] }}')">
+                                                    <img src="{{ asset($tPath.'assets2/icon/delete.svg') }}" alt="">
                                                 </button>
                                             </td>
                                         </tr>

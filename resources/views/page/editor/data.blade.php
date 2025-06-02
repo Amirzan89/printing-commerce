@@ -191,20 +191,19 @@ $tPath = app()->environment('local') ? '' : '';
             <!--  Header Start -->
             @include('components.admin.header')
             <!--  Header End -->
-            <div class="container-fluid">
+            <div class="container-fluid" style="background-color: #F6F9FF">
                 <div class="pagetitle mt-2 mt-sm-3 mt-md-3 mt-lg-4 mb-2 mb-sm-3 mb-md-3 mb-lg-4">
                     <h1>Kelola Editor</h1>
                 </div>
                 <div class="d-flex align-items-stretch">
                     <div class="card w-100">
                         <div class="card-body p-4">
-                            <div class="d-flex justify-content-end">
-                                <a href="{{ url('/editor/tambah') }}" class="btn btn-primary" id="btnTambah">
-                                    <img src="{{ asset($tPath.'assets2/icon/add.png') }}" alt="">
+                            <div class="d-flex justify-content-start">
+                                <a href="{{ url('/editor/tambah') }}" class="btn btn-success d-flex align-items-center justify-content-center gap-2" id="btnTambah">
+                                    <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="Tambah" class="img-fluid" style="max-width: 19px;">
                                     Tambah Editor
                                 </a>
                             </div>
-                            <h5 class="card-title fw-semibold mb-4">Daftar Editor</h5>
                             <div class="table-responsive">
                                 <table class="table text-nowrap mb-0 align-middle">
                                     <thead class="text-dark fs-4">
@@ -242,15 +241,11 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <p class="mb-0 fw-normal">{{ $editor->no_telpon ?: '-' }}</p>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <a href="{{ url('/editor/edit/'.$editor->uuid) }}"
-                                                    class="btn btn-primary m-1 btn-edit">
-                                                    <img src="{{ asset($tPath.'assets2/icon/edit.png') }}" alt="">
-                                                    Edit
+                                                <a href="{{ url('/editor/edit/'.$editor->uuid) }}" class="btn btn-warning btn-edit m-1" style="width: fit-content; height: fit-content; padding: 12px;">
+                                                    <img src="{{ asset($tPath.'assets2/icon/edit.svg') }}" alt="">
                                                 </a>
-                                                <button type="button" onclick="showModalDelete('{{ $editor->uuid }}')"
-                                                    class="btn btn-primary m-1 btn-delete">
-                                                    <img src="{{ asset($tPath.'assets2/icon/delete.png') }}" alt="">
-                                                    Hapus
+                                                <button type="button" onclick="showModalDelete('{{ $editor->uuid }}')" class="btn btn-danger btn-delete m-1" style="width: fit-content; height: fit-content; padding: 12px;">
+                                                    <img src="{{ asset($tPath.'assets2/icon/delete.svg') }}" alt="">
                                                 </button>
                                             </td>
                                         </tr>
