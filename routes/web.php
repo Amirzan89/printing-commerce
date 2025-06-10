@@ -6,11 +6,9 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Services\JasaController;
 use App\Http\Controllers\Services\PesananController;
 use App\Http\Controllers\Services\MetodePembayaranController;
-use App\Http\Controllers\Services\TransaksiController;
-use App\Http\Controllers\Services\ReviewController;
 use App\Http\Controllers\Services\AdminController;
-use App\Http\Controllers\Services\LoginController;
 use App\Http\Controllers\Services\EditorController;
+use App\Http\Controllers\Mobile\ChatController;
 use App\Http\Controllers\Mobile\UserController;
 
 use App\Http\Controllers\Page\PublicController AS ShowHomeController;
@@ -18,7 +16,7 @@ use App\Http\Controllers\Page\JasaController AS ShowJasaController;
 use App\Http\Controllers\Page\PesananController AS ShowPesananController;
 use App\Http\Controllers\Page\MetodePembayaranController AS ShowMetodePembayaranController;
 use App\Http\Controllers\Page\TransaksiController AS ShowTransaksiController;
-use App\Http\Controllers\Page\ReviewController AS ShowReviewController;
+use App\Http\Controllers\Page\ChatController AS ShowChatController;
 use App\Http\Controllers\Page\AdminController AS ShowAdminController;
 use App\Http\Controllers\Page\EditorController AS ShowEditorController;
 use App\Http\Controllers\Page\UserController AS ShowUserController;
@@ -77,11 +75,20 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         //page transaksi
         Route::get('/',[ShowTransaksiController::class,'showAll']);
         Route::get('/detail/{any}',[ShowTransaksiController::class,'showDetail']);
-        Route::get('/detail', function(){
-            return redirect('/transaksi');
-        });
         // route for transaksi
         Route::post('/update',[ShowTransaksiController::class,'validateTransaksi']);
+    });
+
+    //API only chat route
+    Route::group(['prefix'=>'/chat'], function(){
+        //page chat
+        Route::get('/',[ShowChatController::class,'showAll']);
+        Route::get('/{uuid}', [ShowChatController::class, 'showDetail']);
+        
+        // API routes for chat
+        Route::post('/send', [ChatController::class, 'sendMessage']);
+        Route::get('/messages', [ChatController::class, 'getMessages']);
+        Route::post('/mark-read', [ChatController::class, 'markAsRead']);
     });
 
     //API only user route

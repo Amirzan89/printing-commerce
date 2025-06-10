@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'fcm' => [
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        'credentials_file' => env('FIREBASE_CREDENTIALS_FILE', 'firebase-credentials.json'),
+    ],
+
 ];
