@@ -138,7 +138,7 @@ Content-Type: application/json
 
 {
     "order_id": "{{order_id}}",
-    "reject_reason": "Bukti pembayaran tidak jelas"
+    "alasan_penolakan": "Bukti pembayaran tidak jelas"
 }
 ```
 

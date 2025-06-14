@@ -14,8 +14,8 @@ return new class extends Migration
             $table->string('bukti_pembayaran')->nullable();
             $table->dateTime('waktu_pembayaran')->nullable();
             $table->dateTime('confirmed_at')->nullable();
-            $table->text('admin_notes')->nullable();
-            $table->text('reject_reason')->nullable();
+            $table->text('catatan_transaksi')->nullable();
+            $table->text('alasan_penolakan')->nullable();
             $table->dateTime('expired_at');
             $table->timestamps();
             $table->unsignedBigInteger('id_metode_pembayaran');

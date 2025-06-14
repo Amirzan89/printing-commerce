@@ -13,43 +13,81 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 class TransaksiController extends Controller
 {
+    public function getAll(Request $request){
+        $transaksi = Transaksi::select('order_id')->join('pesanan', 'pesanan.id_pesanan', '=', 'transaksi.id_pesanan')
+            ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
+            ->orderBy('transaksi.created_at', 'desc')
+            ->get();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Transaksi berhasil diambil',
+            'data' => $transaksi
+        ]);
+    }
+
+    public function getDetail(Request $request, $order_id){
+        $transaksi = Transaksi::join('pesanan', 'pesanan.id_pesanan', '=', 'transaksi.id_pesanan')
+            ->where('order_id', $order_id)->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
+            ->first();
+        if (!$transaksi) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Detail transaksi tidak ditemukan'
+            ], 404);
+        }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Detail transaksi berhasil diambil',
+            'data' => $transaksi
+        ]);
+    }
     /**
      * Create transaction (Step 2 in manual payment flow)
      */
     public function createTransaction(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'order_uuid' => 'required|exists:pesanan,uuid',
-            'id_metode_pembayaran' => 'required|exists:metode_pembayaran,id_metode_pembayaran'
+        $validator = Validator::make($request->only('id_pesanan', 'id_metode_pembayaran'), [
+            'id_pesanan' => 'required|exists:pesanan,uuid',
+            'id_metode_pembayaran' => 'required'
         ], [
-            'order_uuid.required' => 'UUID pesanan wajib diisi',
-            'order_uuid.exists' => 'Pesanan tidak ditemukan',
-            'id_metode_pembayaran.required' => 'Metode pembayaran wajib dipilih',
-            'id_metode_pembayaran.exists' => 'Metode pembayaran tidak valid'
+            'id_pesanan.required' => 'UUID pesanan wajib diisi',
+            'id_pesanan.exists' => 'Pesanan tidak ditemukan',
+            'id_metode_pembayaran.required' => 'Metode pembayaran wajib dipilih'
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $validator->errors()->first()
-            ], 422);
+        if ($validator->fails()){
+            $errors = [];
+            foreach ($validator->errors()->toArray() as $field => $errorMessages){
+                $errors[$field] = $errorMessages[0];
+                break;
+            }
+            return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
         }
 
         try {
             // Get pesanan by UUID and check ownership
-            $pesanan = Pesanan::where('uuid', $request->order_uuid)
-            ->where('id_user', auth()->user()->id_user)
+            $pesanan = Pesanan::where('uuid', $request->input('id_pesanan'))
+            ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
             ->first();
             
-        if (!$pesanan) {
-            return response()->json([
-                'status' => 'error',
-                    'message' => 'Pesanan tidak ditemukan atau tidak memiliki akses'
-            ], 404);
-        }
+            if (!$pesanan) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Pesanan tidak ditemukan'
+                ], 404);
+            }
+            // Get metode pembayaran by UUID
+            $metodePembayaran = MetodePembayaran::where('uuid', $request->input('id_metode_pembayaran'))->first();
+            if (!$metodePembayaran) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Metode pembayaran tidak ditemukan'
+                ], 404);
+            }
 
             // Check if pesanan status allows payment
             if ($pesanan->status !== 'pending') {
@@ -74,11 +112,11 @@ class TransaksiController extends Controller
                 ], 422);
             }
 
-        // Generate unique order ID
+            // Generate unique order ID
             $orderId = 'TRX-' . date('Ymd') . '-' . strtoupper(Str::random(8));
-        
-        // Set expiration time (24 hours from now)
-        $expiredAt = Carbon::now()->addHours(24);
+            
+            // Set expiration time (24 hours from now)
+            $expiredAt = Carbon::now()->addHours(24);
         
             $transaksi = Transaksi::create([
                 'order_id' => $orderId,
@@ -87,29 +125,27 @@ class TransaksiController extends Controller
                 'bukti_pembayaran' => null,
                 'waktu_pembayaran' => null,
                 'expired_at' => $expiredAt,
-                'id_metode_pembayaran' => $request->id_metode_pembayaran,
+                'id_metode_pembayaran' => $metodePembayaran->id_metode_pembayaran,
                 'id_pesanan' => $pesanan->id_pesanan
             ]);
             
             // Update pesanan payment status to menunggu_konfirmasi for UI flow
             $pesanan->update([
-                'status' => 'menunggu_konfirmasi',
+                'status' => 'pending',
                 'status_pembayaran' => 'belum_bayar'
             ]);
-            
-            // Get payment method details
-            $metodePembayaran = MetodePembayaran::find($request->id_metode_pembayaran);
             
             return response()->json([
                 'status' => 'success',
                 'message' => 'Transaksi berhasil dibuat. Silakan lakukan pembayaran dan upload bukti transfer.',
                 'data' => [
-                    'transaction' => $transaksi,
+                    'transaksi' => $transaksi,
                     'payment_method' => $metodePembayaran,
                     'expired_at' => $expiredAt->format('Y-m-d H:i:s'),
                     'payment_instructions' => [
-                        'step1' => 'Transfer ke rekening: ' . $metodePembayaran->no_rekening,
-                        'step2' => 'Atas nama: ' . $metodePembayaran->atas_nama,
+                        'step1' => 'Transfer ke rekening: ' . $metodePembayaran->no_metode_pembayaran,
+                        'step2' => 'Atas nama: ' . $metodePembayaran->deskripsi_1,
+                        'step2-2' => 'Atas nama: ' . $metodePembayaran->deskripsi_2,
                         'step3' => 'Nominal: Rp ' . number_format($pesanan->total_harga, 0, ',', '.'),
                         'step4' => 'Upload bukti transfer untuk konfirmasi'
                     ]
@@ -120,7 +156,8 @@ class TransaksiController extends Controller
             Log::error('Error creating transaction: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal membuat transaksi'
+                'message' => 'Gagal membuat transaksi',
+                'data' => $e->getMessage()
             ], 500);
         }
     }
@@ -128,9 +165,9 @@ class TransaksiController extends Controller
     /**
      * Upload payment proof (Step 3 in manual payment flow)
      */
-    public function uploadPaymentProof(Request $request): JsonResponse
+    public function uploadPaymentProof(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->only('order_id', 'bukti_pembayaran', 'catatan'), [
             'order_id' => 'required|exists:transaksi,order_id',
             'bukti_pembayaran' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'catatan' => 'nullable|string|max:200'
@@ -152,11 +189,14 @@ class TransaksiController extends Controller
         }
 
         try {
-            $transaksi = Transaksi::where('order_id', $request->order_id)->first();
+            $transaksi = Transaksi::join('pesanan', 'pesanan.id_pesanan', '=', 'transaksi.id_pesanan')
+                ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
+                ->where('order_id', $request->input('order_id'))
+                ->first();
             
             // Check if transaction belongs to user's order
             $pesanan = Pesanan::where('id_pesanan', $transaksi->id_pesanan)
-                ->where('id_user', auth()->user()->id_user)
+                ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
                 ->first();
                 
             if (!$pesanan) {
@@ -171,15 +211,27 @@ class TransaksiController extends Controller
                 $transaksi->update(['status' => 'expired']);
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Transaksi sudah kadaluarsa. Silakan buat transaksi baru.'
+                    'message' => 'Transaksi sudah kadaluarsa. Silakan lakukan pembayaran.'
                 ], 400);
             }
             
             // Check if transaction is in valid state
-            if ($transaksi->status !== 'belum_bayar') {
+            if ($transaksi->status == 'dibatalkan') {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Bukti pembayaran sudah diupload atau pembayaran sudah dikonfirmasi'
+                    'message' => 'Transaksi sudah dibatalkan. Silakan buat transaksi baru.'
+                ], 400);
+            }
+            if ($transaksi->status == 'menunggu_konfirmasi') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Bukti pembayaran sudah diupload. Silakan tunggu konfirmasi admin.'
+                ], 400);
+            }
+            if ($transaksi->status == 'lunas') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Transaksi sudah lunas. Silakan tunggu konfirmasi admin.'
                 ], 400);
             }
             
@@ -193,7 +245,7 @@ class TransaksiController extends Controller
                 'bukti_pembayaran' => $filePath,
                 'status' => 'menunggu_konfirmasi',
                 'waktu_pembayaran' => Carbon::now(),
-                'admin_notes' => $request->catatan
+                'catatan_transaksi' => $request->input('catatan')
             ]);
             
             // Update pesanan status
@@ -223,7 +275,7 @@ class TransaksiController extends Controller
     /**
      * Get transaction details
      */
-    public function getTransactionDetails(Request $request, $orderId): JsonResponse
+    public function getTransactionDetails(Request $request, $orderId)
     {
         try {
             $transaksi = Transaksi::with(['toMetodePembayaran', 'toPesanan.toJasa'])
@@ -239,7 +291,7 @@ class TransaksiController extends Controller
             
             // Check if transaction belongs to user's order
             $pesanan = Pesanan::where('id_pesanan', $transaksi->id_pesanan)
-                ->where('id_user', auth()->user()->id_user)
+                ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
                 ->first();
                 
             if (!$pesanan) {
@@ -276,47 +328,11 @@ class TransaksiController extends Controller
     }
     
     /**
-     * Get user transactions with filtering
-     */
-    public function getUserTransactions(Request $request): JsonResponse
-    {
-        try {
-            $status = $request->query('status');
-            $limit = $request->query('limit', 10);
-            
-            $query = Transaksi::with(['toMetodePembayaran', 'toPesanan.toJasa'])
-                ->whereHas('toPesanan', function ($query) {
-                    $query->where('id_user', auth()->user()->id_user);
-                });
-            
-            if ($status && in_array($status, ['belum_bayar', 'menunggu_konfirmasi', 'lunas', 'dibatalkan', 'expired'])) {
-                $query->where('status', $status);
-            }
-            
-            $transactions = $query->orderBy('created_at', 'desc')
-                ->paginate($limit);
-                
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Riwayat transaksi berhasil diambil',
-                'data' => $transactions
-            ]);
-            
-        } catch (\Exception $e) {
-            Log::error('Error getting user transactions: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengambil riwayat transaksi'
-            ], 500);
-        }
-    }
-    
-    /**
      * Cancel transaction (only if belum_bayar)
      */
-    public function cancelTransaction(Request $request): JsonResponse
+    public function cancelTransaction(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->only('order_id', 'reason'), [
             'order_id' => 'required|exists:transaksi,order_id',
             'reason' => 'nullable|string|max:200'
         ]);
@@ -333,7 +349,7 @@ class TransaksiController extends Controller
             
             // Check ownership
             $pesanan = Pesanan::where('id_pesanan', $transaksi->id_pesanan)
-                ->where('id_user', auth()->user()->id_user)
+                ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
                 ->first();
                 
             if (!$pesanan) {
@@ -353,7 +369,7 @@ class TransaksiController extends Controller
             
             $transaksi->update([
                 'status' => 'dibatalkan',
-                'admin_notes' => $request->reason ?? 'Dibatalkan oleh user'
+                'catatan_transaksi' => $request->reason ?? 'Dibatalkan oleh user'
             ]);
             
             // Reset pesanan status to pending for new transaction
@@ -390,163 +406,5 @@ class TransaksiController extends Controller
         ];
         
         return $labels[$status] ?? $status;
-    }
-
-    /**
-     * Admin: Confirm payment (Step 4 in manual payment flow)
-     * This should be called from admin panel
-     */
-    public function confirmPayment(Request $request): JsonResponse
-    {
-        $validator = Validator::make($request->all(), [
-            'order_id' => 'required|exists:transaksi,order_id',
-            'admin_notes' => 'nullable|string|max:500'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $validator->errors()->first()
-            ], 422);
-        }
-
-        try {
-            $transaksi = Transaksi::where('order_id', $request->order_id)->first();
-            
-            if ($transaksi->status !== 'menunggu_konfirmasi') {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Transaksi tidak dalam status menunggu konfirmasi'
-                ], 422);
-            }
-
-            // Update transaction to lunas
-            $transaksi->update([
-                'status' => 'lunas',
-                'confirmed_at' => Carbon::now(),
-                'admin_notes' => $request->admin_notes ?? 'Pembayaran dikonfirmasi oleh admin'
-            ]);
-
-            // Update pesanan status
-            $pesanan = Pesanan::find($transaksi->id_pesanan);
-            $pesanan->update([
-                'status_pembayaran' => 'lunas',
-                'confirmed_at' => Carbon::now()
-            ]);
-
-            // TODO: Send FCM notification to user
-            // TODO: Create chat notification
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Pembayaran berhasil dikonfirmasi',
-                'data' => [
-                    'transaction' => $transaksi->fresh(),
-                    'order' => $pesanan->fresh(),
-                    'next_step' => 'Assign editor ke pesanan'
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Error confirming payment: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengkonfirmasi pembayaran'
-            ], 500);
-        }
-    }
-
-    /**
-     * Admin: Reject payment (Step 4 alternative in manual payment flow)
-     */
-    public function rejectPayment(Request $request): JsonResponse
-    {
-        $validator = Validator::make($request->all(), [
-            'order_id' => 'required|exists:transaksi,order_id',
-            'reject_reason' => 'required|string|max:500'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $validator->errors()->first()
-            ], 422);
-        }
-
-        try {
-            $transaksi = Transaksi::where('order_id', $request->order_id)->first();
-            
-            if ($transaksi->status !== 'menunggu_konfirmasi') {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Transaksi tidak dalam status menunggu konfirmasi'
-                ], 422);
-            }
-
-            // Update transaction back to belum_bayar
-            $transaksi->update([
-                'status' => 'belum_bayar',
-                'bukti_pembayaran' => null,
-                'waktu_pembayaran' => null,
-                'reject_reason' => $request->reject_reason,
-                'expired_at' => Carbon::now()->addHours(24) // Extend expiry
-            ]);
-
-            // Update pesanan status
-            $pesanan = Pesanan::find($transaksi->id_pesanan);
-            $pesanan->update([
-                'status_pembayaran' => 'belum_bayar',
-                'alasan_reject' => $request->reject_reason
-            ]);
-
-            // TODO: Send FCM notification to user
-            // TODO: Create chat notification with reject reason
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Pembayaran berhasil ditolak',
-                'data' => [
-                    'transaction' => $transaksi->fresh(),
-                    'reject_reason' => $request->reject_reason,
-                    'next_step' => 'User perlu upload ulang bukti pembayaran'
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Error rejecting payment: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal menolak pembayaran'
-            ], 500);
-        }
-    }
-
-    /**
-     * Admin: Get pending payments for review
-     */
-    public function getPendingPayments(Request $request): JsonResponse
-    {
-        try {
-            $limit = $request->query('limit', 20);
-            
-            $pendingPayments = Transaksi::with(['toPesanan.toUser.toAuth', 'toMetodePembayaran'])
-                ->where('status', 'menunggu_konfirmasi')
-                ->whereNotNull('bukti_pembayaran')
-                ->orderBy('waktu_pembayaran', 'asc')
-                ->paginate($limit);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Daftar pembayaran pending berhasil diambil',
-                'data' => $pendingPayments
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Error getting pending payments: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengambil daftar pembayaran pending'
-            ], 500);
-        }
     }
 }

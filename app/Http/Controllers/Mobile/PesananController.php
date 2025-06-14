@@ -18,39 +18,55 @@ use Carbon\Carbon;
 class PesananController extends Controller
 {
     /**
-     * Get all orders for the authenticated user with pagination
+     * Get all pesanan for the authenticated user with pagination
      */
-    public function getAll(Request $request)
-    {
+    public function getAll(Request $request){
         try {
-            $status = $request->query('status'); // filter by status
-            $query = Pesanan::with(['toJasa', 'toPaketJasa', 'toEditor', 'fromTransaksi'])
-                ->where('id_user', $request->user()->id_user);
+            $statusPesanan = $request->query('status_pesanan');
+            $statusPembayaran = $request->query('status_pembayaran');
+            $query = Pesanan::select('id_pesanan', 'uuid', 'status', 'status_pembayaran', 'total_harga', 'estimasi_waktu', 'maksimal_revisi', 'created_at')->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user);
             
-            if ($status) {
-                $query->where('status', $status);
+            // Apply status filter only if it's not 'all'
+            if($statusPesanan && $statusPesanan != 'all'){
+                if(!in_array($statusPesanan, ['pending', 'menunggu_konfirmasi', 'dibatalkan', 'selesai', 'dikerjakan', 'revisi', 'selesai', 'dikirim', 'diterima'])){
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Status pesanan tidak valid'
+                    ], 400);
+                }
+                $query->where('status', $statusPesanan);
             }
             
-            $pesanan = $query->orderBy('created_at', 'desc')
-                ->paginate(10);
+            // Apply payment status filter only if it's not 'all'
+            if($statusPembayaran && $statusPembayaran != 'all'){
+                if(!in_array($statusPembayaran, ['belum_buat_transaksi', 'belum_bayar', 'menunggu_konfirmasi', 'lunas', 'dibatalkan', 'expired'])){
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Status pembayaran tidak valid'
+                    ], 400);
+                }
+                $query->where('status_pembayaran', $statusPembayaran);
+            }
+            
+            $pesanan = $query->orderBy('created_at', 'desc')->get();
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Orders retrieved successfully',
+                'message' => 'Pesanan berhasil diambil',
                 'data' => $pesanan
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Error retrieving orders: ' . $e->getMessage());
+            Log::error('Error retrieving pesanan: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to retrieve orders',
+                'message' => 'Gagal mengambil pesanan', 
                 'data' => null
             ], 500);
         }
     }
 
     /**
-     * Get detailed order information
+     * Get detailed pesanan information
      */
     public function getDetail($uuid)
     {
@@ -70,31 +86,30 @@ class PesananController extends Controller
             if (!$pesanan) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Order not found',
+                    'message' => 'Detail Pesanan tidak ditemukan',
                     'data' => null
                 ], 404);
             }
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Order details retrieved successfully',
+                'message' => 'Detail pesanan berhasil diambil',
                 'data' => $pesanan
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Error retrieving order detail: ' . $e->getMessage());
+            Log::error('Error retrieving detail pesanan: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to retrieve order details',
+                'message' => 'Gagal mengambil detail pesanan',
                 'data' => null
             ], 500);
         }
     }
 
     /**
-     * Create new order (Step 1 in flow)
+     * Create new pesanan (Step 1 in flow)
      */
-    public function create(Request $request)
-    {
+    public function create(Request $request){
         try {
             $validator = Validator::make($request->only('id_jasa', 'id_paket_jasa', 'catatan_user', 'gambar_referensi', 'maksimal_revisi'), [
                 'id_jasa' => 'required|exists:jasa,id_jasa',
@@ -138,10 +153,12 @@ class PesananController extends Controller
                 'uuid' => $uuid,
                 'deskripsi' => $request->catatan_user,
                 'status' => 'pending',
-                'status_pembayaran' => 'belum_bayar',
+                'status_pembayaran' => 'belum_buat_transaksi',
                 'total_harga' => $paketJasa->harga_paket_jasa,
                 'estimasi_waktu' => $estimasiWaktu,
                 'maksimal_revisi' => $jumlahRevisi,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
                 'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user,
                 'id_jasa' => $request->input('id_jasa'),
                 'id_paket_jasa' => $request->input('id_paket_jasa')
@@ -156,14 +173,15 @@ class PesananController extends Controller
             }
 
             // Create revisi record
-            CatatanPesanan::create([
-                'catatan_pesanan' => $request->input('catatan_user'),
-                'gambar_referensi' => $gambarFilename,
-                'uploaded_at' => now(),
-                'id_pesanan' => $idPesanan,
-                'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user
-            ]);
-
+            if($request->input('catatan_user') != null){
+                CatatanPesanan::create([
+                    'catatan_pesanan' => $request->input('catatan_user'),
+                    'gambar_referensi' => $gambarFilename,
+                    'uploaded_at' => now(),
+                    'id_pesanan' => $idPesanan,
+                    'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user
+                ]);
+            }
             return response()->json([
                 'status' => 'success',
                 'message' => 'Pesanan berhasil dibuat. Silahkan lanjutkan ke pembayaran.',
@@ -182,7 +200,7 @@ class PesananController extends Controller
     }
 
     /**
-     * Cancel order (only if pending or belum_bayar)
+     * Cancel pesanan (only if pending or belum_bayar)
      */
     public function cancel(Request $request){
         try {
@@ -210,6 +228,12 @@ class PesananController extends Controller
                 ], 404);
             }
 
+            if ($pesanan->status == 'dibatalkan') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Pesanan sudah dibatalkan'
+                ], 422);
+            }
             if (!in_array($pesanan->status, ['pending', 'menunggu_konfirmasi'])) {
                 return response()->json([
                     'status' => 'error',

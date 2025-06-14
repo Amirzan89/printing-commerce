@@ -13,7 +13,7 @@ use DataTables;
 use Excel;
 use Illuminate\Support\Facades\Validator;
 use App\Exports\TransaksiExport;
-
+use Illuminate\Support\Facades\Log;
 class TransaksiController extends Controller
 {
 
@@ -93,10 +93,12 @@ class TransaksiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-            ], 200);
+            $errors = [];
+            foreach($validator->errors()->toArray() as $field => $errorMessages){
+                $errors[$field] = $errorMessages[0];
+                break;
+            }
+            return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
         }
 
         try {
@@ -192,6 +194,214 @@ class TransaksiController extends Controller
                 'success' => false,
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
             ], 200);
+        }
+    }
+    /**
+     * Get user transactions with filtering
+     */
+    public function getUserTransactions(Request $request)
+    {
+        try {
+            $status = $request->query('status');
+            $limit = $request->query('limit', 10);
+            
+            $query = Transaksi::with(['toMetodePembayaran', 'toPesanan.toJasa'])
+                ->whereHas('toPesanan', function ($query) use ($request) {
+                    $query->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user);
+                });
+            
+            if ($status && in_array($status, ['belum_bayar', 'menunggu_konfirmasi', 'lunas', 'dibatalkan', 'expired'])) {
+                $query->where('status', $status);
+            }
+            
+            $transactions = $query->orderBy('created_at', 'desc')
+                ->paginate($limit);
+                
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Riwayat transaksi berhasil diambil',
+                'data' => $transactions
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error getting user transactions: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengambil riwayat transaksi'
+            ], 500);
+        }
+    }
+    /**
+     * Admin: Get pending payments for review
+     */
+    public function getPendingPayments(Request $request)
+    {
+        try {
+            $limit = $request->query('limit', 20);
+            
+            $pendingPayments = Transaksi::with(['toPesanan.toUser.toAuth', 'toMetodePembayaran'])
+                ->where('status', 'menunggu_konfirmasi')
+                ->whereNotNull('bukti_pembayaran')
+                ->orderBy('waktu_pembayaran', 'asc')
+                ->paginate($limit);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Daftar pembayaran pending berhasil diambil',
+                'data' => $pendingPayments
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getting pending payments: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengambil daftar pembayaran pending'
+            ], 500);
+        }
+    }
+    /**
+     * Admin: Confirm payment (Step 4 in manual payment flow)
+     * This should be called from admin panel
+     */
+    public function confirmPayment(Request $request)
+    {
+        $validator = Validator::make($request->only('order_id', 'catatan_admin'), [
+            'order_id' => 'required',
+            'catatan_admin' => 'nullable|string|max:500'
+        ], [
+            'order_id.required' => 'Order ID wajib diisi',
+            'catatan_admin.string' => 'Catatan admin harus berupa teks',
+            'catatan_admin.max' => 'Catatan admin maksimal 500 karakter'
+        ]);
+
+        if ($validator->fails()) {
+            $errors = [];
+            foreach($validator->errors()->toArray() as $field => $errorMessages){
+                $errors[$field] = $errorMessages[0];
+                break;
+            }
+            return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
+        }
+
+        try {
+            $transaksi = Transaksi::where('order_id', $request->input('order_id'))->first();
+            if (!$transaksi) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Transaksi tidak ditemukan'
+                ], 404);
+            }
+            if ($transaksi->status !== 'menunggu_konfirmasi') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Transaksi tidak dalam status menunggu konfirmasi'
+                ], 422);
+            }
+
+            // Update transaction to lunas
+            $transaksi->update([
+                'status' => 'lunas',
+                'confirmed_at' => Carbon::now(),
+                'catatan_transaksi' => $request->input('catatan_admin') ?? 'Pembayaran dikonfirmasi oleh admin'
+            ]);
+
+            // Update pesanan status
+            $pesanan = Pesanan::find($transaksi->id_pesanan);
+            $pesanan->update([
+                'status_pembayaran' => 'lunas',
+                'confirmed_at' => Carbon::now()
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Pembayaran berhasil dikonfirmasi',
+                'data' => [
+                    'transaksi' => $transaksi->fresh(),
+                    'pesanan' => $pesanan->fresh(),
+                    'next_step' => 'Assign editor ke pesanan'
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error confirming payment: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengkonfirmasi pembayaran',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    /**
+     * Admin: Reject payment (Step 4 alternative in manual payment flow)
+     */
+    public function rejectPayment(Request $request)
+    {
+        $validator = Validator::make($request->only('order_id', 'alasan_penolakan'), [
+            'order_id' => 'required',
+            'alasan_penolakan' => 'required|string|max:500'
+        ], [
+            'order_id.required' => 'Order ID wajib diisi',
+            'alasan_penolakan.required' => 'Alasan penolakan wajib diisi',
+            'alasan_penolakan.string' => 'Alasan penolakan harus berupa teks',
+            'alasan_penolakan.max' => 'Alasan penolakan maksimal 500 karakter'
+        ]);
+
+        if ($validator->fails()) {
+            $errors = [];
+            foreach($validator->errors()->toArray() as $field => $errorMessages){
+                $errors[$field] = $errorMessages[0];
+                break;
+            }
+            return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
+        }
+
+        try {
+            $transaksi = Transaksi::where('order_id', $request->input('order_id'))->first();
+            if (!$transaksi) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Transaksi tidak ditemukan'
+                ], 404);
+            }
+            if ($transaksi->status !== 'menunggu_konfirmasi') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Transaksi tidak dalam status menunggu konfirmasi'
+                ], 422);
+            }
+
+            // Update transaction back to belum_bayar
+            $transaksi->update([
+                'status' => 'belum_bayar',
+                'bukti_pembayaran' => null,
+                'waktu_pembayaran' => null,
+                'alasan_penolakan' => $request->input('alasan_penolakan'),
+                'expired_at' => Carbon::now()->addHours(24)
+            ]);
+
+            // Update pesanan status
+            $pesanan = Pesanan::find($transaksi->id_pesanan);
+            $pesanan->update([
+                'status_pembayaran' => 'belum_bayar',
+                'alasan_reject' => $request->input('alasan_penolakan')
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Pembayaran berhasil ditolak',
+                'data' => [
+                    'transaksi' => $transaksi->fresh(),
+                    'alasan_penolakan' => $request->input('alasan_penolakan'),
+                    'next_step' => 'User perlu upload ulang bukti pembayaran'
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error rejecting payment: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal menolak pembayaran'
+            ], 500);
         }
     }
     public function exportTransactions(Request $request)
