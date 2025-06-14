@@ -159,7 +159,7 @@ class RevisiController extends Controller
             // Update pesanan with assigned editor
             $pesanan->update([
                 'id_editor' => $request->id_editor,
-                'status' => 'dikerjakan',
+                'status_pesanan' => 'dikerjakan',
                 'assigned_at' => now()
             ]);
 
@@ -281,8 +281,8 @@ class RevisiController extends Controller
             })->count();
 
             // Count by status
-            $pendingRevisions = Pesanan::where('status', 'revisi')->count();
-            $inProgressRevisions = Pesanan::where('status', 'dikerjakan')
+            $pendingRevisions = Pesanan::where('status_pesanan', 'revisi')->count();
+            $inProgressRevisions = Pesanan::where('status_pesanan', 'dikerjakan')
                 ->whereHas('chatMessages', function($q) {
                     $q->where('message', 'like', '%revisi%')
                       ->orWhere('message', 'like', '%revision%')
@@ -351,7 +351,7 @@ class RevisiController extends Controller
 
             // Update pesanan status
             $pesanan->update([
-                'status' => 'selesai',
+                'status_pesanan' => 'selesai',
                 'completed_at' => now()
             ]);
 

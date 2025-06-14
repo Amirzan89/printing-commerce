@@ -35,8 +35,7 @@ class PesananSeeder extends Seeder
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => Str::uuid(),
                 'deskripsi' => $descriptions[rand(0, count($descriptions) - 1)],
-                'status' => 'pending',
-                'status_pembayaran' => 'belum_bayar',
+                'status_pesanan' => 'pending',
                 'total_harga' => [250000, 350000, 500000, 750000, 1000000][rand(0, 4)],
                 'estimasi_waktu' => $createdAt->copy()->addDays(rand(3, 7)),
                 'maksimal_revisi' => [3, 5, 7][rand(0, 2)],
@@ -55,8 +54,7 @@ class PesananSeeder extends Seeder
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => Str::uuid(),
                 'deskripsi' => $descriptions[rand(0, count($descriptions) - 1)],
-                'status' => 'menunggu_konfirmasi',
-                'status_pembayaran' => 'menunggu_konfirmasi',
+                'status_pesanan' => 'menunggu_editor',
                 'total_harga' => [250000, 350000, 500000, 750000, 1000000][rand(0, 4)],
                 'estimasi_waktu' => $createdAt->copy()->addDays(rand(3, 7)),
                 'maksimal_revisi' => [3, 5, 7][rand(0, 2)],
@@ -76,8 +74,7 @@ class PesananSeeder extends Seeder
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => Str::uuid(),
                 'deskripsi' => $descriptions[rand(0, count($descriptions) - 1)],
-                'status' => 'dikerjakan',
-                'status_pembayaran' => 'lunas',
+                'status_pesanan' => 'dikerjakan',
                 'total_harga' => [250000, 350000, 500000, 750000, 1000000][rand(0, 4)],
                 'estimasi_waktu' => $createdAt->copy()->addDays(rand(3, 7)),
                 'maksimal_revisi' => [3, 5, 7][rand(0, 2)],
@@ -100,8 +97,7 @@ class PesananSeeder extends Seeder
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => Str::uuid(),
                 'deskripsi' => $descriptions[rand(0, count($descriptions) - 1)],
-                'status' => 'revisi',
-                'status_pembayaran' => 'lunas',
+                'status_pesanan' => 'revisi',
                 'total_harga' => [250000, 350000, 500000, 750000, 1000000][rand(0, 4)],
                 'estimasi_waktu' => $createdAt->copy()->addDays(rand(3, 7)),
                 'maksimal_revisi' => [3, 5, 7][rand(0, 2)],
@@ -124,8 +120,7 @@ class PesananSeeder extends Seeder
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => Str::uuid(),
                 'deskripsi' => $descriptions[rand(0, count($descriptions) - 1)],
-                'status' => 'selesai',
-                'status_pembayaran' => 'lunas',
+                'status_pesanan' => 'selesai',
                 'total_harga' => [250000, 350000, 500000, 750000, 1000000][rand(0, 4)],
                 'estimasi_waktu' => $createdAt->copy()->addDays(rand(3, 7)),
                 'maksimal_revisi' => [3, 5, 7][rand(0, 2)],
@@ -147,8 +142,7 @@ class PesananSeeder extends Seeder
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => Str::uuid(),
                 'deskripsi' => $descriptions[rand(0, count($descriptions) - 1)],
-                'status' => 'dibatalkan',
-                'status_pembayaran' => 'belum_bayar',
+                'status_pesanan' => 'dibatalkan',
                 'total_harga' => [250000, 350000, 500000, 750000, 1000000][rand(0, 4)],
                 'estimasi_waktu' => $createdAt->copy()->addDays(rand(3, 7)),
                 'maksimal_revisi' => [3, 5, 7][rand(0, 2)],

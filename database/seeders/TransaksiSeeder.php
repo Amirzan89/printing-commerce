@@ -21,13 +21,12 @@ class TransaksiSeeder extends Seeder
         $this->createSamplePaymentProofs();
 
         // Get pesanan that need transactions (only certain status)
-        $pesananNeedingTransactions = Pesanan::whereIn('status', [
-            'menunggu_konfirmasi',  // waiting for payment confirmation
+        $pesananNeedingTransactions = Pesanan::whereIn('status_pesanan', [
+            'menunggu_editor',  // waiting for payment confirmation
             'dikerjakan',           // already paid, being worked
             'revisi',              // already paid, in revision
             'selesai'              // already paid, completed
         ])
-        ->whereIn('status_pembayaran', ['menunggu_konfirmasi', 'lunas'])
         ->get();
 
         foreach ($pesananNeedingTransactions as $pesanan) {
@@ -40,7 +39,7 @@ class TransaksiSeeder extends Seeder
             $confirmedAt = null;
             $buktiPembayaran = null;
             
-            if ($pesanan->status === 'menunggu_konfirmasi') {
+            if ($pesanan->status_pesanan === 'menunggu_konfirmasi') {
                 // User has uploaded payment proof, waiting admin confirmation
                 $transaksiStatus = 'menunggu_konfirmasi';
                 $waktuPembayaran = $createdAt->copy()->addHours(rand(1, 24));
@@ -62,7 +61,7 @@ class TransaksiSeeder extends Seeder
             $transaksiId = Transaksi::insertGetId([
                 'order_id' => $orderId,
                 'jumlah' => $pesanan->total_harga,
-                'status' => $transaksiStatus,
+                'status_transaksi' => $transaksiStatus,
                 'bukti_pembayaran' => $buktiPembayaran,
                 'waktu_pembayaran' => $waktuPembayaran,
                 'confirmed_at' => $confirmedAt,
@@ -78,10 +77,7 @@ class TransaksiSeeder extends Seeder
         }
 
         // Create some expired transactions for testing
-        $expiredPesanan = Pesanan::where('status', 'pending')
-            ->where('status_pembayaran', 'belum_bayar')
-            ->take(3)
-            ->get();
+        $expiredPesanan = Pesanan::where('status_pesanan', 'pending')->take(3)->get();
 
         foreach ($expiredPesanan as $pesanan) {
             $createdAt = $pesanan->created_at;
@@ -91,7 +87,7 @@ class TransaksiSeeder extends Seeder
             $transaksiId = Transaksi::insertGetId([
                 'order_id' => $orderId,
                 'jumlah' => $pesanan->total_harga,
-                'status' => 'expired',
+                'status_transaksi' => 'expired',
                 'bukti_pembayaran' => null,
                 'waktu_pembayaran' => null,
                 'confirmed_at' => null,

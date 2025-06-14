@@ -51,11 +51,8 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
             return redirect('/pesanan');
         });
         // route for pesanan
-        Route::post('/bulk-update', [PesananController::class, 'bulkUpdateStatus']);
-        Route::post('/assign-editor', [PesananController::class, 'assignEditor']);
         Route::put('/update', [PesananController::class, 'updateStatus']);
         Route::delete('/delete', [PesananController::class, 'deletePesanan']);
-        Route::post('/create',[PesananController::class,'createPesanan']);
     });
     
     //API only metode pembayaran route

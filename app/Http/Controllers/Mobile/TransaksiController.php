@@ -30,20 +30,33 @@ class TransaksiController extends Controller
     }
 
     public function getDetail(Request $request, $order_id){
-        $transaksi = Transaksi::join('pesanan', 'pesanan.id_pesanan', '=', 'transaksi.id_pesanan')
-            ->where('order_id', $order_id)->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
-            ->first();
-        if (!$transaksi) {
+        try{
+            $transaksi = Transaksi::join('pesanan', 'pesanan.id_pesanan', '=', 'transaksi.id_pesanan')
+                ->where('order_id', $order_id)->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
+                ->first();
+            if (!$transaksi) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Transaksi tidak ditemukan'
+                ], 404);
+            }
+            // Get payment status label
+            $paymentStatusLabel = $this->getPaymentStatusLabel($transaksi->status);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Detail transaksi berhasil diambil',
+                'data' => [
+                    'transaction' => $transaksi,
+                    'payment_status_label' => $paymentStatusLabel
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting transaction details: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Detail transaksi tidak ditemukan'
-            ], 404);
+                'message' => 'Gagal mengambil detail transaksi'
+            ], 500);
         }
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Detail transaksi berhasil diambil',
-            'data' => $transaksi
-        ]);
     }
     /**
      * Create transaction (Step 2 in manual payment flow)
@@ -132,7 +145,6 @@ class TransaksiController extends Controller
             // Update pesanan payment status to menunggu_konfirmasi for UI flow
             $pesanan->update([
                 'status' => 'pending',
-                'status_pembayaran' => 'belum_bayar'
             ]);
             
             return response()->json([
@@ -222,7 +234,7 @@ class TransaksiController extends Controller
                     'message' => 'Transaksi sudah dibatalkan. Silakan buat transaksi baru.'
                 ], 400);
             }
-            if ($transaksi->status == 'menunggu_konfirmasi') {
+            if ($transaksi->status == 'menunggu_editor') {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Bukti pembayaran sudah diupload. Silakan tunggu konfirmasi admin.'
@@ -243,14 +255,9 @@ class TransaksiController extends Controller
             // Update transaction
             $transaksi->update([
                 'bukti_pembayaran' => $filePath,
-                'status' => 'menunggu_konfirmasi',
+                'status' => 'menunggu_editor',
                 'waktu_pembayaran' => Carbon::now(),
                 'catatan_transaksi' => $request->input('catatan')
-            ]);
-            
-            // Update pesanan status
-            $pesanan->update([
-                'status_pembayaran' => 'menunggu_konfirmasi'
             ]);
             
             return response()->json([
@@ -271,62 +278,6 @@ class TransaksiController extends Controller
             ], 500);
         }
     }
-    
-    /**
-     * Get transaction details
-     */
-    public function getTransactionDetails(Request $request, $orderId)
-    {
-        try {
-            $transaksi = Transaksi::with(['toMetodePembayaran', 'toPesanan.toJasa'])
-                ->where('order_id', $orderId)
-                ->first();
-                
-            if (!$transaksi) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Transaksi tidak ditemukan'
-                ], 404);
-            }
-            
-            // Check if transaction belongs to user's order
-            $pesanan = Pesanan::where('id_pesanan', $transaksi->id_pesanan)
-                ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
-                ->first();
-                
-            if (!$pesanan) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Transaksi tidak ditemukan atau tidak memiliki akses'
-                ], 404);
-            }
-
-            // Add time remaining if not expired
-            $timeRemaining = null;
-            if ($transaksi->status === 'belum_bayar' && Carbon::now()->isBefore($transaksi->expired_at)) {
-                $timeRemaining = Carbon::now()->diffInMinutes($transaksi->expired_at);
-            }
-            
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Detail transaksi berhasil diambil',
-                'data' => [
-                    'transaction' => $transaksi,
-                    'time_remaining_minutes' => $timeRemaining,
-                    'can_upload_proof' => $transaksi->status === 'belum_bayar' && $timeRemaining > 0,
-                    'payment_status_label' => $this->getPaymentStatusLabel($transaksi->status)
-                ]
-            ]);
-            
-        } catch (\Exception $e) {
-            Log::error('Error getting transaction details: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengambil detail transaksi'
-            ], 500);
-        }
-    }
-    
     /**
      * Cancel transaction (only if belum_bayar)
      */
@@ -375,7 +326,6 @@ class TransaksiController extends Controller
             // Reset pesanan status to pending for new transaction
             $pesanan->update([
                 'status' => 'pending',
-                'status_pembayaran' => 'belum_bayar'
             ]);
             
             return response()->json([

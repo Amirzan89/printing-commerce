@@ -23,12 +23,14 @@ class PesananController extends Controller
     public function getAll(Request $request){
         try {
             $statusPesanan = $request->query('status_pesanan');
-            $statusPembayaran = $request->query('status_pembayaran');
-            $query = Pesanan::select('id_pesanan', 'uuid', 'status', 'status_pembayaran', 'total_harga', 'estimasi_waktu', 'maksimal_revisi', 'created_at')->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user);
+            $statusTransaksi = $request->query('status_transaksi');
+            $query = Pesanan::select('id_pesanan', 'uuid', 'status', 'total_harga', 'estimasi_waktu', 'maksimal_revisi', 'created_at')
+                ->join('transaksi', 'transaksi.id_pesanan', '=', 'pesanan.id_pesanan')
+                ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user);
             
             // Apply status filter only if it's not 'all'
             if($statusPesanan && $statusPesanan != 'all'){
-                if(!in_array($statusPesanan, ['pending', 'menunggu_konfirmasi', 'dibatalkan', 'selesai', 'dikerjakan', 'revisi', 'selesai', 'dikirim', 'diterima'])){
+                if(!in_array($statusPesanan, ['pending', 'diproses', 'menunggu_editor', 'dibatalkan', 'selesai', 'dikerjakan', 'revisi'])){
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Status pesanan tidak valid'
@@ -38,14 +40,14 @@ class PesananController extends Controller
             }
             
             // Apply payment status filter only if it's not 'all'
-            if($statusPembayaran && $statusPembayaran != 'all'){
-                if(!in_array($statusPembayaran, ['belum_buat_transaksi', 'belum_bayar', 'menunggu_konfirmasi', 'lunas', 'dibatalkan', 'expired'])){
+            if($statusTransaksi && $statusTransaksi != 'all'){
+                if(!in_array($statusTransaksi, ['belum_bayar', 'menunggu_konfirmasi', 'lunas', 'dibatalkan', 'expired'])){
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Status pembayaran tidak valid'
                     ], 400);
                 }
-                $query->where('status_pembayaran', $statusPembayaran);
+                $query->where('status_pembayaran', $statusTransaksi);
             }
             
             $pesanan = $query->orderBy('created_at', 'desc')->get();
@@ -153,7 +155,6 @@ class PesananController extends Controller
                 'uuid' => $uuid,
                 'deskripsi' => $request->catatan_user,
                 'status' => 'pending',
-                'status_pembayaran' => 'belum_buat_transaksi',
                 'total_harga' => $paketJasa->harga_paket_jasa,
                 'estimasi_waktu' => $estimasiWaktu,
                 'maksimal_revisi' => $jumlahRevisi,
@@ -247,7 +248,6 @@ class PesananController extends Controller
 
             $pesanan->update([
                 'status' => 'dibatalkan',
-                'status_pembayaran' => 'dibatalkan'
             ]);
 
             return response()->json([

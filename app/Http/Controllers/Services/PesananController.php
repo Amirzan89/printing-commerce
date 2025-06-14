@@ -3,122 +3,40 @@ namespace App\Http\Controllers\Services;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pesanan;
-use App\Models\CatatanPesanan;
-use App\Models\Revisi;
-use App\Models\RevisiUser;
-use App\Models\Transaksi;
-use App\Models\Jasa;
-use App\Models\PaketJasa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Models\Editor;
-use App\Models\User;
+use Carbon\Carbon;
 
 class PesananController extends Controller
 {
     /**
-     * ADMIN: Get all pesanan with filters
-     */
-    public function getAllPesanan(Request $request)
-    {
-        try {
-            $status = $request->get('status', 'all');
-            $search = $request->get('search');
-            $perPage = $request->get('per_page', 15);
-
-            $query = Pesanan::with(['toUser', 'toJasa', 'toPaketJasa']);
-
-            // Filter by status
-            if ($status !== 'all') {
-                $query->where('status', $status);
-            }
-
-            // Search by user name or pesanan UUID
-            if ($search) {
-                $query->whereHas('toUser', function($q) use ($search) {
-                    $q->where('nama_user', 'like', "%{$search}%");
-                })->orWhere('uuid', 'like', "%{$search}%");
-            }
-
-            $pesanan = $query->orderBy('created_at', 'desc')->paginate($perPage);
-
-            return response()->json([
-                'status' => 'success',
-                'data' => $pesanan
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengambil data pesanan: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * ADMIN: Get pesanan detail
-     */
-    public function getPesananDetail($uuid)
-    {
-        try {
-            $pesanan = Pesanan::with([
-                'toUser',
-                'toJasa',
-                'toPaketJasa', 
-                'fromCatatanPesanan',
-                'revisions.userFiles',
-                'revisions.editorFiles.editor'
-            ])->where('uuid', $uuid)->first();
-
-            if (!$pesanan) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Pesanan tidak ditemukan'
-                ], 404);
-            }
-
-            // Get editors who worked on this pesanan
-            $workingEditors = $pesanan->editorFiles()->with('editor')->get()
-                ->pluck('editor')->unique('id_editor')->values();
-
-            // Add editors info to response
-            $pesananData = $pesanan->toArray();
-            $pesananData['working_editors'] = $workingEditors;
-
-            return response()->json([
-                'status' => 'success',
-                'data' => $pesananData
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengambil detail pesanan: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
      * ADMIN: Update pesanan status
      */
-    public function updateStatus(Request $request, $uuid)
-    {
+    public function updateStatus(Request $request){
         try {
-            $validator = Validator::make($request->all(), [
-                'status' => 'required|in:menunggu,proses,dikerjakan,revisi,selesai,dibatalkan'
+            $validator = Validator::make($request->only('id_pesanan', 'status_pesanan', 'editor_id'), [
+                'id_pesanan' => 'required',
+                'status_pesanan' => 'required|in:pending,diproses,menunggu_editor,dikerjakan,revisi,selesai,dibatalkan',
+                'editor_id' => 'nullable|exists:editor,id_editor'
+            ], [
+                'id_pesanan.required' => 'ID pesanan harus diisi',
+                'status_pesanan.required' => 'Status pesanan harus diisi',
+                'status_pesanan.in' => 'Status pesanan tidak valid',
+                'editor_id.exists' => 'Editor tidak ditemukan'
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $validator->errors()->first()
-                ], 422);
+                $errors = [];
+                foreach ($validator->errors()->toArray() as $field => $errorMessages){
+                    $errors[$field] = $errorMessages[0];
+                    break;
+                }
+                return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
             }
 
-            $pesanan = Pesanan::where('uuid', $uuid)->first();
+            $pesanan = Pesanan::where('uuid', $request->input('id_pesanan'))->first();
 
             if (!$pesanan) {
                 return response()->json([
@@ -127,23 +45,36 @@ class PesananController extends Controller
                 ], 404);
             }
 
-            $updateData = ['status' => $request->status];
+            $updateData = ['status_pesanan' => $request->input('status_pesanan')];
 
             // Set timestamps based on status
-            switch ($request->status) {
-                case 'proses':
-                    $updateData['confirmed_at'] = now();
+            switch ($request->input('status_pesanan')) {
+                case 'diproses':
+                    $updateData['confirmed_at'] = Carbon::now();
                     break;
                 case 'dikerjakan':
-                    $updateData['assigned_at'] = now();
+                    $updateData['assigned_at'] = Carbon::now();
+                    // If editor_id is provided, assign the editor
+                    if (!$request->has('editor_id') || is_null($request->input('editor_id'))) {
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Silahkan pilih editor terlebih dahulu'
+                        ], 400);
+                    }
+                    $editor = Editor::where('id_editor', $request->input('editor_id'))->first();
+                    if (!$editor) {
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Editor tidak ditemukan'
+                        ], 404);
+                    }
+                    $updateData['id_editor'] = $request->input('editor_id');
                     break;
                 case 'selesai':
-                    $updateData['completed_at'] = now();
+                    $updateData['completed_at'] = Carbon::now();
                     break;
             }
-
             $pesanan->update($updateData);
-
             return response()->json([
                 'status' => 'success',
                 'message' => 'Status pesanan berhasil diupdate',
@@ -161,10 +92,24 @@ class PesananController extends Controller
     /**
      * ADMIN: Delete pesanan (hard delete)
      */
-    public function deletePesanan($uuid)
+    public function deletePesanan(Request $request)
     {
         try {
-            $pesanan = Pesanan::where('uuid', $uuid)->first();
+            $validator = Validator::make($request->only('id_pesanan'), [
+                'id_pesanan' => 'required|exists:pesanan,uuid',
+            ], [
+                'id_pesanan.required' => 'ID pesanan harus diisi',
+                'id_pesanan.exists' => 'ID pesanan tidak ditemukan'
+            ]);
+            if ($validator->fails()) {
+                $errors = [];
+                foreach ($validator->errors()->toArray() as $field => $errorMessages){
+                    $errors[$field] = $errorMessages[0];
+                    break;
+                }
+                return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
+            }
+            $pesanan = Pesanan::where('uuid', $request->input('id_pesanan'))->first();
 
             if (!$pesanan) {
                 return response()->json([
@@ -174,7 +119,7 @@ class PesananController extends Controller
             }
 
             // Check if pesanan can be deleted
-            if (in_array($pesanan->status, ['dikerjakan', 'selesai'])) {
+            if (in_array($pesanan->status_pesanan, ['dikerjakan', 'selesai'])) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Pesanan yang sedang dikerjakan atau selesai tidak dapat dihapus'
@@ -197,73 +142,6 @@ class PesananController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal menghapus pesanan: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * ADMIN: Get pesanan statistics
-     */
-    public function getStatistics()
-    {
-        try {
-            $stats = [
-                'total_pesanan' => Pesanan::count(),
-                'menunggu' => Pesanan::where('status', 'menunggu')->count(),
-                'proses' => Pesanan::where('status', 'proses')->count(),
-                'dikerjakan' => Pesanan::where('status', 'dikerjakan')->count(),
-                'revisi' => Pesanan::where('status', 'revisi')->count(),
-                'selesai' => Pesanan::where('status', 'selesai')->count(),
-                'dibatalkan' => Pesanan::where('status', 'dibatalkan')->count(),
-                'total_revenue' => Pesanan::where('status_pembayaran', 'lunas')->sum('total_harga'),
-                'pending_payment' => Pesanan::where('status_pembayaran', 'belum_bayar')->count()
-            ];
-
-            return response()->json([
-                'status' => 'success',
-                'data' => $stats
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengambil statistik: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * ADMIN: Bulk update pesanan status
-     */
-    public function bulkUpdateStatus(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'pesanan_ids' => 'required|array',
-                'pesanan_ids.*' => 'exists:pesanan,uuid',
-                'status' => 'required|in:menunggu,proses,dikerjakan,revisi,selesai,dibatalkan'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $validator->errors()->first()
-                ], 422);
-            }
-
-            $updated = Pesanan::whereIn('uuid', $request->pesanan_ids)
-                ->update(['status' => $request->status]);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => "{$updated} pesanan berhasil diupdate",
-                'data' => ['updated_count' => $updated]
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal bulk update: ' . $e->getMessage()
             ], 500);
         }
     }

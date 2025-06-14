@@ -47,7 +47,7 @@ class RevisiSeeder extends Seeder
         }
 
         // 1. CREATE REVISIONS FOR PESANAN WITH STATUS 'revisi' (currently in revision)
-        $pesananInRevision = Pesanan::where('status', 'revisi')
+        $pesananInRevision = Pesanan::where('status_pesanan', 'revisi')
             ->whereNotNull('assigned_at')
             ->get();
             
@@ -101,7 +101,7 @@ class RevisiSeeder extends Seeder
         }
 
         // 2. CREATE COMPLETE REVISION HISTORY FOR COMPLETED PESANAN
-        $completedPesanan = Pesanan::where('status', 'selesai')
+        $completedPesanan = Pesanan::where('status_pesanan', 'selesai')
             ->whereNotNull('completed_at')
             ->take(10)
             ->get();
@@ -156,7 +156,7 @@ class RevisiSeeder extends Seeder
         }
 
         // 3. CREATE INITIAL BRIEF FILES FOR PESANAN BEING WORKED ON
-        $workingPesanan = Pesanan::where('status', 'dikerjakan')
+        $workingPesanan = Pesanan::where('status_pesanan', 'dikerjakan')
             ->whereNotNull('assigned_at')
             ->get();
             

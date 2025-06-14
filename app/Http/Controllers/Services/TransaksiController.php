@@ -35,10 +35,10 @@ class TransaksiController extends Controller
         try {
             $transaksi = Transaksi::where('order_id', $request->order_id)->first();
             
-            if ($transaksi->status !== 'menunggu_konfirmasi') {
+            if ($transaksi->status_transaksi !== 'menunggu_konfirmasi') {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Transaksi tidak dapat divalidasi. Status saat ini: ' . $transaksi->status
+                    'message' => 'Transaksi tidak dapat divalidasi. Status saat ini: ' . $transaksi->status_transaksi
                 ], 400);
             }
             
@@ -308,7 +308,7 @@ class TransaksiController extends Controller
             // Update pesanan status
             $pesanan = Pesanan::find($transaksi->id_pesanan);
             $pesanan->update([
-                'status_pembayaran' => 'lunas',
+                'status_pesanan' => 'diproses',
                 'confirmed_at' => Carbon::now()
             ]);
 
@@ -363,7 +363,7 @@ class TransaksiController extends Controller
                     'message' => 'Transaksi tidak ditemukan'
                 ], 404);
             }
-            if ($transaksi->status !== 'menunggu_konfirmasi') {
+            if ($transaksi->status_transaksi !== 'menunggu_konfirmasi') {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Transaksi tidak dalam status menunggu konfirmasi'
@@ -372,7 +372,7 @@ class TransaksiController extends Controller
 
             // Update transaction back to belum_bayar
             $transaksi->update([
-                'status' => 'belum_bayar',
+                'status_transaksi' => 'belum_bayar',
                 'bukti_pembayaran' => null,
                 'waktu_pembayaran' => null,
                 'alasan_penolakan' => $request->input('alasan_penolakan'),

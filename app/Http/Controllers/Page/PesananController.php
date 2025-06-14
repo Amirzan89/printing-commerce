@@ -10,20 +10,20 @@ use Carbon\Carbon;
 class PesananController extends Controller
 {
     public function showAll(Request $request){
-        $status = $request->query('status', 'menunggu');
-        $validStatuses = ['menunggu', 'proses', 'dikerjakan', 'revisi', 'selesai', 'dibatalkan'];
+        $status = $request->query('status', 'pending');
+        $validStatuses = ['pending', 'diproses', 'menunggu_editor', 'dikerjakan', 'revisi', 'selesai', 'dibatalkan'];
         if (!in_array($status, $validStatuses)) {
-            $status = 'menunggu';
+            $status = 'pending';
         }
         if (!$request->has('status')) {
             return redirect('/pesanan?status='.$status);
         }
         $orderBy = 'asc';
-        $pesananList = Pesanan::select('pesanan.uuid', 'nama_user', 'status', 'estimasi_waktu')
+        $pesananList = Pesanan::select('pesanan.uuid', 'nama_user', 'status_pesanan', 'estimasi_waktu')
             ->join('jasa', 'jasa.id_jasa', '=', 'pesanan.id_jasa')
             ->join('users', 'users.id_user', '=', 'pesanan.id_user')
             ->orderBy('pesanan.created_at', $orderBy)
-            ->where('status', $status)
+            ->where('status_pesanan', $status)
             ->get();
         
         $pesananList->each(function($pesanan) {
@@ -71,12 +71,39 @@ class PesananController extends Controller
                 ],
                 'editors' => $workingEditors,
                 'latest_editor' => $workingEditors->first(),
-                'status' => ucfirst($pesanan->status)
+                'status' => ucfirst($pesanan->status_pesanan)
             ],
             'headerData' => UtilityController::getHeaderData(),
             'editorList' => Editor::select('id_editor', 'nama_editor')->get()
         ];
         return view('page.pesanan.detail', $dataShow);
+    }
+    public function getStatistics()
+    {
+        try {
+            $stats = [
+                'total_pesanan' => Pesanan::count(),
+                'menunggu' => Pesanan::where('status_pesanan', 'pending')->count(),
+                'proses' => Pesanan::where('status_pesanan', 'diproses')->count(),
+                'dikerjakan' => Pesanan::where('status_pesanan', 'dikerjakan')->count(),
+                'revisi' => Pesanan::where('status_pesanan', 'revisi')->count(),
+                'selesai' => Pesanan::where('status_pesanan', 'selesai')->count(),
+                'dibatalkan' => Pesanan::where('status_pesanan', 'dibatalkan')->count(),
+                'total_revenue' => Pesanan::where('status_pesanan', 'lunas')->sum('total_harga'),
+                'pending_payment' => Pesanan::where('status_pesanan', 'menunggu_editor')->count()
+            ];
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $stats
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengambil statistik: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
 ?>
