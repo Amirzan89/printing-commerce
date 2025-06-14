@@ -8,11 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('catatan_pesanan', function (Blueprint $table) {
-            $table->id('id_catatan_pesanan');
-            $table->string('catatan', 500);
-            $table->unsignedBigInteger('id_admin');
-            $table->foreign('id_admin')->references('id_admin')->on('admin')->onDelete('cascade');
+        Schema::create('pesanan_revisi', function (Blueprint $table) {
+            $table->id('id_revisi');
+            $table->unsignedTinyInteger('urutan_revisi');
+            $table->timestamps();
             $table->unsignedBigInteger('id_pesanan');
             $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanan')->onDelete('cascade');
         });
@@ -20,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('catatan_pesanan');
+        Schema::dropIfExists('pesanan_revisi');
     }
 };

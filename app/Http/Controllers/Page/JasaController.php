@@ -43,7 +43,7 @@ class JasaController extends Controller
             'nama_jasa' => $jasa->nama_jasa,
             'thumbnail_jasa' => $jasa->thumbnail_jasa,
             'kategori' => $jasa->kategori,
-            'nama_paket_jasa' => $paketJasa->nama_paket_jasa,
+            'kelas_jasa' => $paketJasa->kelas_jasa,
             'deskripsi_paket_jasa' => $paketJasa->deskripsi_paket_jasa,
             'harga_paket_jasa' => $paketJasa->harga_paket_jasa,
             'waktu_pengerjaan' => $paketJasa->waktu_pengerjaan,

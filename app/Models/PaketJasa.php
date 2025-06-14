@@ -11,7 +11,7 @@ class PaketJasa extends Model
     protected $keyType = 'integer';
     public $timestamps = false;
     protected $fillable = [
-        'nama_paket_jasa', 'deskripsi_paket_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'fitur', 'id_jasa'
+        'kelas_jasa', 'deskripsi_paket_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'fitur', 'id_jasa'
     ];
     public function fromPesanan()
     {

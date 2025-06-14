@@ -4,12 +4,45 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Mobile\UserController;
 use App\Http\Controllers\Mobile\JasaController;
 use App\Http\Controllers\Mobile\PesananController;
+use App\Http\Controllers\Mobile\RevisiController;
 use App\Http\Controllers\Mobile\TransaksiController;
 use App\Http\Controllers\Mobile\MetodePembayaranController;
 use App\Http\Controllers\Mobile\MailController;
+
+// Services (Admin) routes
+use App\Http\Controllers\Services\PesananController as AdminPesananController;
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request){
     return $request->user();
 });
+
+// ========================================
+// ADMIN ROUTES (Services Controller)
+// ========================================
+Route::group(['prefix' => '/admin', 'middleware' => 'auth.admin'], function() {
+    
+    // Admin Pesanan Management
+    Route::prefix('pesanan')->group(function () {
+        Route::get('/', [AdminPesananController::class, 'getAllPesanan']);
+        Route::get('/detail/{uuid}', [AdminPesananController::class, 'getPesananDetail']);
+        Route::put('/status/{uuid}', [AdminPesananController::class, 'updateStatus']);
+        Route::post('/assign-editor/{uuid}', [AdminPesananController::class, 'assignEditor']);
+        Route::delete('/delete/{uuid}', [AdminPesananController::class, 'deletePesanan']);
+        Route::get('/statistics', [AdminPesananController::class, 'getStatistics']);
+        Route::post('/bulk-update', [AdminPesananController::class, 'bulkUpdateStatus']);
+    });
+    
+    // Admin Payment Management
+    Route::prefix('payments')->group(function () {
+        Route::get('/pending', [TransaksiController::class, 'getPendingPayments']);
+        Route::post('/confirm', [TransaksiController::class, 'confirmPayment']);
+        Route::post('/reject', [TransaksiController::class, 'rejectPayment']);
+    });
+});
+
+// ========================================
+// USER ROUTES (Mobile Controller)
+// ========================================
 Route::group(['prefix'=>'/mobile'], function(){
     Route::group(['middleware'=>'auth.mobile'], function(){
         //API only jasa route
@@ -76,7 +109,30 @@ Route::group(['prefix'=>'/mobile'], function(){
             Route::post('/logout-all', [UserController::class, 'logoutAll']);
         });
         Route::get('/dashboard',[UserController::class, 'dashboard']);
+        
+        // USER: Enhanced Pesanan routes for manual payment flow
+        Route::prefix('orders')->group(function () {
+            Route::get('/', [PesananController::class, 'getAll']);
+            Route::get('/detail/{uuid}', [PesananController::class, 'getDetail']);
+            Route::post('/create', [PesananController::class, 'create']);
+            Route::post('/cancel/{uuid}', [PesananController::class, 'cancel']);
+            Route::post('/accept-work/{uuid}', [PesananController::class, 'acceptWork']);
+            Route::get('/download/{uuid}', [PesananController::class, 'downloadFiles']);
+            Route::get('/revisions/{uuid}', [PesananController::class, 'getRevisionHistory']);
+            Route::post('/request-revision/{uuid}', [PesananController::class, 'requestRevision']);
+            Route::post('/approve-revision/{uuid}/{revisionUuid}', [PesananController::class, 'approveRevision']);
+        });
+
+        // USER: Enhanced Transaction routes for manual payment flow
+        Route::prefix('transactions')->group(function () {
+            Route::post('/create', [TransaksiController::class, 'createTransaction']);
+            Route::post('/upload-payment', [TransaksiController::class, 'uploadPaymentProof']);
+            Route::get('/details/{orderId}', [TransaksiController::class, 'getTransactionDetails']);
+            Route::get('/user-transactions', [TransaksiController::class, 'getUserTransactions']);
+            Route::post('/cancel', [TransaksiController::class, 'cancelTransaction']);
+        });
     });
+    
     Route::group(['middleware' => 'user.guest'], function(){
         Route::group(['prefix'=>'/users'],function(){
             Route::post('/login', [UserController::class,'login']);
@@ -101,16 +157,4 @@ Route::group(['prefix'=>'/mobile'], function(){
             });
         });
     });
-    
-    // Mobile API routes (authenticated users)
-    Route::middleware('auth.mobile')->group(function () {
-        // Transaction routes
-        Route::prefix('transactions')->group(function () {
-            Route::post('/create', [TransaksiController::class, 'createTransaction']);
-            Route::post('/upload-payment', [TransaksiController::class, 'uploadPaymentProof']);
-            Route::get('/details/{orderId}', [TransaksiController::class, 'getTransactionDetails']);
-            Route::get('/user-transactions', [TransaksiController::class, 'getUserTransactions']);
-            Route::post('/cancel', [TransaksiController::class, 'cancelTransaction']);
-        });
-    }); 
 });

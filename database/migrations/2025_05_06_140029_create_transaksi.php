@@ -8,11 +8,14 @@ return new class extends Migration
     {
         Schema::create('transaksi', function (Blueprint $table) {
             $table->id('id_transaksi');
-            $table->string('order_id');
+            $table->string('order_id')->unique();
             $table->unsignedInteger('jumlah');
-            $table->enum('status', ['belum_bayar', 'menunggu_konfirmasi', 'lunas']);
-            $table->string('bukti_pembayaran');
-            $table->dateTime('waktu_pembayaran');
+            $table->enum('status', ['belum_bayar', 'menunggu_konfirmasi', 'lunas', 'dibatalkan', 'expired']);
+            $table->string('bukti_pembayaran')->nullable();
+            $table->dateTime('waktu_pembayaran')->nullable();
+            $table->dateTime('confirmed_at')->nullable();
+            $table->text('admin_notes')->nullable();
+            $table->text('reject_reason')->nullable();
             $table->dateTime('expired_at');
             $table->timestamps();
             $table->unsignedBigInteger('id_metode_pembayaran');

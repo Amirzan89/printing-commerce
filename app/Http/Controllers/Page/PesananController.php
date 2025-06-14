@@ -38,7 +38,9 @@ class PesananController extends Controller
             'toJasa',
             'toEditor',
             'toPaketJasa',
-            'fromPesananFile'
+            'fromCatatanPesanan',
+            'revisions.userFiles',
+            'revisions.editorFiles'
         ])->where('uuid', $uuid)->first();
         if (!$pesanan) {
             return redirect('/pesanan')->with('error', 'Data Pesanan tidak ditemukan');
@@ -49,10 +51,13 @@ class PesananController extends Controller
                 'uuid' => $pesanan->uuid,
                 'nama_pelanggan' => $pesanan->toUser->nama_user ?? '-',
                 'jenis_jasa' => $pesanan->toJasa->nama_jasa ?? '-',
-                'kelas_jasa' => $pesanan->toPaketJasa->nama_paket_jasa ?? '-',
-                'sisa_revisi' => $pesanan->jumlah_revisi ?? '0',
+                'kelas_jasa' => $pesanan->toPaketJasa->kelas_jasa,
+                'maksimal_revisi' => $pesanan->maksimal_revisi ?? 0,
+                'revisi_used' => $pesanan->revisi_used,
+                'sisa_revisi' => $pesanan->revisi_tersisa,
                 'deskripsi' => $pesanan->deskripsi ?? '-',
-                'gambar_referensi' => $pesanan->fromPesananFile->where('status', 'preview')->first()->file_path ?? null,
+                'catatan_pesanan' => $pesanan->fromCatatanPesanan,
+                'revisions' => $pesanan->revisions,
                 'estimasi_waktu' => [
                     'dari' => $pesanan->estimasi_waktu ? Carbon::parse($pesanan->estimasi_waktu)->format('Y-m-d') : null,
                     'sampai' => $pesanan->estimasi_waktu ? Carbon::parse($pesanan->estimasi_waktu)->addDays($pesanan->toPaketJasa->waktu_pengerjaan ?? 0)->format('Y-m-d') : null

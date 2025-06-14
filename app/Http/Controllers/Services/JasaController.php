@@ -13,12 +13,12 @@ use App\Models\JasaImage;
 class JasaController extends Controller
 {
     public function createJasa(Request $rt){
-        $v = Validator::make($rt->only('nama_jasa', 'thumbnail_jasa', 'images', 'kategori', 'nama_paket_jasa', 'deskripsi_paket_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'fitur'), [
+        $v = Validator::make($rt->only('nama_jasa', 'thumbnail_jasa', 'images', 'kategori', 'kelas_jasa', 'deskripsi_paket_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'fitur'), [
             'nama_jasa' => 'required|min:6|max:30',
             'thumbnail_jasa' => 'required|image|mimes:jpeg,png,jpg|max:5120',
             'images.*' => 'image|mimes:jpeg,png,jpg|max:5120',
             'kategori' => 'required|in:printing,desain',
-            'nama_paket_jasa' => 'required|min:3|max:15',
+            'kelas_jasa' => 'required|in:basic,standard,premium',
             'deskripsi_paket_jasa' => 'required|max:500',
             'harga_paket_jasa' => 'required|integer',
             'waktu_pengerjaan' => 'required|date',
@@ -37,9 +37,8 @@ class JasaController extends Controller
             'images.*.max' => 'Ukuran Gambar tambahan tidak boleh lebih dari 5MB',
             'kategori.required' => 'Kategori wajib di isi',
             'kategori.in' => 'Kategori harus Printing atau Desain',
-            'nama_paket_jasa.required' => 'Nama Paket Jasa wajib di isi',
-            'nama_paket_jasa.min' => 'Nama Paket Jasa minimal 3 karakter',
-            'nama_paket_jasa.max' => 'Nama Paket Jasa maksimal 15 karakter',
+            'kelas_jasa.required' => 'Kelas Jasa wajib di isi',
+            'kelas_jasa.in' => 'Kelas Jasa harus Basic, Standard, atau Premium',
             'deskripsi_paket_jasa.required' => 'Deskripsi Paket Jasa wajib di isi',
             'deskripsi_paket_jasa.max' => 'Deskripsi Paket Jasa maksimal 500 karakter',
             'harga_paket_jasa.required' => 'Harga Paket Jasa wajib di isi',
@@ -96,7 +95,7 @@ class JasaController extends Controller
         $waktuPengerjaan = Carbon::parse($rt->input('waktu_pengerjaan'))->format('Y-m-d H:i:s');
         
         $ins = PaketJasa::insert([
-            'nama_paket_jasa' => $rt->input('nama_paket_jasa'),
+            'kelas_jasa' => $rt->input('kelas_jasa'),
             'deskripsi_paket_jasa' => $rt->input('deskripsi_paket_jasa'),
             'harga_paket_jasa' => $rt->input('harga_paket_jasa'),
             'waktu_pengerjaan' => $waktuPengerjaan,
@@ -113,13 +112,13 @@ class JasaController extends Controller
     }
     
     public function updateJasa(Request $rt){
-        $v = Validator::make($rt->only('id_jasa', 'nama_jasa', 'thumbnail_jasa', 'images', 'kategori', 'nama_paket_jasa', 'deskripsi_paket_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'fitur', 'deleted_images'), [
+        $v = Validator::make($rt->only('id_jasa', 'nama_jasa', 'thumbnail_jasa', 'images', 'kategori', 'kelas_jasa', 'deskripsi_paket_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'fitur', 'deleted_images'), [
             'id_jasa' => 'required',
             'nama_jasa' => 'required|min:6|max:30',
             'thumbnail_jasa' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'kategori' => 'required|in:printing,desain',
-            'nama_paket_jasa' => 'required|min:3|max:15',
+            'kelas_jasa' => 'required|in:basic,standard,premium',
             'deskripsi_paket_jasa' => 'required|max:500',
             'harga_paket_jasa' => 'required|integer',
             'waktu_pengerjaan' => 'required|date',
@@ -139,9 +138,8 @@ class JasaController extends Controller
             'images.*.max' => 'Ukuran Gambar tambahan tidak boleh lebih dari 5MB',
             'kategori.required' => 'Kategori wajib di isi',
             'kategori.in' => 'Kategori harus Printing atau Desain',
-            'nama_paket_jasa.required' => 'Nama Paket Jasa wajib di isi',
-            'nama_paket_jasa.min' => 'Nama Paket Jasa minimal 3 karakter',
-            'nama_paket_jasa.max' => 'Nama Paket Jasa maksimal 15 karakter',
+            'kelas_jasa.required' => 'Kelas Jasa wajib di isi',
+            'kelas_jasa.in' => 'Kelas Jasa harus Basic, Standard, atau Premium',
             'deskripsi_paket_jasa.required' => 'Deskripsi Paket Jasa wajib di isi',
             'deskripsi_paket_jasa.max' => 'Deskripsi Paket Jasa maksimal 500 karakter',
             'harga_paket_jasa.required' => 'Harga Paket Jasa wajib di isi',
@@ -222,7 +220,7 @@ class JasaController extends Controller
         $waktuPengerjaan = Carbon::parse($rt->input('waktu_pengerjaan'))->format('Y-m-d H:i:s');
         
         $paketJasa->update([
-            'nama_paket_jasa' => $rt->input('nama_paket_jasa'),
+            'kelas_jasa' => $rt->input('kelas_jasa'),
             'deskripsi_paket_jasa' => $rt->input('deskripsi_paket_jasa'),
             'harga_paket_jasa' => $rt->input('harga_paket_jasa'),
             'waktu_pengerjaan' => $waktuPengerjaan,
@@ -264,11 +262,9 @@ class JasaController extends Controller
                 unlink($thumbnailPath);
             }
         }
-        
         JasaImage::where('id_jasa', $jasa->id_jasa)->delete();
         PaketJasa::where('id_jasa', $jasa->id_jasa)->delete();
         $jasa->delete();
-        
         return response()->json(['status' => 'success', 'message' => 'Data Jasa berhasil dihapus']);
     }
 }

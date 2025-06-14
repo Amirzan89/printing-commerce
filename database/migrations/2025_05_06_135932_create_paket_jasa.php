@@ -8,7 +8,7 @@ return new class extends Migration
     {
         Schema::create('paket_jasa', function (Blueprint $table) {
             $table->id('id_paket_jasa');
-            $table->string('nama_paket_jasa', 15);
+            $table->enum('kelas_jasa', ['basic', 'standard', 'premium']);
             $table->string('deskripsi_paket_jasa', 500);
             $table->integer('harga_paket_jasa');
             $table->dateTime('waktu_pengerjaan');

@@ -11,20 +11,29 @@ class Pesanan extends Model
     protected $keyType = 'integer';
     public $timestamps = true;
     protected $fillable = [
-        'uuid', 'deskripsi', 'status', 'status_pembayaran', 'total_harga', 'estimasi_waktu', 'jumlah_revisi', 'id_user', 'id_jasa', 'id_paket_jasa', 'id_editor'
+        'uuid', 'deskripsi', 'status', 'status_pembayaran', 'total_harga', 'estimasi_waktu', 'maksimal_revisi', 'confirmed_at', 'assigned_at', 'completed_at', 'id_user', 'id_jasa', 'id_paket_jasa', 'id_editor'
     ];
     protected $casts = [
         'estimasi_waktu' => 'datetime',
+        'confirmed_at' => 'datetime',
+        'assigned_at' => 'datetime',
+        'completed_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
-    public function fromPesananFile()
+    public function userFiles()
     {
-        return $this->hasMany(PesananFile::class, 'id_pesanan_file');
+        return $this->hasManyThrough(RevisiUser::class, PesananRevisi::class, 'id_pesanan', 'id_revisi');
+    }
+    
+    // Get all editor files through revisions
+    public function editorFiles()
+    {
+        return $this->hasManyThrough(RevisiEditor::class, PesananRevisi::class, 'id_pesanan', 'id_revisi');
     }
     public function fromCatatanPesanan()
     {
-        return $this->hasMany(CatatanPesanan::class, 'id_catatan_pesanan');
+        return $this->hasMany(CatatanPesanan::class, 'id_pesanan');
     }
     public function fromTransaksi()
     {
@@ -49,5 +58,29 @@ class Pesanan extends Model
     public function toEditor()
     {
         return $this->belongsTo(Editor::class, 'id_editor');
+    }
+    
+    public function revisions()
+    {
+        return $this->hasMany(PesananRevisi::class, 'id_pesanan')
+            ->orderBy('urutan_revisi', 'asc');
+    }
+    
+    public function latestRevision()
+    {
+        return $this->hasOne(PesananRevisi::class, 'id_pesanan')
+            ->latest('urutan_revisi');
+    }
+    
+    // Dynamic count - no more revisi_used field needed!
+    public function getRevisiUsedAttribute()
+    {
+        return $this->revisions()->count();
+    }
+    
+    // Dynamic calculation
+    public function getRevisiTersisaAttribute()
+    {
+        return $this->maksimal_revisi - $this->revisi_used;
     }
 }

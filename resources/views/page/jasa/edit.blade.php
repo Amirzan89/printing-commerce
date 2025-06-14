@@ -372,10 +372,11 @@ $tPath = app()->environment('local') ? '' : '';
 
                         <div class="form-group">
                             <label class="form-label">Kelas Jasa</label>
-                            <select class="form-control" name="kategori">
+                            <select class="form-control" name="kelas_jasa">
                                 <option value="">Pilih Kelas Jasa</option>
-                                <option value="printing" {{ $jasa['kategori'] == 'printing' ? 'selected' : '' }}>Printing</option>
-                                <option value="desain" {{ $jasa['kategori'] == 'desain' ? 'selected' : '' }}>Desain</option>
+                                <option value="basic" {{ $jasa['kategori'] == 'basic' ? 'selected' : '' }}>Basic</option>
+                                <option value="standard" {{ $jasa['kategori'] == 'standard' ? 'selected' : '' }}>Standard</option>
+                                <option value="premium" {{ $jasa['kategori'] == 'premium' ? 'selected' : '' }}>Premium</option>
                             </select>
                             <small class="text-muted">Ketika dipilih yang bawah baru muncul</small>
                         </div>

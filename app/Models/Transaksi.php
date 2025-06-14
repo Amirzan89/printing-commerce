@@ -11,7 +11,15 @@ class Transaksi extends Model
     protected $keyType = 'integer';
     public $timestamps = true;
     protected $fillable = [
-        'order_id', 'jumlah', 'status', 'bukti_pembayaran', 'waktu_pembayaran', 'expired_at', 'id_metode_pembayaran', 'id_pesanan'
+        'order_id', 'jumlah', 'status', 'bukti_pembayaran', 'waktu_pembayaran', 'confirmed_at', 'admin_notes', 'reject_reason', 'expired_at', 'id_metode_pembayaran', 'id_pesanan'
+    ];
+
+    protected $casts = [
+        'waktu_pembayaran' => 'datetime',
+        'confirmed_at' => 'datetime',
+        'expired_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
     public function toMetodePembayaran()
     {

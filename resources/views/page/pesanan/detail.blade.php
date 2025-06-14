@@ -108,6 +108,21 @@ $tPath = app()->environment('local') ? '' : '';
         .status-revisi { background-color: #F8D7DA; color: #721C24; }
         .status-selesai { background-color: #D1E7DD; color: #0F5132; }
         .status-dibatalkan { background-color: #E2E3E5; color: #383D41; }
+        
+        .revision-item {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6 !important;
+        }
+        .file-item {
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        .file-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .badge {
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 
@@ -189,8 +204,8 @@ $tPath = app()->environment('local') ? '' : '';
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label class="form-label">Sisa Revisi</label>
-                                            <input type="text" class="form-control" value="{{ $pesananData['sisa_revisi'] }}" disabled>
+                                            <label class="form-label">Revisi</label>
+                                            <input type="text" class="form-control" value="{{ $pesananData['revisi_used'] }}/{{ $pesananData['maksimal_revisi'] }} (Sisa: {{ $pesananData['sisa_revisi'] }})" disabled>
                                         </div>
                                     </div>
                                 </div>
@@ -207,18 +222,38 @@ $tPath = app()->environment('local') ? '' : '';
                                 <div class="row mb-3">
                                     <div class="col-12">
                                         <div class="form-group">
-                                            <label class="form-label">Gambar Referensi</label>
-                                            <div class="dropzone-container">
-                                                @if($pesananData['gambar_referensi'])
-                                                    {{-- <img src="{{ $tPath . 'assets3/img/pesanan'. $pesananData['gambar_referensi'] }}" alt="Gambar Referensi" class="img-fluid"> --}}
-                                                    <img src="{{ asset($tPath . 'assets3/img/pesanan/1.jpg') }}" alt="Gambar Referensi" class="img-fluid">
-                                                @else
-                                                    <p class="text-muted mb-0">Tidak ada gambar referensi</p>
-                                                @endif
+                                            <label class="form-label">Status Pesanan</label>
+                                            <div class="status-badge status-{{ strtolower($pesananData['status']) }}">
+                                                {{ $pesananData['status'] }}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Brief Section -->
+                                @if($pesananData['catatan_pesanan'])
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label class="form-label">Catatan Pesanan</label>
+                                            <textarea class="form-control" rows="4" disabled>{{ $pesananData['catatan_pesanan']->catatan_pesanan }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if($pesananData['catatan_pesanan']->hasGambar())
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label class="form-label">Gambar Referensi</label>
+                                            <div class="dropzone-container">
+                                                <img src="{{ $pesananData['catatan_pesanan']->gambar_referensi }}" alt="Gambar Referensi" class="img-fluid img-preview">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+                                @endif
 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
@@ -255,6 +290,81 @@ $tPath = app()->environment('local') ? '' : '';
                             </form>
                         </div>
                     </div>
+
+                    <!-- Riwayat Revisi Section -->
+                    @if(count($pesananData['revisions']) > 0)
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h3 class="card-title">Riwayat Revisi</h3>
+                            
+                            @foreach($pesananData['revisions'] as $revision)
+                            <div class="revision-item border rounded p-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">Revisi #{{ $revision->urutan_revisi }}</h5>
+                                    <small class="text-muted">{{ $revision->created_at->format('d M Y H:i') }}</small>
+                                </div>
+                                
+                                @if($revision->catatan_user)
+                                <div class="mb-3">
+                                    <strong>Catatan User:</strong>
+                                    <p class="mb-0">{{ $revision->catatan_user }}</p>
+                                </div>
+                                @endif
+                                
+                                <!-- User Files -->
+                                @if(count($revision->userFiles) > 0)
+                                <div class="mb-3">
+                                    <strong>File dari User:</strong>
+                                    <div class="row">
+                                        @foreach($revision->userFiles as $file)
+                                        <div class="col-md-4 mb-2">
+                                            <div class="file-item p-2 border rounded">
+                                                <i class="fas fa-file-pdf text-danger me-2"></i>
+                                                <span>{{ $file->file_name }}</span>
+                                                @if($file->user_notes)
+                                                <small class="d-block text-muted">{{ $file->user_notes }}</small>
+                                                @endif
+                                                <small class="d-block text-muted">{{ $file->uploaded_at->format('d M Y H:i') }}</small>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endif
+                                
+                                <!-- Editor Files -->
+                                @if(count($revision->editorFiles) > 0)
+                                <div class="mb-3">
+                                    <strong>Response dari Editor:</strong>
+                                    <div class="row">
+                                        @foreach($revision->editorFiles as $file)
+                                        <div class="col-md-4 mb-2">
+                                            <div class="file-item p-2 border rounded bg-light">
+                                                <i class="fas fa-file-pdf text-success me-2"></i>
+                                                <span>{{ $file->file_name }}</span>
+                                                <span class="badge badge-{{ $file->type === 'final' ? 'success' : 'info' }} ms-2">
+                                                    {{ ucfirst($file->type) }}
+                                                </span>
+                                                @if($file->editor_notes)
+                                                <small class="d-block text-muted">{{ $file->editor_notes }}</small>
+                                                @endif
+                                                <small class="d-block text-muted">{{ $file->uploaded_at->format('d M Y H:i') }}</small>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @else
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-clock me-2"></i>
+                                    Menunggu response dari editor
+                                </div>
+                                @endif
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
                 </div>
                 @include('components.admin.footer')
             </div>

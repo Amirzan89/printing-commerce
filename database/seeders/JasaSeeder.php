@@ -23,7 +23,7 @@ class JasaSeeder extends Seeder
             $idJasas[] = $idJasa;
             for($l = 1; $l <= 3; $l++){
                 $idPaketJasas[] = PaketJasa::insertGetId([
-                    'nama_paket_jasa' => 'paket Jasa '. $l,
+                    'kelas_jasa' => ['basic', 'standard', 'premium'][rand(0,2)],
                     'deskripsi_paket_jasa' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla, placeat? Vitae quam error laudantium suscipit nulla soluta? Vero nobis cupiditate, quam similique nisi eligendi veniam nesciunt odit ipsam, at quis?',
                     'harga_paket_jasa' => 20000,
                     'waktu_pengerjaan' => Carbon::now(),
