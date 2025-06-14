@@ -13,8 +13,8 @@ class Editor extends Model
     protected $fillable = [
         'uuid', 'nama_editor', 'jenis_kelamin', 'no_telpon'
     ];
-    public function fromRiwayatEditors()
+    public function revisiFiles()
     {
-        return $this->hasMany(RiwayatEditor::class, 'id_riwayat_editor');
+        return $this->hasMany(RevisiEditor::class, 'id_editor');
     }
 }

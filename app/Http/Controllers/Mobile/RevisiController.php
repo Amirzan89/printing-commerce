@@ -99,21 +99,11 @@ class RevisiController extends Controller
         try {
             $revision = PesananRevisi::findOrFail($revisionId);
             $pesanan = $revision->pesanan;
-            
-            // Check if editor is assigned to this pesanan
-            if ($pesanan->id_editor !== auth()->guard('editor')->id()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Unauthorized'
-                ], 403);
-            }
-            
             $validator = Validator::make($request->all(), [
                 'type' => 'required|in:preview,final',
                 'notes' => 'nullable|string|max:1000',
                 'files.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240'
             ]);
-            
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 'error',
@@ -122,7 +112,6 @@ class RevisiController extends Controller
                 ], 422);
             }
             
-            // Handle file uploads
             if ($request->hasFile('files')) {
                 foreach ($request->file('files') as $file) {
                     $filename = 'editor_' . $revision->urutan_revisi . '_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
@@ -139,7 +128,6 @@ class RevisiController extends Controller
                 }
             }
             
-            // Update pesanan status based on file type
             if ($request->type === 'final') {
                 $pesanan->update(['status' => 'selesai', 'completed_at' => now()]);
             } else {
@@ -167,10 +155,9 @@ class RevisiController extends Controller
     public function getRevision($revisionId)
     {
         try {
-            $revision = PesananRevisi::with(['pesanan', 'userFiles', 'editorFiles'])
+            $revision = PesananRevisi::with(['pesanan', 'userFiles', 'editorFiles.editor'])
                 ->findOrFail($revisionId);
             
-            // Check authorization
             $user = auth()->user();
             $editor = auth()->guard('editor')->user();
             
@@ -182,13 +169,6 @@ class RevisiController extends Controller
             }
             
             if ($user && $revision->pesanan->id_user !== $user->id_user) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Unauthorized'
-                ], 403);
-            }
-            
-            if ($editor && $revision->pesanan->id_editor !== $editor->id_editor) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Unauthorized'
@@ -215,21 +195,13 @@ class RevisiController extends Controller
     public function getPesananRevisions($pesananId)
     {
         try {
-            $pesanan = Pesanan::with(['revisions.userFiles', 'revisions.editorFiles'])
+            $pesanan = Pesanan::with(['revisions.userFiles', 'revisions.editorFiles.editor'])
                 ->findOrFail($pesananId);
             
-            // Check authorization
             $user = auth()->user();
             $editor = auth()->guard('editor')->user();
             
             if ($user && $pesanan->id_user !== $user->id_user) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Unauthorized'
-                ], 403);
-            }
-            
-            if ($editor && $pesanan->id_editor !== $editor->id_editor) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Unauthorized'
@@ -242,7 +214,8 @@ class RevisiController extends Controller
                     'pesanan' => $pesanan,
                     'revisions' => $pesanan->revisions,
                     'revisi_used' => $pesanan->revisi_used,
-                    'revisi_tersisa' => $pesanan->revisi_tersisa
+                    'revisi_tersisa' => $pesanan->revisi_tersisa,
+                    'working_editors' => $pesanan->editors
                 ]
             ]);
             

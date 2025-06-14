@@ -5,9 +5,13 @@ use App\Models\Pesanan;
 use Illuminate\Database\Seeder;
 class PesananCatatanSeeder extends Seeder
 {
+    private static $tempFile;
+    public function __construct(){
+        self::$tempFile = database_path('seeders/temp/table.json');
+    }
     public function run(): void
     {
-        // Sample brief texts
+        $jsonData = json_decode(file_get_contents(self::$tempFile), true);
         $briefTexts = [
             'Saya membutuhkan desain logo untuk perusahaan teknologi. Logo harus modern, minimalis, dan mencerminkan inovasi. Warna yang diinginkan adalah biru dan putih.',
             'Butuh banner untuk promosi produk makanan. Ukuran A3, dengan foto produk yang menarik dan informasi promo. Tema warna hangat seperti orange dan merah.',
@@ -27,18 +31,26 @@ class PesananCatatanSeeder extends Seeder
             'sample_poster_ref.png',
             'sample_flyer_ref.jpg'
         ];
-        $pesananList = Pesanan::all();
-        foreach ($pesananList as $pesanan) {
+        $pesananList = Pesanan::select('id_pesanan', 'id_user')->get();
+        for($i = 1; $i <= 10; $i++){
+            $pesanan = $pesananList[rand(0, 9)];
+            $idPesanan = $pesanan->id_pesanan;
+            $idUser = $pesanan->id_user;
             $briefText = $briefTexts[rand(0, count($briefTexts) - 1)];
             $hasImage = rand(1, 10) <= 7;
             $imageName = $hasImage ? $sampleImages[rand(0, count($sampleImages) - 1)] : null;
-            CatatanPesanan::create([
+            $idCatatanPesanan = CatatanPesanan::insertGetId([
                 'catatan_pesanan' => $briefText,
                 'gambar_referensi' => $imageName,
-                'uploaded_at' => $pesanan->created_at,
-                'id_pesanan' => $pesanan->id_pesanan,
-                'id_user' => $pesanan->id_user
+                'id_pesanan' => $idPesanan,
+                'id_user' => $idUser
             ]);
+            $idCatatanPesanans[] = $idCatatanPesanan;
         }
+        if(!isset($jsonData['catatan_pesanan'])){
+            $jsonData['catatan_pesanan'] = [];
+        }
+        $jsonData['catatan_pesanan'] = array_merge($jsonData['catatan_pesanan'], $idCatatanPesanans);
+        file_put_contents(self::$tempFile,json_encode($jsonData, JSON_PRETTY_PRINT));
     }
 }

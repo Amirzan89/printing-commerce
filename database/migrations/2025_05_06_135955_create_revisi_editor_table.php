@@ -12,7 +12,6 @@ return new class extends Migration
             $table->string('nama_file');
             $table->enum('type', ['preview', 'final']);
             $table->text('editor_notes')->nullable();
-            $table->dateTime('uploaded_at');
             $table->timestamps();
             $table->unsignedBigInteger('id_editor');
             $table->foreign('id_editor')->references('id_editor')->on('editor')->onDelete('cascade');

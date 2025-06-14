@@ -36,7 +36,6 @@ class DatabaseSeeder extends Seeder
         $this->call(PesananSeeder::class);
         $this->call(PesananCatatanSeeder::class);
         $this->call(RevisiSeeder::class);
-        $this->call(RiwayatEditorSeeder::class);
         $this->call(TransaksiSeeder::class);
         $this->call(ReviewSeeder::class);
         unlink(self::$tempFile);

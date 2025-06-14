@@ -12,18 +12,10 @@ class CatatanPesanan extends Model
     protected $primaryKey = 'id_catatan_pesanan';
     public $incrementing = true;
     protected $keyType = 'integer';
-    public $timestamps = true;
-    
+    public $timestamps = false;
     protected $fillable = [
-        'catatan_pesanan', 'gambar_referensi', 'uploaded_at', 'id_pesanan', 'id_user'
+        'catatan_pesanan', 'gambar_referensi', 'id_pesanan', 'id_user'
     ];
-    
-    protected $casts = [
-        'uploaded_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime'
-    ];
-    
     public function pesanan()
     {
         return $this->belongsTo(Pesanan::class, 'id_pesanan');

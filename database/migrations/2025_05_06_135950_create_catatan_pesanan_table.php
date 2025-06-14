@@ -11,8 +11,6 @@ return new class extends Migration
             $table->id('id_catatan_pesanan');
             $table->text('catatan_pesanan');
             $table->string('gambar_referensi')->nullable();
-            $table->dateTime('uploaded_at');
-            $table->timestamps();
             $table->unsignedBigInteger('id_pesanan');
             $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanan')->onDelete('cascade');
             $table->unsignedBigInteger('id_user');

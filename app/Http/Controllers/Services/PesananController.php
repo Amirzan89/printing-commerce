@@ -29,7 +29,7 @@ class PesananController extends Controller
             $search = $request->get('search');
             $perPage = $request->get('per_page', 15);
 
-            $query = Pesanan::with(['toUser', 'toJasa', 'toPaketJasa', 'toEditor']);
+            $query = Pesanan::with(['toUser', 'toJasa', 'toPaketJasa']);
 
             // Filter by status
             if ($status !== 'all') {
@@ -68,10 +68,9 @@ class PesananController extends Controller
                 'toUser',
                 'toJasa',
                 'toPaketJasa', 
-                'toEditor',
                 'fromCatatanPesanan',
                 'revisions.userFiles',
-                'revisions.editorFiles'
+                'revisions.editorFiles.editor'
             ])->where('uuid', $uuid)->first();
 
             if (!$pesanan) {
@@ -81,9 +80,17 @@ class PesananController extends Controller
                 ], 404);
             }
 
+            // Get editors who worked on this pesanan
+            $workingEditors = $pesanan->editorFiles()->with('editor')->get()
+                ->pluck('editor')->unique('id_editor')->values();
+
+            // Add editors info to response
+            $pesananData = $pesanan->toArray();
+            $pesananData['working_editors'] = $workingEditors;
+
             return response()->json([
                 'status' => 'success',
-                'data' => $pesanan
+                'data' => $pesananData
             ]);
 
         } catch (\Exception $e) {
@@ -147,52 +154,6 @@ class PesananController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengupdate status: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * ADMIN: Assign editor to pesanan
-     */
-    public function assignEditor(Request $request, $uuid)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'id_editor' => 'required|exists:editor,id_editor'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $validator->errors()->first()
-                ], 422);
-            }
-
-            $pesanan = Pesanan::where('uuid', $uuid)->first();
-
-            if (!$pesanan) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Pesanan tidak ditemukan'
-                ], 404);
-            }
-
-            $pesanan->update([
-                'id_editor' => $request->id_editor,
-                'status' => 'dikerjakan',
-                'assigned_at' => now()
-            ]);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Editor berhasil ditugaskan',
-                'data' => $pesanan->load('toEditor')
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal menugaskan editor: ' . $e->getMessage()
             ], 500);
         }
     }

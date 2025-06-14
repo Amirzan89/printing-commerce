@@ -1,7 +1,6 @@
 <?php
 namespace Database\Seeders;
 use App\Models\Editor;
-use App\Models\RiwayatEditor;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 class EditorSeeder extends Seeder

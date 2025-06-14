@@ -11,7 +11,7 @@ class Pesanan extends Model
     protected $keyType = 'integer';
     public $timestamps = true;
     protected $fillable = [
-        'uuid', 'deskripsi', 'status', 'status_pembayaran', 'total_harga', 'estimasi_waktu', 'maksimal_revisi', 'confirmed_at', 'assigned_at', 'completed_at', 'id_user', 'id_jasa', 'id_paket_jasa', 'id_editor'
+        'uuid', 'deskripsi', 'status', 'status_pembayaran', 'total_harga', 'estimasi_waktu', 'maksimal_revisi', 'confirmed_at', 'assigned_at', 'completed_at', 'id_user', 'id_jasa', 'id_paket_jasa'
     ];
     protected $casts = [
         'estimasi_waktu' => 'datetime',
@@ -55,10 +55,6 @@ class Pesanan extends Model
     {
         return $this->belongsTo(PaketJasa::class, 'id_paket_jasa');
     }
-    public function toEditor()
-    {
-        return $this->belongsTo(Editor::class, 'id_editor');
-    }
     
     public function revisions()
     {
@@ -82,5 +78,11 @@ class Pesanan extends Model
     public function getRevisiTersisaAttribute()
     {
         return $this->maksimal_revisi - $this->revisi_used;
+    }
+    
+    // Get editors who worked on this pesanan
+    public function getEditorsAttribute()
+    {
+        return $this->editorFiles()->with('editor')->get()->pluck('editor')->unique('id_editor');
     }
 }

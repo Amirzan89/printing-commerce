@@ -12,7 +12,6 @@ return new class extends Migration
             $table->string('nama_file');
             $table->enum('type', ['brief', 'revisi']);
             $table->text('user_notes')->nullable();
-            $table->dateTime('uploaded_at');
             $table->timestamps();
             $table->unsignedBigInteger('id_revisi')->nullable();
             $table->foreign('id_revisi')->references('id_revisi')->on('pesanan_revisi')->onDelete('cascade');
