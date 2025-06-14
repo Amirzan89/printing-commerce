@@ -321,8 +321,8 @@ $tPath = app()->environment('local') ? '' : '';
                                             <div class="file-item p-2 border rounded">
                                                 <i class="fas fa-file-pdf text-danger me-2"></i>
                                                 <span>{{ $file->file_name }}</span>
-                                                @if($file->user_notes)
-                                                <small class="d-block text-muted">{{ $file->user_notes }}</small>
+                                                @if($file->catatan_user)
+                                                <small class="d-block text-muted">{{ $file->catatan_user }}</small>
                                                 @endif
                                                 <small class="d-block text-muted">{{ $file->uploaded_at->format('d M Y H:i') }}</small>
                                             </div>
@@ -345,8 +345,8 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <span class="badge badge-{{ $file->type === 'final' ? 'success' : 'info' }} ms-2">
                                                     {{ ucfirst($file->type) }}
                                                 </span>
-                                                @if($file->editor_notes)
-                                                <small class="d-block text-muted">{{ $file->editor_notes }}</small>
+                                                @if($file->catatan_editor)
+                                                <small class="d-block text-muted">{{ $file->catatan_editor }}</small>
                                                 @endif
                                                 <small class="d-block text-muted">{{ $file->uploaded_at->format('d M Y H:i') }}</small>
                                             </div>

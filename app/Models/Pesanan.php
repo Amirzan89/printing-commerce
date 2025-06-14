@@ -23,13 +23,13 @@ class Pesanan extends Model
     ];
     public function userFiles()
     {
-        return $this->hasManyThrough(RevisiUser::class, PesananRevisi::class, 'id_pesanan', 'id_revisi');
+        return $this->hasManyThrough(RevisiUser::class, Revisi::class, 'id_pesanan', 'id_revisi');
     }
     
     // Get all editor files through revisions
     public function editorFiles()
     {
-        return $this->hasManyThrough(RevisiEditor::class, PesananRevisi::class, 'id_pesanan', 'id_revisi');
+        return $this->hasManyThrough(RevisiEditor::class, Revisi::class, 'id_pesanan', 'id_revisi');
     }
     public function fromCatatanPesanan()
     {
@@ -58,13 +58,13 @@ class Pesanan extends Model
     
     public function revisions()
     {
-        return $this->hasMany(PesananRevisi::class, 'id_pesanan')
+        return $this->hasMany(Revisi::class, 'id_pesanan')
             ->orderBy('urutan_revisi', 'asc');
     }
     
     public function latestRevision()
     {
-        return $this->hasOne(PesananRevisi::class, 'id_pesanan')
+        return $this->hasOne(Revisi::class, 'id_pesanan')
             ->latest('urutan_revisi');
     }
     

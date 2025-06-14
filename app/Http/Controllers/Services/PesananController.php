@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Services;
 use App\Http\Controllers\Controller;
 use App\Models\Pesanan;
 use App\Models\CatatanPesanan;
-use App\Models\PesananRevisi;
+use App\Models\Revisi;
 use App\Models\RevisiUser;
 use App\Models\Transaksi;
 use App\Models\Jasa;

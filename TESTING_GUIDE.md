@@ -22,7 +22,7 @@ Setelah menjalankan `php artisan db:seed`, kamu akan mendapatkan data dengan str
 ### 🔄 Revisi
 - Pesanan dengan status `revisi`: ada 1-2 revisi ongoing
 - Pesanan dengan status `selesai`: ada 1-3 revisi complete history
-- Pesanan dengan status `dikerjakan`: ada initial brief files
+- Pesanan dengan status `dikerjakan`: ada initial revisi files
 
 ---
 

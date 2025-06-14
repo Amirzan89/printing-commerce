@@ -1,7 +1,7 @@
 <?php
 namespace Database\Seeders;
 
-use App\Models\PesananRevisi;
+use App\Models\Revisi;
 use App\Models\RevisiUser;
 use App\Models\RevisiEditor;
 use App\Models\Pesanan;
@@ -60,7 +60,7 @@ class RevisiSeeder extends Seeder
                 $revisionCreatedAt = $pesanan->assigned_at->copy()->addDays(rand(1, 3));
                 
                 // Create revision record
-                $revision = PesananRevisi::create([
+                $revision = Revisi::create([
                     'urutan_revisi' => $revisionNum,
                     'id_pesanan' => $pesanan->id_pesanan,
                     'created_at' => $revisionCreatedAt,
@@ -72,7 +72,7 @@ class RevisiSeeder extends Seeder
                     RevisiUser::create([
                         'nama_file' => "user_revision_r{$revisionNum}_f{$fileNum}_{$pesanan->id_pesanan}.pdf",
                         'type' => 'revisi',
-                        'user_notes' => $userRevisionNotes[rand(0, count($userRevisionNotes) - 1)],
+                        'catatan_user' => $userRevisionNotes[rand(0, count($userRevisionNotes) - 1)],
                         'id_revisi' => $revision->id_revisi,
                         'id_user' => $pesanan->id_user,
                         'created_at' => $revisionCreatedAt,
@@ -90,7 +90,7 @@ class RevisiSeeder extends Seeder
                     RevisiEditor::create([
                         'nama_file' => "editor_response_r{$revisionNum}_{$pesanan->id_pesanan}.pdf",
                         'type' => 'preview', // Always preview for ongoing revisions
-                        'editor_notes' => $editorNotes[rand(0, count($editorNotes) - 1)],
+                        'catatan_editor' => $editorNotes[rand(0, count($editorNotes) - 1)],
                         'id_editor' => $assignedEditor->id_editor,
                         'id_revisi' => $revision->id_revisi,
                         'created_at' => $editorResponseAt,
@@ -114,7 +114,7 @@ class RevisiSeeder extends Seeder
                 $revisionCreatedAt = $pesanan->assigned_at->copy()->addDays($revisionNum);
                 
                 // Create revision record
-                $revision = PesananRevisi::create([
+                $revision = Revisi::create([
                     'urutan_revisi' => $revisionNum,
                     'id_pesanan' => $pesanan->id_pesanan,
                     'created_at' => $revisionCreatedAt,
@@ -126,7 +126,7 @@ class RevisiSeeder extends Seeder
                     RevisiUser::create([
                         'nama_file' => "completed_revision_r{$revisionNum}_f{$fileNum}_{$pesanan->id_pesanan}.pdf",
                         'type' => 'revisi',
-                        'user_notes' => $userRevisionNotes[rand(0, count($userRevisionNotes) - 1)],
+                        'catatan_user' => $userRevisionNotes[rand(0, count($userRevisionNotes) - 1)],
                         'id_revisi' => $revision->id_revisi,
                         'id_user' => $pesanan->id_user,
                         'created_at' => $revisionCreatedAt,
@@ -146,7 +146,7 @@ class RevisiSeeder extends Seeder
                 RevisiEditor::create([
                     'nama_file' => "completed_editor_r{$revisionNum}_{$pesanan->id_pesanan}.pdf",
                     'type' => $fileType,
-                    'editor_notes' => $editorNotes[rand(0, count($editorNotes) - 1)],
+                    'catatan_editor' => $editorNotes[rand(0, count($editorNotes) - 1)],
                     'id_editor' => $assignedEditor->id_editor,
                     'id_revisi' => $revision->id_revisi,
                     'created_at' => $editorResponseAt,
@@ -161,13 +161,13 @@ class RevisiSeeder extends Seeder
             ->get();
             
         foreach ($workingPesanan as $pesanan) {
-            // Create initial brief files (uploaded when pesanan was created)
+            // Create initial revisi files (uploaded when pesanan was created)
             for ($fileNum = 1; $fileNum <= rand(1, 3); $fileNum++) {
                 RevisiUser::create([
                     'nama_file' => "initial_brief_f{$fileNum}_{$pesanan->id_pesanan}.pdf",
-                    'type' => 'brief',
-                    'user_notes' => "File brief awal untuk pesanan",
-                    'id_revisi' => null, // No revision, this is initial brief
+                    'type' => 'revisi',
+                    'catatan_user' => "File revisi awal untuk pesanan",
+                    'id_revisi' => null, // No revision, this is initial revisi
                     'id_user' => $pesanan->id_user,
                     'created_at' => $pesanan->created_at,
                     'updated_at' => $pesanan->created_at
@@ -184,7 +184,7 @@ class RevisiSeeder extends Seeder
                 RevisiEditor::create([
                     'nama_file' => "initial_preview_{$pesanan->id_pesanan}.pdf",
                     'type' => 'preview',
-                    'editor_notes' => "Preview awal untuk review",
+                    'catatan_editor' => "Preview awal untuk review",
                     'id_revisi' => null, // No revision, this is initial preview
                     'id_editor' => $assignedEditor->id_editor,
                     'created_at' => $previewAt,

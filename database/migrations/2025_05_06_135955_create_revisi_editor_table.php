@@ -11,12 +11,12 @@ return new class extends Migration
             $table->id('id_revisi_editor');
             $table->string('nama_file');
             $table->enum('type', ['preview', 'final']);
-            $table->text('editor_notes')->nullable();
+            $table->text('catatan_editor')->nullable();
             $table->timestamps();
             $table->unsignedBigInteger('id_editor');
             $table->foreign('id_editor')->references('id_editor')->on('editor')->onDelete('cascade');
             $table->unsignedBigInteger('id_revisi')->nullable();
-            $table->foreign('id_revisi')->references('id_revisi')->on('pesanan_revisi')->onDelete('cascade');
+            $table->foreign('id_revisi')->references('id_revisi')->on('revisi')->onDelete('cascade');
         });
     }
 

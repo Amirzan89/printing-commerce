@@ -15,7 +15,7 @@ class RevisiUser extends Model
     public $timestamps = true;
     
     protected $fillable = [
-        'nama_file', 'type', 'user_notes', 'uploaded_at', 'id_revisi', 'id_user'
+        'nama_file', 'type', 'catatan_user', 'uploaded_at', 'id_revisi', 'id_user'
     ];
     
     protected $casts = [
@@ -32,7 +32,7 @@ class RevisiUser extends Model
     
     public function revision()
     {
-        return $this->belongsTo(PesananRevisi::class, 'id_revisi');
+        return $this->belongsTo(Revisi::class, 'id_revisi');
     }
     
     // Helper methods
@@ -43,7 +43,7 @@ class RevisiUser extends Model
     
     public function isBriefFile()
     {
-        return $this->type === 'brief';
+        return $this->type === 'revisi';
     }
     
     public function isRevisionFile()

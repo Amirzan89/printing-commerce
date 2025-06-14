@@ -41,15 +41,15 @@ class TransaksiController extends Controller
         try {
             // Get pesanan by UUID and check ownership
             $pesanan = Pesanan::where('uuid', $request->order_uuid)
-                ->where('id_user', auth()->user()->id_user)
-                ->first();
-                
-            if (!$pesanan) {
-                return response()->json([
-                    'status' => 'error',
+            ->where('id_user', auth()->user()->id_user)
+            ->first();
+            
+        if (!$pesanan) {
+            return response()->json([
+                'status' => 'error',
                     'message' => 'Pesanan tidak ditemukan atau tidak memiliki akses'
-                ], 404);
-            }
+            ], 404);
+        }
 
             // Check if pesanan status allows payment
             if ($pesanan->status !== 'pending') {
@@ -74,12 +74,12 @@ class TransaksiController extends Controller
                 ], 422);
             }
 
-            // Generate unique order ID
+        // Generate unique order ID
             $orderId = 'TRX-' . date('Ymd') . '-' . strtoupper(Str::random(8));
-            
-            // Set expiration time (24 hours from now)
-            $expiredAt = Carbon::now()->addHours(24);
-            
+        
+        // Set expiration time (24 hours from now)
+        $expiredAt = Carbon::now()->addHours(24);
+        
             $transaksi = Transaksi::create([
                 'order_id' => $orderId,
                 'jumlah' => $pesanan->total_harga,
@@ -295,7 +295,7 @@ class TransaksiController extends Controller
             
             $transactions = $query->orderBy('created_at', 'desc')
                 ->paginate($limit);
-            
+                
             return response()->json([
                 'status' => 'success',
                 'message' => 'Riwayat transaksi berhasil diambil',

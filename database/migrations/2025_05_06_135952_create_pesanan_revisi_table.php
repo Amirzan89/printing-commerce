@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('pesanan_revisi', function (Blueprint $table) {
+        Schema::create('revisi', function (Blueprint $table) {
             $table->id('id_revisi');
             $table->unsignedTinyInteger('urutan_revisi');
             $table->timestamps();
@@ -19,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('pesanan_revisi');
+        Schema::dropIfExists('revisi');
     }
 };

@@ -11,7 +11,7 @@ return new class extends Migration
             $table->uuid();
             $table->string('deskripsi');
             $table->enum('status', ['pending', 'menunggu_konfirmasi', 'dikerjakan', 'revisi', 'selesai', 'dibatalkan']);
-            $table->enum('status_pembayaran', ['belum_bayar', 'menunggu_konfirmasi', 'lunas']);
+            $table->enum('status_pembayaran', ['belum_bayar', 'menunggu_konfirmasi', 'lunas', 'dibatalkan']);
             $table->unsignedInteger('total_harga');
             $table->dateTime('estimasi_waktu');
             $table->unsignedTinyInteger('maksimal_revisi');

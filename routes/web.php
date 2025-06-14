@@ -6,12 +6,13 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Services\JasaController;
 use App\Http\Controllers\Services\PesananController;
 use App\Http\Controllers\Services\MetodePembayaranController;
+use App\Http\Controllers\Services\TransaksiController;
 use App\Http\Controllers\Services\AdminController;
 use App\Http\Controllers\Services\EditorController;
+use App\Http\Controllers\Services\RevisiController;
 use App\Http\Controllers\Mobile\ChatController;
 use App\Http\Controllers\Mobile\UserController;
 
-use App\Http\Controllers\Page\PublicController AS ShowHomeController;
 use App\Http\Controllers\Page\JasaController AS ShowJasaController;
 use App\Http\Controllers\Page\PesananController AS ShowPesananController;
 use App\Http\Controllers\Page\MetodePembayaranController AS ShowMetodePembayaranController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Page\ChatController AS ShowChatController;
 use App\Http\Controllers\Page\AdminController AS ShowAdminController;
 use App\Http\Controllers\Page\EditorController AS ShowEditorController;
 use App\Http\Controllers\Page\UserController AS ShowUserController;
+use App\Http\Controllers\Page\RevisiController AS ShowRevisiController;
 
 Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
     //API only jasa route
@@ -42,18 +44,20 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         //page pesanan
         Route::get('/',[ShowPesananController::class,'showAll']);
         Route::get('/detail/{any}',[ShowPesananController::class,'showDetail']);
+        Route::get('/statistics', [PesananController::class, 'getStatistics']);
         Route::get('/tambah',[ShowPesananController::class,'showTambah']);
         Route::get('/edit/{any}',[ShowPesananController::class,'showEdit']);
         Route::get('/edit', function(){
             return redirect('/pesanan');
         });
         // route for pesanan
+        Route::post('/bulk-update', [PesananController::class, 'bulkUpdateStatus']);
+        Route::post('/assign-editor', [PesananController::class, 'assignEditor']);
+        Route::put('/update', [PesananController::class, 'updateStatus']);
+        Route::delete('/delete', [PesananController::class, 'deletePesanan']);
         Route::post('/create',[PesananController::class,'createPesanan']);
-        Route::put('/update',[PesananController::class,'updatePesanan']);
-        Route::delete('/delete',[PesananController::class,'deletePesanan']);
     });
-
-
+    
     //API only metode pembayaran route
     Route::group(['prefix'=>'/metode-pembayaran'], function(){
         //page metode pembayaran
@@ -75,8 +79,11 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         //page transaksi
         Route::get('/',[ShowTransaksiController::class,'showAll']);
         Route::get('/detail/{any}',[ShowTransaksiController::class,'showDetail']);
-        // route for transaksi
-        Route::post('/update',[ShowTransaksiController::class,'validateTransaksi']);
+        //route for transaksi
+        Route::post('/update',[TransaksiController::class,'validateTransaksi']);
+        Route::get('/pending', [TransaksiController::class, 'getPendingPayments']);
+        Route::post('/confirm', [TransaksiController::class, 'confirmPayment']);
+        Route::post('/reject', [TransaksiController::class, 'rejectPayment']);
     });
 
     //API only chat route
@@ -119,6 +126,22 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::post('/create',[EditorController::class,'createEditor']);
         Route::put('/update',[EditorController::class,'updateEditor']);
         Route::delete('/delete',[EditorController::class,'deleteEditor']);
+    });
+
+    //API only revisi route
+    Route::group(['prefix'=>'/revisi'], function(){
+        //page revisi
+        Route::get('/',[ShowRevisiController::class,'showAll']);
+        Route::get('/detail/{uuid}',[ShowRevisiController::class,'showDetail']);
+        Route::get('/statistics',[ShowRevisiController::class,'showStatistics']);
+        
+        // API routes for revisi management
+        Route::get('/requests', [RevisiController::class, 'getAllRevisionRequests']);
+        Route::get('/detail/{uuid}', [RevisiController::class, 'getRevisionDetail']);
+        Route::post('/assign-editor/{uuid}', [RevisiController::class, 'assignEditor']);
+        Route::post('/respond/{uuid}', [RevisiController::class, 'sendRevisionResponse']);
+        Route::post('/complete/{uuid}', [RevisiController::class, 'markRevisionCompleted']);
+        Route::get('/stats', [RevisiController::class, 'getRevisionStatistics']);
     });
 
     Route::group(['prefix'=>'/admin'], function(){

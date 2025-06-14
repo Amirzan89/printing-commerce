@@ -15,7 +15,7 @@ class RevisiEditor extends Model
     public $timestamps = true;
     
     protected $fillable = [
-        'nama_file', 'type', 'editor_notes', 'uploaded_at', 'id_editor', 'id_revisi'
+        'nama_file', 'type', 'catatan_editor', 'uploaded_at', 'id_editor', 'id_revisi'
     ];
     
     protected $casts = [
@@ -32,7 +32,7 @@ class RevisiEditor extends Model
     
     public function revision()
     {
-        return $this->belongsTo(PesananRevisi::class, 'id_revisi');
+        return $this->belongsTo(Revisi::class, 'id_revisi');
     }
     
     // Helper methods

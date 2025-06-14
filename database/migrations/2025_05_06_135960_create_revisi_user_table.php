@@ -10,11 +10,11 @@ return new class extends Migration
         Schema::create('revisi_user', function (Blueprint $table) {
             $table->id('id_revisi_user');
             $table->string('nama_file');
-            $table->enum('type', ['brief', 'revisi']);
-            $table->text('user_notes')->nullable();
+            $table->enum('type', ['revisi', 'final']);
+            $table->text('catatan_user')->nullable();
             $table->timestamps();
             $table->unsignedBigInteger('id_revisi')->nullable();
-            $table->foreign('id_revisi')->references('id_revisi')->on('pesanan_revisi')->onDelete('cascade');
+            $table->foreign('id_revisi')->references('id_revisi')->on('revisi')->onDelete('cascade');
             $table->unsignedBigInteger('id_user');
             $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');
         });

@@ -60,7 +60,6 @@ class Kernel extends HttpKernel
         'admin.guest' => \App\Http\Middleware\RedirectIfAuthenticatedAdmin::class,
         'user.guest' => \App\Http\Middleware\RedirectIfAuthenticatedUser::class,
         'authorize' => \App\Http\Middleware\Authorization::class,
-        'authMobile' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
         'auth.mobile' => \App\Http\Middleware\AuthenticateMobile::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,

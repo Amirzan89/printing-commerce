@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class PesananRevisi extends Model
+class Revisi extends Model
 {
     use HasFactory;
     
-    protected $table = 'pesanan_revisi';
+    protected $table = 'revisi';
     protected $primaryKey = 'id_revisi';
     public $incrementing = true;
     protected $keyType = 'integer';
@@ -64,6 +64,6 @@ class PesananRevisi extends Model
             return 'waiting_editor_response';
         }
         
-        return 'completed';
+        return 'selesai';
     }
 } 
