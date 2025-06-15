@@ -8,9 +8,12 @@ use App\Http\Controllers\Mobile\TransaksiController;
 use App\Http\Controllers\Mobile\MailController;
 use App\Http\Controllers\Mobile\PengerjaanController;
 use App\Http\Controllers\Mobile\MetodePembayaranController;
+use App\Http\Controllers\Api\ChatController;
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request){
     return $request->user();
 });
+
 Route::group(['prefix'=>'/mobile'], function(){
     Route::group(['middleware'=>'auth.mobile'], function(){
         //API only jasa route
@@ -93,4 +96,25 @@ Route::group(['prefix'=>'/mobile'], function(){
             });
         });
     });
+});
+
+// Chat API Routes
+Route::middleware('auth:sanctum')->prefix('chat')->group(function () {
+    Route::post('/send', [ChatController::class, 'sendMessage']);
+    Route::get('/messages', [ChatController::class, 'getMessages']);
+    Route::post('/mark-read', [ChatController::class, 'markAsRead']);
+    Route::post('/update-fcm-token', [ChatController::class, 'updateFcmToken']);
+});
+
+// ========================================
+// TESTING ROUTES - UNTUK POSTMAN ONLY
+// ========================================
+Route::prefix('chat')->group(function () {
+    Route::post('/test-simple', [ChatController::class, 'testSimple']);
+    Route::post('/test-connection', [ChatController::class, 'testConnection']);
+    Route::post('/test-save', [ChatController::class, 'testSaveMessage']);
+    Route::get('/test-get/{pesanan_uuid}', [ChatController::class, 'testGetMessages']);
+    Route::post('/test-fcm', [ChatController::class, 'testFcmNotification']);
+    Route::get('/generate-test-token', [ChatController::class, 'generateTestToken']);
+    Route::post('/test-chat-with-fcm', [ChatController::class, 'testChatWithFcm']);
 });

@@ -138,7 +138,7 @@ class TransaksiController extends Controller
                         'existing_transaction' => $existingTransaction
                     ]
                 ], 422);
-            }
+        }
 
         // Generate unique order ID
             $orderId = 'TRX-' . date('Ymd') . '-' . strtoupper(Str::random(8));

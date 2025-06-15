@@ -10,8 +10,29 @@ class User extends Model
     public $incrementing = true;
     protected $keyType = 'integer';
     public $timestamps = true;
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'uuid', 'nama_user', 'jenis_kelamin', 'no_telpon', 'alamat', 'no_rekening', 'email_verified_at', 'created_at', 'updated_at', 'id_auth'
+        'name',
+        'email',
+        'password',
+        'uuid',
+        'fcm_token',
+        'fcm_token_updated_at',
+        'device_id',
+        'device_type',
+        'nama_user',
+        'jenis_kelamin',
+        'no_telpon',
+        'alamat',
+        'no_rekening',
+        'email_verified_at',
+        'created_at',
+        'updated_at',
+        'id_auth'
     ];
     public function fromVerifikasi()
     {
@@ -24,5 +45,32 @@ class User extends Model
     public function toAuth()
     {
         return $this->belongsTo(Auth::class, 'id_auth');
+    }
+    /**
+     * Update FCM token untuk user ini
+     */
+    public function updateFcmToken($fcmToken, $deviceId = null, $deviceType = null)
+    {
+        $this->update([
+            'fcm_token' => $fcmToken,
+            'fcm_token_updated_at' => now(),
+            'device_id' => $deviceId,
+            'device_type' => $deviceType,
+        ]);
+        
+        return $this;
+    }
+    /**
+     * Check apakah FCM token masih valid (tidak expired)
+     */
+    public function isFcmTokenValid()
+    {
+        if (!$this->fcm_token) {
+            return false;
+        }
+        
+        // FCM token dianggap expired kalau lebih dari 30 hari tidak update
+        return $this->fcm_token_updated_at && 
+               $this->fcm_token_updated_at->diffInDays(now()) <= 30;
     }
 }

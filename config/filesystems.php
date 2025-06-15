@@ -30,6 +30,11 @@ return [
 
     'disks' => [
 
+        'firebase' => [
+            'driver' => 'local',
+            'root' => storage_path('app/firebase'),
+            'throw' => false,
+        ],
         'admin' => [
             'driver' => 'local',
             'root' => storage_path('app/admin'),
