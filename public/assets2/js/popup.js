@@ -24,7 +24,7 @@ function showGreenPopup(message, div = null) {
             `;
         greenPopup.style.display = "block";
         setTimeout(() => {
-            closePopup("green");
+            // closePopup("green");
         }, 1000);
     }
 }

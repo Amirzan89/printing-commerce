@@ -199,12 +199,15 @@
         xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
         xhr.setRequestHeader('Content-Type', 'application/json');
         //send the form data
-        xhr.send({});
+        xhr.send(JSON.stringify({}));
         xhr.onreadystatechange = function() {
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    window.location.reload();
+                    var response = JSON.parse(xhr.responseText);
+                    // Redirect to login page after successful logout
+                    window.location.href = '/login';
                 } else {
+                    console.error('Logout failed');
                 }
             }
         }

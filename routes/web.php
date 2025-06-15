@@ -159,6 +159,15 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
     Route::get('/dashboard',[ShowAdminController::class,'showDashboard']);
     Route::get('/profile',[ShowAdminController::class,'showProfile']);
 });
+
+// Logout route - should be accessible when authenticated
+Route::post('/admin/logout', function(Request $request){
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return response()->json(['status' => 'success', 'message' => 'Logout berhasil']);
+})->middleware('auth');
+
 Route::group(['middleware' => 'admin.guest'], function(){
     Route::get('/login', function(){
         return view('page.login');
@@ -186,11 +195,6 @@ Route::group(['middleware' => 'admin.guest'], function(){
             }
             $request->session()->regenerate();
             return response()->json(['status'=>'success', 'message'=>'Login successful']);
-        });
-        Route::post('/logout', function(Request $request){
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
         });
     });
     Route::get('/password/reset', function(){

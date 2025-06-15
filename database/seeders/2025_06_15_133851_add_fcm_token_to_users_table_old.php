@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('fcm_token', function (Blueprint $table) {
+            $table->string('remember_token')->nullable();
             $table->string('fcm_token')->nullable()->after('remember_token');
             $table->timestamp('fcm_token_updated_at')->nullable()->after('fcm_token');
             $table->string('device_id')->nullable()->after('fcm_token_updated_at');
@@ -24,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['fcm_token', 'fcm_token_updated_at', 'device_id', 'device_type']);
-        });
+        Schema::dropIfExists('fcm_token');
     }
 };
