@@ -17,13 +17,6 @@ class JasaController extends Controller
         ];
         return view('page.jasa.data',$dataShow);
     }
-    public function showTambah(Request $request){
-        $dataShow = [
-            'headerData' => UtilityController::getHeaderData(),
-            'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
-        ];
-        return view('page.jasa.tambah',$dataShow);
-    }
     public function showEdit(Request $request, $uuid){
         $jasa = Jasa::where('uuid', $uuid)->first();
         

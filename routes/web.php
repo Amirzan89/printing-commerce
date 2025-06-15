@@ -28,15 +28,12 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
     Route::group(['prefix'=>'/jasa'], function(){
         //page jasa
         Route::get('/',[ShowJasaController::class,'showAll'])->name('jasa.index');
-        Route::get('/tambah',[ShowJasaController::class,'showTambah'])->name('jasa.create');
         Route::get('/edit/{any}',[ShowJasaController::class,'showEdit'])->name('jasa.edit');
         Route::get('/edit', function(){
             return redirect('/jasa');
         });
         // route for jasa
-        Route::post('/create',[JasaController::class,'createJasa'])->name('api.jasa.store');
         Route::put('/update',[JasaController::class,'updateJasa'])->name('api.jasa.update');
-        Route::delete('/delete',[JasaController::class,'deleteJasa'])->name('api.jasa.destroy');
     });
 
     //API only pesanan route
@@ -63,7 +60,7 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::get('/tambah',[ShowMetodePembayaranController::class,'showTambah']);
         Route::get('/edit/{any}',[ShowMetodePembayaranController::class,'showEdit']);
         Route::get('/edit', function(){
-            return redirect('/metode-pembayaran');
+            // return redirect('/metode-pembayaran');
         });
         // route for metode pembayaran
         Route::post('/create',[MetodePembayaranController::class,'createMPembayaran']);

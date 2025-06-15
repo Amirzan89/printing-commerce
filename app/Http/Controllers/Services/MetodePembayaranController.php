@@ -9,6 +9,15 @@ use App\Models\PaketJasa;
 use Illuminate\Support\Str;
 class MetodePembayaranController extends Controller
 {
+    private static $destinationPath;
+    public function __construct(){
+        if(env('APP_ENV', 'local') == 'local'){
+            self::$destinationPath = public_path('metode-pembayaran');
+        }else{
+            $path = env('PUBLIC_PATH', '/../public_html');
+            self::$destinationPath = base_path($path == '/../public_html' ? $path : '/../public_html') .'/metode-pembayaran';
+        }
+    }
     public function createMPembayaran(Request $rt){
         $v = Validator::make($rt->only('nama_metode_pembayaran', 'no_metode_pembayaran', 'deskripsi_1', 'deskripsi_2', 'thumbnail', 'icon'), [
             'nama_metode_pembayaran' => 'required|min:3|max:12',
@@ -51,13 +60,13 @@ class MetodePembayaranController extends Controller
         if($rt->hasFile('thumbnail')){
             $thumbnailFile = $rt->file('thumbnail');
             $thumbnailFilename = $thumbnailFile->hashName();
-            $thumbnailFile->move(public_path('assets3/img/metode-pembayaran/'), $thumbnailFilename);
+            $thumbnailFile->move(self::$destinationPath, $thumbnailFilename);
         }
 
         if($rt->hasFile('icon')){
             $iconFile = $rt->file('icon');
             $iconFilename = $iconFile->hashName();
-            $iconFile->move(public_path('assets3/img/metode-pembayaran/'), $iconFilename);
+            $iconFile->move(self::$destinationPath, $iconFilename);
         }
 
         $ins = MetodePembayaran::insert([
@@ -127,13 +136,13 @@ class MetodePembayaranController extends Controller
             }
             
             // Delete old file if exists
-            $oldThumbnailPath = public_path('assets3/img/metode-pembayaran/') . $metodePembayaran->thumbnail;
+            $oldThumbnailPath = self::$destinationPath . $metodePembayaran->thumbnail;
             if(file_exists($oldThumbnailPath) && !is_dir($oldThumbnailPath)){
                 unlink($oldThumbnailPath);
             }
             
             $thumbnailFilename = $thumbnailFile->hashName();
-            $thumbnailFile->move(public_path('assets3/img/metode-pembayaran/'), $thumbnailFilename);
+            $thumbnailFile->move(self::$destinationPath, $thumbnailFilename);
         }
 
         if($rt->hasFile('icon')){
@@ -143,13 +152,13 @@ class MetodePembayaranController extends Controller
             }
             
             // Delete old file if exists
-            $oldIconPath = public_path('assets3/img/metode-pembayaran/') . $metodePembayaran->icon;
+            $oldIconPath = self::$destinationPath . $metodePembayaran->icon;
             if(file_exists($oldIconPath) && !is_dir($oldIconPath)){
                 unlink($oldIconPath);
             }
             
             $iconFilename = $iconFile->hashName();
-            $iconFile->move(public_path('assets3/img/metode-pembayaran/'), $iconFilename);
+            $iconFile->move(self::$destinationPath, $iconFilename);
         }
 
         $result = $metodePembayaran->update([
@@ -181,11 +190,11 @@ class MetodePembayaranController extends Controller
             return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
         }
         $metodePembayaran = MetodePembayaran::where('uuid',$rt->input('id_metode_pembayaran'))->firstOrFail();
-        $ftd = public_path('assets3/img/metode-pembayaran/') . $metodePembayaran['thumbnail'];
+        $ftd = self::$destinationPath . $metodePembayaran['thumbnail'];
         if (file_exists($ftd) && !is_dir($ftd)){
             unlink($ftd);
         }
-        $ftd = public_path('assets3/img/metode-pembayaran/') . $metodePembayaran['icon'];
+        $ftd = self::$destinationPath . $metodePembayaran['icon'];
         if (file_exists($ftd) && !is_dir($ftd)){
             unlink($ftd);
         }

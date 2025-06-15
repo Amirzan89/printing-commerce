@@ -8,7 +8,7 @@ $tPath = app()->environment('local') ? '' : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Metode Pembayaran | TATA</title>
-    <link rel="shortcut icon" type="image/png" href="{{ asset($tPath.'assets2/icon/icon.png') }}" />
+    <link href="{{ asset($tPath.'assets2/img/logo.png') }}" rel="icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -173,7 +173,7 @@ $tPath = app()->environment('local') ? '' : '';
     @endif
     <script>
     const domain = window.location.protocol + '//' + window.location.hostname + ":" + window.location.port;
-    const reff = '/admin';
+    const reff = '/metode-pembayaran';
     var csrfToken = "{{ csrf_token() }}";
     var userAuth = @json($userAuth);
     </script>
@@ -254,13 +254,80 @@ $tPath = app()->environment('local') ? '' : '';
     @include('components.preloader')
     <div id="greenPopup" style="display:none"></div>
     <div id="redPopup" style="display:none"></div>
+    <script>
+        const modalDelete = document.querySelector('#modalDelete');
+        const deleteForm = document.getElementById('deleteForm');
+        const inpID = document.getElementById('inpID');
+        let isAnimating = false;
+        deleteForm.addEventListener('click',function(event){
+            event.stopPropagation();
+        });
+        function showModalDelete(id){
+            inpID.value = id;
+            modalDelete.style.display = 'block';
+            animateModalDelete('20%');
+        }
+        function closeModalDelete(){
+            animateModalDelete('-20%');
+        }
+        function animateModalDelete(finalTop) {
+            let currentTop = parseInt(deleteForm.style.top) || 0;
+            let increment = currentTop < parseInt(finalTop) ? 1 : -1;
+            function frame() {
+                currentTop += increment;
+                deleteForm.style.top = currentTop + '%';
+                if ((increment === 1 && currentTop >= parseInt(finalTop)) || (increment === -1 && currentTop <= parseInt(finalTop))) {
+                    clearInterval(animationInterval);
+                    if (finalTop === '20%') {
+                        isAnimating = false;
+                    } else {
+                        modalDelete.style.display = 'none';
+                    }
+                }
+            }
+            let animationInterval = setInterval(frame, 5);
+        }
+        function showLoading() {
+            document.querySelector("div#preloader").style.display = "block";
+        }
+        function closeLoading() {
+            document.querySelector("div#preloader").style.display = "none";
+        }
+        deleteForm.onsubmit = function (event) {
+            event.preventDefault();
+            showLoading();
+            var xhr = new XMLHttpRequest();
+            var requestBody = {
+                id_metode_pembayaran: inpID.value.trim(),
+            };
+            xhr.open("DELETE", "/metode-pembayaran/delete");
+            xhr.setRequestHeader("X-CSRF-TOKEN", csrfToken);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.send(JSON.stringify(requestBody));
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        closeLoading();
+                        var response = JSON.parse(xhr.responseText);
+                        showGreenPopup(response.message);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        closeLoading();
+                        var response = JSON.parse(xhr.responseText);
+                        showRedPopup(response.message);
+                    }
+                }
+            };
+            return false;
+        };
+    </script>
     <script src="{{ asset($tPath.'assets/libs/jquery/dist/jquery.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/sidebarmenu.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/app.min.js') }}"></script>
-    <script src="{{ asset($tPath.'assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
-    <script src="{{ asset($tPath.'assets2/js/page/modalDelete.js') }}"></script>
 </body>
 </html>

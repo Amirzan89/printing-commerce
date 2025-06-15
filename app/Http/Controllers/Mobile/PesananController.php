@@ -25,7 +25,7 @@ class PesananController extends Controller
         try {
             $statusPesanan = $request->query('status_pesanan');
             $statusTransaksi = $request->query('status_transaksi');
-            $query = Pesanan::select('id_pesanan', 'uuid', 'status_pesanan', 'total_harga', 'estimasi_waktu', 'maksimal_revisi', 'created_at')
+            $query = Pesanan::select('pesanan.id_pesanan', 'uuid', 'status_pesanan', 'total_harga', 'estimasi_waktu', 'maksimal_revisi', 'pesanan.created_at')
                 ->join('transaksi', 'transaksi.id_pesanan', '=', 'pesanan.id_pesanan')
                 ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user);
             
@@ -63,7 +63,7 @@ class PesananController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengambil pesanan', 
-                'data' => null
+                'data' => $e->getMessage()
             ], 500);
         }
     }

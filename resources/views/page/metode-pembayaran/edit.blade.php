@@ -8,7 +8,7 @@ $tPath = app()->environment('local') ? '' : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Metode Pembayaran | TATA</title>
-    <link rel="shortcut icon" type="image/png" href="{{ asset($tPath.'img/icon/icon.png') }}" />
+    <link href="{{ asset($tPath.'assets2/img/logo.png') }}" rel="icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -176,8 +176,7 @@ $tPath = app()->environment('local') ? '' : '';
                                 <div class="form-group">
                                     <label class="form-label">Thumbnail</label>
                                     <div class="image-preview" onclick="document.getElementById('inpThumbnail').click()">
-                                        {{-- <img src="{{ asset($tPath.'assets3/img/metode-pembayaran/'.$metodePembayaranData['thumbnail']) }}"  --}}
-                                        <img src="{{ asset($tPath.'assets3/img/metode-pembayaran/1.jpg') }}"
+                                        <img src="{{ asset($tPath.'metode-pembayaran/'.$metodePembayaranData['thumbnail']) }}"
                                             alt="Thumbnail Preview" id="thumbnailPreview" style="display: block;">
                                         <div class="placeholder" id="thumbnailPlaceholder" style="display: none;">
                                             <i class="fas fa-image"></i>
@@ -192,8 +191,7 @@ $tPath = app()->environment('local') ? '' : '';
                                 <div class="form-group">
                                     <label class="form-label">Icon</label>
                                     <div class="image-preview" onclick="document.getElementById('inpIcon').click()">
-                                        {{-- <img src="{{ asset($tPath.'assets3/img/metode-pembayaran/'.$metodePembayaranData['icon']) }}"  --}}
-                                        <img src="{{ asset($tPath.'assets3/img/metode-pembayaran/2.jpg') }}"
+                                        <img src="{{ asset($tPath.'metode-pembayaran/'.$metodePembayaranData['icon']) }}"
                                             alt="Icon Preview" id="iconPreview" style="display: block;">
                                         <div class="placeholder" id="iconPlaceholder" style="display: none;">
                                             <i class="fas fa-image"></i>
@@ -252,9 +250,10 @@ $tPath = app()->environment('local') ? '' : '';
                 $('#preloader').show();
 
                 const formData = new FormData(this);
-                
+                formData.append('id_metode_pembayaran', uuid);
+                formData.append('_method', 'PUT');
                 $.ajax({
-                    url: domain + '/api/metode-pembayaran/update',
+                    url: domain + '/metode-pembayaran/update',
                     type: 'POST',
                     data: formData,
                     contentType: false,

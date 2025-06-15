@@ -42,10 +42,11 @@ deleteForm.onsubmit = function (event) {
     var xhr = new XMLHttpRequest();
     var requestBody = {
         uuid: inpID.value.trim(),
-        email: email,
     };
     if(reff == '/admin'){
         xhr.open("DELETE", "/admin/delete");
+    }else if(reff == '/metode-pembayaran'){
+        xhr.open("DELETE", "/metode-pembayaran/delete");
     }else{
         xhr.open("DELETE", reff + "/delete");
     }
@@ -57,14 +58,14 @@ deleteForm.onsubmit = function (event) {
             if (xhr.status === 200) {
                 closeLoading();
                 var response = JSON.parse(xhr.responseText);
-                showGreenPopup(response);
+                showGreenPopup(response.message);
                 setTimeout(() => {
                     window.location.reload();
                 }, 1000);
             } else {
                 closeLoading();
                 var response = JSON.parse(xhr.responseText);
-                showRedPopup(response);
+                showRedPopup(response.message);
             }
         }
     };

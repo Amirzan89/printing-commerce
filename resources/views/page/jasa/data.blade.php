@@ -8,7 +8,7 @@ $tPath = app()->environment('local') ? '' : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Jasa | TATA</title>
-    <link rel="shortcut icon" type="image/png" href="{{ asset($tPath.'assets2/icon/icon.png') }}" />
+    <link href="{{ asset($tPath.'assets2/img/logo.png') }}" rel="icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -206,21 +206,12 @@ $tPath = app()->environment('local') ? '' : '';
                 <div class="d-flex align-items-stretch">
                     <div class="card w-100">
                         <div class="card-body p-4">
-                            <div class="d-flex justify-content-start">
-                                <a href="/jasa/tambah" class="btn btn-success d-flex align-items-center justify-content-center gap-2" id="btnTambah">
-                                    <img src="{{ asset($tPath.'assets2/icon/tambah.svg') }}" alt="Tambah" class="img-fluid" style="max-width: 19px;">
-                                    <span>Tambah Jasa</span>
-                                </a>
-                            </div>
                             <div class="table-responsive">
                                 <table class="table mb-0 align-middle">
                                     <thead class="text-dark fs-4">
                                         <tr>
                                             <th class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">No</h6>
-                                            </th>
-                                            <th class="border-bottom-0">
-                                                <h6 class="fw-semibold mb-0">Judul</h6>
                                             </th>
                                             <th class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">Kategori</h6>
@@ -238,19 +229,13 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <h6 class="fw-semibold mb-0">{{ $no++ }}</h6>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <span class="fw-normal">{{ $data['nama_jasa'] }}
+                                                <span class="fw-normal">{{ $data['kategori'] }}
                                                 </span>
-                                            </td>
-                                            <td class="border-bottom-0">
-                                                <p class="mb-0 fw-normal">{{ $data['kategori']}}</p>
                                             </td>
                                             <td class="border-bottom-0">
                                                 <a href="/jasa/edit/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1" style="width: fit-content; height: fit-content; padding: 12px;">
                                                     <img src="{{ asset($tPath.'assets2/icon/edit.svg') }}" alt="">
                                                 </a>
-                                                <button type="button" class="btn btn-danger btn-delete m-1" style="width: fit-content; height: fit-content; padding: 12px;" onclick="showModalDelete('{{ $data['uuid'] }}')">
-                                                    <img src="{{ asset($tPath.'assets2/icon/delete.svg') }}" alt="">
-                                                </button>
                                             </td>
                                         </tr>
                                         @endforeach

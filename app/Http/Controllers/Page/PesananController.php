@@ -27,7 +27,7 @@ class PesananController extends Controller
             ->get();
         
         $pesananList->each(function($pesanan) {
-            $latestEditor = $pesanan->editorFiles()->with('editor')->latest('uploaded_at')->first();
+            $latestEditor = $pesanan->editorFiles()->with('editor')->latest('updated_at')->first();
             $pesanan->nama_editor = $latestEditor ? $latestEditor->editor->nama_editor : '-';
         });
         $dataShow = [
