@@ -10,7 +10,7 @@ return new class extends Migration
             $table->id('id_transaksi');
             $table->string('order_id')->unique();
             $table->unsignedInteger('jumlah');
-            $table->enum('status_transaksi', ['belum_buat_transaksi', 'belum_bayar', 'menunggu_konfirmasi', 'lunas', 'dibatalkan', 'expired']);
+            $table->enum('status_transaksi', ['belum_bayar', 'menunggu_konfirmasi', 'lunas', 'dibatalkan', 'expired']);
             $table->string('bukti_pembayaran')->nullable();
             $table->dateTime('waktu_pembayaran')->nullable();
             $table->dateTime('confirmed_at')->nullable();

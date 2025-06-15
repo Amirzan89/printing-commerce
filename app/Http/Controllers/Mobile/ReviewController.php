@@ -22,17 +22,27 @@ class ReviewController extends Controller
         try {
             // Validate input
             $validator = Validator::make($request->all(), [
-                'id_pesanan' => 'required|exists:pesanan,id_pesanan',
+                'id_pesanan' => 'required',
                 'review' => 'required|string|max:250|min:5',
                 'rating' => 'required|integer|between:1,5',
+            ], [
+                'id_pesanan.required' => 'ID pesanan wajib diisi',
+                'review.required' => 'Review wajib diisi',
+                'review.string' => 'Review harus berupa teks',
+                'review.max' => 'Review maksimal 250 karakter',
+                'review.min' => 'Review minimal 5 karakter',
+                'rating.required' => 'Rating wajib diisi',
+                'rating.integer' => 'Rating harus berupa angka',
+                'rating.between' => 'Rating harus antara 1 dan 5'
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Validation error',
-                    'errors' => $validator->errors()
-                ], 422);
+                $errors = [];
+                foreach ($validator->errors()->toArray() as $field => $errorMessages){
+                    $errors[$field] = $errorMessages[0];
+                    break;
+                }
+                return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
             }
 
             // Sanitize input

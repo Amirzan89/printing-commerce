@@ -8,6 +8,12 @@ use App\Services\ChatService;
 use App\Models\User;
 use App\Models\Order;
 use Kreait\Firebase\Contract\Database;
+use App\Models\Pesanan;
+use App\Models\ChatMessage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Google_Client;
 
 class ChatController extends Controller
 {
@@ -19,6 +25,45 @@ class ChatController extends Controller
         $this->chatService = $chatService;
         $this->database = $database;
     }
+    private function assignEditor($sender_id, $pesanan, $editor){
+        // // Send notification message to chat
+            $isRevision = $pesanan->chatMessages()->where(function($q) {
+                $q->where('message', 'like', '%revisi%')
+                  ->orWhere('message', 'like', '%revision%')
+                  ->orWhere('message', 'like', '%perbaikan%');
+            })->exists();
+
+            $assignmentMessage = $isRevision 
+                ? "Editor {$editor->nama_editor} telah ditugaskan untuk menangani revisi Anda."
+                : "Editor {$editor->nama_editor} telah ditugaskan untuk mengerjakan pesanan Anda.";
+                
+            if ($pesanan->notes) {
+                $assignmentMessage .= " Catatan: " . $pesanan->notes;
+            }
+
+            ChatMessage::create([
+                'uuid' => Str::uuid(),
+                'message' => $assignmentMessage,
+                'sender_type' => 'admin',
+                'sender_id' => $sender_id,
+                'id_pesanan' => $pesanan->id_pesanan,
+                'created_at' => now()
+            ]);
+    // // Send completion message
+            // $completionMessage = "Revisi telah selesai dikerjakan dan pesanan Anda sudah siap.";
+            // if ($request->input('catatan_editor')) {
+            //     $completionMessage .= " Catatan: " . $request->catatan_editor;
+            // }
+
+            // ChatMessage::create([
+            //     'uuid' => Str::uuid(),
+            //     'message' => $completionMessage,
+            //     'sender_type' => 'admin',
+            //     'sender_id' => auth()->id(),
+            //     'id_pesanan' => $pesanan->id_pesanan,
+            //     'created_at' => now()
+            // ]);
+        }
 
     public function sendMessage(Request $request)
     {
@@ -217,6 +262,76 @@ class ChatController extends Controller
                 'message' => 'Notification has been sent',
                 'response' => json_decode($response, true)
             ]);
+        }
+    }
+    /**
+     * ADMIN: Send revision response via chat
+     */
+    public function sendRevisionResponse(Request $request, $uuid){
+        try {
+            $validator = Validator::make($request->all(), [
+                'message' => 'required|string|max:1000',
+                'action' => 'required|in:accept,reject,request_clarification'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $validator->errors()->first()
+                ], 422);
+            }
+
+            $pesanan = Pesanan::where('uuid', $uuid)->first();
+
+            if (!$pesanan) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Pesanan tidak ditemukan'
+                ], 404);
+            }
+
+            // Send response message
+            ChatMessage::create([
+                'uuid' => Str::uuid(),
+                'message' => $request->message,
+                'sender_type' => 'admin',
+                'sender_id' => auth()->id(),
+                'id_pesanan' => $pesanan->id_pesanan,
+                'created_at' => now()
+            ]);
+
+            // Update pesanan status based on action
+            $statusUpdate = [];
+            switch ($request->action) {
+                case 'accept':
+                    $statusUpdate['status'] = 'dikerjakan';
+                    break;
+                case 'reject':
+                    $statusUpdate['status'] = 'selesai';
+                    break;
+                case 'request_clarification':
+                    // Status remains the same, just asking for clarification
+                    break;
+            }
+
+            if (!empty($statusUpdate)) {
+                $pesanan->update($statusUpdate);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Respon revisi berhasil dikirim',
+                'data' => [
+                    'pesanan' => $pesanan->fresh(),
+                    'action_taken' => $request->action
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengirim respon: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

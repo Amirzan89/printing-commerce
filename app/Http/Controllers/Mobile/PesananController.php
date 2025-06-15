@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -24,7 +25,7 @@ class PesananController extends Controller
         try {
             $statusPesanan = $request->query('status_pesanan');
             $statusTransaksi = $request->query('status_transaksi');
-            $query = Pesanan::select('id_pesanan', 'uuid', 'status', 'total_harga', 'estimasi_waktu', 'maksimal_revisi', 'created_at')
+            $query = Pesanan::select('id_pesanan', 'uuid', 'status_pesanan', 'total_harga', 'estimasi_waktu', 'maksimal_revisi', 'created_at')
                 ->join('transaksi', 'transaksi.id_pesanan', '=', 'pesanan.id_pesanan')
                 ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user);
             
@@ -36,7 +37,7 @@ class PesananController extends Controller
                         'message' => 'Status pesanan tidak valid'
                     ], 400);
                 }
-                $query->where('status', $statusPesanan);
+                $query->where('status_pesanan', $statusPesanan);
             }
             
             // Apply payment status filter only if it's not 'all'
@@ -70,7 +71,7 @@ class PesananController extends Controller
     /**
      * Get detailed pesanan information
      */
-    public function getDetail($uuid)
+    public function getDetail(Request $request, $uuid)
     {
         try {
             $pesanan = Pesanan::with([
@@ -82,7 +83,7 @@ class PesananController extends Controller
                 'toEditor'
             ])
                 ->where('uuid', $uuid)
-                ->where('id_user', request()->user()->id_user)
+                ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
                 ->first();
 
             if (!$pesanan) {
@@ -154,7 +155,7 @@ class PesananController extends Controller
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => $uuid,
                 'deskripsi' => $request->catatan_user,
-                'status' => 'pending',
+                'status_pesanan' => 'pending',
                 'total_harga' => $paketJasa->harga_paket_jasa,
                 'estimasi_waktu' => $estimasiWaktu,
                 'maksimal_revisi' => $jumlahRevisi,
@@ -166,18 +167,22 @@ class PesananController extends Controller
             ]);
 
             // Handle image upload for revisi
-            $gambarFilename = null;
-            if ($request->hasFile('gambar_referensi')) {
+            $filename = null;
+            if ($request->hasFile('gambar_referensi') && $request->file('gambar_referensi')->isValid() && in_array($request->file('gambar_referensi')->extension(), ['jpeg', 'png', 'jpg'])) {
                 $file = $request->file('gambar_referensi');
-                $gambarFilename = 'brief_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('uploads/revisi'), $gambarFilename);
+                $filename = $file->hashName();
+                // Checking folder existence
+                if (!Storage::disk('pesanan')->exists('catatan_pesanan')) {
+                    Storage::disk('pesanan')->makeDirectory('catatan_pesanan');
+                }
+                // Uploading file
+                Storage::disk('pesanan')->put('catatan_pesanan/' . $filename, file_get_contents($file));
             }
-
             // Create revisi record
             if($request->input('catatan_user') != null){
                 CatatanPesanan::create([
                     'catatan_pesanan' => $request->input('catatan_user'),
-                    'gambar_referensi' => $gambarFilename,
+                    'gambar_referensi' => $filename,
                     'uploaded_at' => now(),
                     'id_pesanan' => $idPesanan,
                     'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user
@@ -201,7 +206,7 @@ class PesananController extends Controller
     }
 
     /**
-     * Cancel pesanan (only if pending or belum_bayar)
+     * Cancel pesanan (only if pending)
      */
     public function cancel(Request $request){
         try {
@@ -218,8 +223,9 @@ class PesananController extends Controller
                 }
                 return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
             }
-            $pesanan = Pesanan::where('uuid', $request->input('id_pesanan'))
-                ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
+            $pesanan = Pesanan::join('catatan_pesanan', 'catatan_pesanan.id_pesanan', '=', 'pesanan.id_pesanan')
+                ->where('uuid', $request->input('id_pesanan'))
+                ->where('pesanan.id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
                 ->first();
 
             if (!$pesanan) {
@@ -229,25 +235,27 @@ class PesananController extends Controller
                 ], 404);
             }
 
-            if ($pesanan->status == 'dibatalkan') {
+            if ($pesanan->status_pesanan == 'dibatalkan') {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Pesanan sudah dibatalkan'
                 ], 422);
             }
-            if (!in_array($pesanan->status, ['pending', 'menunggu_konfirmasi'])) {
+            if ($pesanan->status_pesanan != 'pending') {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Pesanan tidak dapat dibatalkan pada status ini'
                 ], 422);
             }
-
+            if($pesanan->gambar_referensi != null){
+                Storage::disk('pesanan')->delete('catatan_pesanan/' . $pesanan->gambar_referensi);
+            }
             // Cancel related transactions
             Transaksi::where('id_pesanan', $pesanan->id_pesanan)
-                ->update(['status' => 'dibatalkan']);
+                ->update(['status_transaksi' => 'dibatalkan']);
 
             $pesanan->update([
-                'status' => 'dibatalkan',
+                'status_pesanan' => 'dibatalkan',
             ]);
 
             return response()->json([

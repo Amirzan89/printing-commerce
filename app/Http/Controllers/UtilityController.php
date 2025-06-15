@@ -14,8 +14,8 @@ class UtilityController extends Controller
     }
     public static function getHeaderData(){
         return Pesanan::with(['toUser', 'toJasa'])
-            ->select('id_pesanan', 'deskripsi', 'status', 'total_harga', 'id_user', 'id_jasa', 'created_at')
-            ->where('status', 'pending')
+            ->select('id_pesanan', 'deskripsi', 'status_pesanan', 'total_harga', 'id_user', 'id_jasa', 'created_at')
+            ->where('status_pesanan', 'pending')
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();

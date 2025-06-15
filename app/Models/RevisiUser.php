@@ -15,7 +15,7 @@ class RevisiUser extends Model
     public $timestamps = true;
     
     protected $fillable = [
-        'nama_file', 'type', 'catatan_user', 'uploaded_at', 'id_revisi', 'id_user'
+        'nama_file', 'catatan_user', 'uploaded_at', 'id_revisi', 'id_user'
     ];
     
     protected $casts = [
@@ -39,15 +39,5 @@ class RevisiUser extends Model
     public function getFileUrlAttribute()
     {
         return asset('uploads/revisi_user/' . $this->nama_file);
-    }
-    
-    public function isBriefFile()
-    {
-        return $this->type === 'revisi';
-    }
-    
-    public function isRevisionFile()
-    {
-        return $this->type === 'revisi';
     }
 } 

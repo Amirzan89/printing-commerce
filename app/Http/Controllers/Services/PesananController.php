@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Models\Editor;
+use App\Models\RevisiEditor;
 use Carbon\Carbon;
 
 class PesananController extends Controller
@@ -16,15 +17,13 @@ class PesananController extends Controller
      */
     public function updateStatus(Request $request){
         try {
-            $validator = Validator::make($request->only('id_pesanan', 'status_pesanan', 'editor_id'), [
+            $validator = Validator::make($request->only('id_pesanan', 'status_pesanan'), [
                 'id_pesanan' => 'required',
-                'status_pesanan' => 'required|in:pending,diproses,menunggu_editor,dikerjakan,revisi,selesai,dibatalkan',
-                'editor_id' => 'nullable|exists:editor,id_editor'
+                'status_pesanan' => 'required|in:menunggu_editor,selesai,dibatalkan'
             ], [
                 'id_pesanan.required' => 'ID pesanan harus diisi',
                 'status_pesanan.required' => 'Status pesanan harus diisi',
-                'status_pesanan.in' => 'Status pesanan tidak valid',
-                'editor_id.exists' => 'Editor tidak ditemukan'
+                'status_pesanan.in' => 'Status pesanan harus diantara menunggu_editor, selesai, dibatalkan',
             ]);
 
             if ($validator->fails()) {
@@ -36,7 +35,9 @@ class PesananController extends Controller
                 return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
             }
 
-            $pesanan = Pesanan::where('uuid', $request->input('id_pesanan'))->first();
+            $pesanan = Pesanan::join('transaksi', 'pesanan.id_pesanan', '=', 'transaksi.id_pesanan')
+                ->where('pesanan.uuid', $request->input('id_pesanan'))
+                ->first();
 
             if (!$pesanan) {
                 return response()->json([
@@ -44,40 +45,72 @@ class PesananController extends Controller
                     'message' => 'Pesanan tidak ditemukan'
                 ], 404);
             }
-
+            if(in_array($pesanan->status_pesanan, ['pending', 'dibatalkan', 'selesai'])){
+                switch($pesanan->status_pesanan){
+                    case 'pending':
+                        $message = 'masih dalam proses pembayaran';
+                        break;
+                    case 'dibatalkan':
+                        $message = 'sudah dibatalkan';
+                        break;
+                    case 'selesai':
+                        $message = 'sudah selesai final';
+                        break;
+                }
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Pesanan ' . $message
+                ], 400);
+            }
+            if($pesanan->status_transaksi != 'lunas'){
+                switch($pesanan->status_transaksi){
+                    case 'belum_bayar':
+                        $message = 'belum dibayar';
+                        break;
+                    case 'menunggu_konfirmasi':
+                        $message = 'masih menunggu konfirmasi';
+                        break;
+                    case 'dibatalkan':
+                        $message = 'sudah dibatalkan';
+                        break;
+                    case 'expired':
+                        $message = 'sudah kadaluarsa';
+                        break;
+                }
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Transaksi ' . $message
+                ], 400);
+            }
             $updateData = ['status_pesanan' => $request->input('status_pesanan')];
-
             // Set timestamps based on status
             switch ($request->input('status_pesanan')) {
-                case 'diproses':
-                    $updateData['confirmed_at'] = Carbon::now();
-                    break;
-                case 'dikerjakan':
-                    $updateData['assigned_at'] = Carbon::now();
-                    // If editor_id is provided, assign the editor
-                    if (!$request->has('editor_id') || is_null($request->input('editor_id'))) {
+                case 'menunggu_editor':
+                    if($pesanan->status_pesanan == 'menunggu_editor'){
                         return response()->json([
                             'status' => 'error',
-                            'message' => 'Silahkan pilih editor terlebih dahulu'
+                            'message' => 'Pesanan sudah dalam status menunggu editor'
                         ], 400);
                     }
-                    $editor = Editor::where('id_editor', $request->input('editor_id'))->first();
-                    if (!$editor) {
-                        return response()->json([
-                            'status' => 'error',
-                            'message' => 'Editor tidak ditemukan'
-                        ], 404);
-                    }
-                    $updateData['id_editor'] = $request->input('editor_id');
+                    $message = 'berhasil diubah ke status menunggu editor';
                     break;
                 case 'selesai':
-                    $updateData['completed_at'] = Carbon::now();
+                    if($pesanan->status_pesanan == 'selesai'){
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Pesanan sudah dalam status selesai final'
+                        ], 400);
+                    }
+                    $message = 'berhasil diselesaikan secara final';
+                    break;
+                case 'dibatalkan':
+                    $message = 'berhasil dibatalkan';
                     break;
             }
             $pesanan->update($updateData);
             return response()->json([
                 'status' => 'success',
-                'message' => 'Status pesanan berhasil diupdate',
+                'message' => 'Status pesanan ' . $message,
                 'data' => $pesanan->fresh()
             ]);
 
@@ -119,10 +152,10 @@ class PesananController extends Controller
             }
 
             // Check if pesanan can be deleted
-            if (in_array($pesanan->status_pesanan, ['dikerjakan', 'selesai'])) {
+            if (in_array($pesanan->status_pesanan, ['dikerjakan', 'revisi', 'menunggu_review', 'selesai'])) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Pesanan yang sedang dikerjakan atau selesai tidak dapat dihapus'
+                    'message' => 'Pesanan yang sedang dikerjakan, revisi, menunggu review, atau selesai tidak dapat dihapus'
                 ], 422);
             }
 

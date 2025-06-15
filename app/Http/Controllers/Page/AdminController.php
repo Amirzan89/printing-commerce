@@ -10,7 +10,7 @@ use App\Models\Pesanan;
 class AdminController extends Controller
 {
     public function showDashboard(Request $request){
-        $monthlyTotals = Pesanan::where('status', 'selesai')
+        $monthlyTotals = Pesanan::where('status_pesanan', 'selesai')
             ->whereYear('updated_at', Carbon::now()->year)
             ->select(
                 DB::raw('MONTH(updated_at) as month'),
@@ -30,8 +30,8 @@ class AdminController extends Controller
             $salesData[] = $monthData ? $monthData->total : 0;
         }
         $dataShow = [
-            'total_pesanan' => Pesanan::where('status', 'selesai')->count(),
-            'list_pesanan' => Pesanan::where('status', 'selesai')
+            'total_pesanan' => Pesanan::where('status_pesanan', 'selesai')->count(),
+            'list_pesanan' => Pesanan::where('status_pesanan', 'selesai')
                 ->join('users', 'pesanan.id_user', '=', 'users.id_user')
                 ->join('jasa', 'pesanan.id_jasa', '=', 'jasa.id_jasa')
                 ->select(

@@ -10,7 +10,6 @@ return new class extends Migration
         Schema::create('revisi_editor', function (Blueprint $table) {
             $table->id('id_revisi_editor');
             $table->string('nama_file');
-            $table->enum('type', ['preview', 'final']);
             $table->text('catatan_editor')->nullable();
             $table->timestamps();
             $table->unsignedBigInteger('id_editor');

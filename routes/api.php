@@ -6,7 +6,7 @@ use App\Http\Controllers\Mobile\JasaController;
 use App\Http\Controllers\Mobile\PesananController;
 use App\Http\Controllers\Mobile\TransaksiController;
 use App\Http\Controllers\Mobile\MailController;
-use App\Http\Controllers\Mobile\RevisiController;
+use App\Http\Controllers\Mobile\PengerjaanController;
 use App\Http\Controllers\Mobile\MetodePembayaranController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request){
     return $request->user();
@@ -27,17 +27,16 @@ Route::group(['prefix'=>'/mobile'], function(){
             Route::post('/cancel', [PesananController::class, 'cancel']);
         });
         
-        //API only revisi route
-        Route::group(['prefix'=>'/revisi'], function(){
-            Route::get('/', [RevisiController::class, 'getAll']);
-            Route::get('/{id_revisi}', [RevisiController::class, 'getDetail']);
-            Route::post('/{id_revisi}/request', [RevisiController::class, 'requestRevision']);
-            Route::get('/{id_revisi}/download', [RevisiController::class, 'downloadFiles']);
-            Route::get('/{id_revisi}/history', [RevisiController::class, 'getRevisionHistory']);
-            Route::get('/{id_revisi}/{revisionUuid}', [RevisiController::class, 'getDetail']);
-            Route::post('/{id_revisi}/{revisionUuid}/accept', [RevisiController::class, 'acceptWork']);
-            Route::post('/accept-work/{id_revisi}', [RevisiController::class, 'acceptWork']);
-            Route::get('/download/{id_revisi}', [RevisiController::class, 'downloadFiles']);
+        //API only pengerjaan route
+        Route::group(['prefix'=>'/pengerjaan'], function(){
+            Route::get('/', [PengerjaanController::class, 'getAll']);
+            Route::get('/{id_revisi}', [PengerjaanController::class, 'getDetail']);
+            Route::post('/{id_revisi}/request-revisi', [PengerjaanController::class, 'requestRevision']);
+            Route::get('/{id_revisi}/download', [PengerjaanController::class, 'downloadFiles']);
+            Route::get('/{id_revisi}/history', [PengerjaanController::class, 'getRevisionHistory']);
+            Route::get('/{id_revisi}/{revisionUuid}', [PengerjaanController::class, 'getDetail']);
+            Route::post('/{id_revisi}/accept-work', [PengerjaanController::class, 'acceptWork']);
+            Route::post('/download', [PengerjaanController::class, 'downloadFiles']);
         });
 
         //API only metode pembayaran route

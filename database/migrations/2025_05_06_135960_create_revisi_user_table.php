@@ -10,7 +10,6 @@ return new class extends Migration
         Schema::create('revisi_user', function (Blueprint $table) {
             $table->id('id_revisi_user');
             $table->string('nama_file');
-            $table->enum('type', ['revisi', 'final']);
             $table->text('catatan_user')->nullable();
             $table->timestamps();
             $table->unsignedBigInteger('id_revisi')->nullable();

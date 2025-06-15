@@ -26,11 +26,12 @@ class ReviewController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Validation error',
-                    'errors' => $validator->errors()
-                ], 422);
+                $errors = [];
+                foreach ($validator->errors()->toArray() as $field => $errorMessages){
+                    $errors[$field] = $errorMessages[0];
+                    break;
+                }
+                return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
             }
 
             // Sanitize input
@@ -126,11 +127,12 @@ class ReviewController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Invalid filter parameters',
-                    'errors' => $validator->errors()
-                ], 422);
+                $errors = [];
+                foreach ($validator->errors()->toArray() as $field => $errorMessages){
+                    $errors[$field] = $errorMessages[0];
+                    break;
+                }
+                return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
             }
 
             $perPage = $request->input('per_page', 10);
@@ -197,11 +199,12 @@ class ReviewController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Invalid date parameters',
-                    'errors' => $validator->errors()
-                ], 422);
+                $errors = [];
+                foreach ($validator->errors()->toArray() as $field => $errorMessages){
+                    $errors[$field] = $errorMessages[0];
+                    break;
+                }
+                return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
             }
 
             $query = Review::query();

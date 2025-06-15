@@ -10,7 +10,7 @@ return new class extends Migration
             $table->id('id_pesanan');
             $table->uuid();
             $table->string('deskripsi');
-            $table->enum('status_pesanan', ['pending', 'diproses', 'menunggu_editor', 'dikerjakan', 'revisi', 'selesai', 'dibatalkan']);
+            $table->enum('status_pesanan', ['pending', 'diproses', 'menunggu_editor', 'dikerjakan', 'revisi', 'menunggu_review', 'selesai', 'dibatalkan']);
             $table->unsignedInteger('total_harga');
             $table->dateTime('estimasi_waktu');
             $table->unsignedTinyInteger('maksimal_revisi');
@@ -24,6 +24,8 @@ return new class extends Migration
             $table->foreign('id_jasa')->references('id_jasa')->on('jasa')->onDelete('cascade');
             $table->unsignedBigInteger('id_paket_jasa');
             $table->foreign('id_paket_jasa')->references('id_paket_jasa')->on('paket_jasa')->onDelete('cascade');
+            $table->unsignedBigInteger('id_editor')->nullable();
+            $table->foreign('id_editor')->references('id_editor')->on('editor')->onDelete('set null');
         });
     }
 

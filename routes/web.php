@@ -9,7 +9,7 @@ use App\Http\Controllers\Services\MetodePembayaranController;
 use App\Http\Controllers\Services\TransaksiController;
 use App\Http\Controllers\Services\AdminController;
 use App\Http\Controllers\Services\EditorController;
-use App\Http\Controllers\Services\RevisiController;
+use App\Http\Controllers\Services\PengerjaanController;
 use App\Http\Controllers\Mobile\ChatController;
 use App\Http\Controllers\Mobile\UserController;
 
@@ -21,7 +21,7 @@ use App\Http\Controllers\Page\ChatController AS ShowChatController;
 use App\Http\Controllers\Page\AdminController AS ShowAdminController;
 use App\Http\Controllers\Page\EditorController AS ShowEditorController;
 use App\Http\Controllers\Page\UserController AS ShowUserController;
-use App\Http\Controllers\Page\RevisiController AS ShowRevisiController;
+use App\Http\Controllers\Page\PengerjaanController AS ShowPengerjaanController;
 
 Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
     //API only jasa route
@@ -76,9 +76,8 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         //page transaksi
         Route::get('/',[ShowTransaksiController::class,'showAll']);
         Route::get('/detail/{any}',[ShowTransaksiController::class,'showDetail']);
+        Route::get('/pending', [ShowTransaksiController::class, 'getPendingPayments']);
         //route for transaksi
-        Route::post('/update',[TransaksiController::class,'validateTransaksi']);
-        Route::get('/pending', [TransaksiController::class, 'getPendingPayments']);
         Route::post('/confirm', [TransaksiController::class, 'confirmPayment']);
         Route::post('/reject', [TransaksiController::class, 'rejectPayment']);
     });
@@ -125,20 +124,19 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::delete('/delete',[EditorController::class,'deleteEditor']);
     });
 
-    //API only revisi route
-    Route::group(['prefix'=>'/revisi'], function(){
-        //page revisi
-        Route::get('/',[ShowRevisiController::class,'showAll']);
-        Route::get('/detail/{uuid}',[ShowRevisiController::class,'showDetail']);
-        Route::get('/statistics',[ShowRevisiController::class,'showStatistics']);
+    //API only pengerjaan route
+    Route::group(['prefix'=>'/pengerjaan'], function(){
+        //page pengerjaan
+        Route::get('/',[ShowPengerjaanController::class,'showAll']);
+        Route::get('/detail/{uuid}',[ShowPengerjaanController::class,'showDetail']);
+        Route::get('/statistics',[ShowPengerjaanController::class,'showStatistics']);
+        Route::get('/requests', [ShowPengerjaanController::class, 'getAllRevisionRequests']);
+        Route::get('/detail/{uuid}', [ShowPengerjaanController::class, 'getRevisionDetail']);
+        Route::get('/stats', [ShowPengerjaanController::class, 'getRevisionStatistics']);
         
         // API routes for revisi management
-        Route::get('/requests', [RevisiController::class, 'getAllRevisionRequests']);
-        Route::get('/detail/{uuid}', [RevisiController::class, 'getRevisionDetail']);
-        Route::post('/assign-editor/{uuid}', [RevisiController::class, 'assignEditor']);
-        Route::post('/respond/{uuid}', [RevisiController::class, 'sendRevisionResponse']);
-        Route::post('/complete/{uuid}', [RevisiController::class, 'markRevisionCompleted']);
-        Route::get('/stats', [RevisiController::class, 'getRevisionStatistics']);
+        Route::post('/assign-editor', [PengerjaanController::class, 'assignEditor']);
+        Route::post('/mark-completed', [PengerjaanController::class, 'markRevisionCompleted']);
     });
 
     Route::group(['prefix'=>'/admin'], function(){

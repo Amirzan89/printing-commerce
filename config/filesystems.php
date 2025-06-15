@@ -45,6 +45,11 @@ return [
             'root' => storage_path('app/transaksi'),
             'throw' => false,
         ],
+        'pesanan' => [
+            'driver' => 'local',
+            'root' => storage_path('app/pesanan'),
+            'throw' => false,
+        ],
 
         'public' => [
             'driver' => 'local',

@@ -8,7 +8,7 @@ use App\Models\Transaksi;
 use App\Models\Pesanan;
 use App\Models\MetodePembayaran;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Log;
 class TransaksiController extends Controller
 {
     public function showAll(Request $request){
@@ -69,6 +69,69 @@ class TransaksiController extends Controller
         
     //     return view('page.transaksi.tambah', $dataShow);
     // }
+    /**
+     * Admin: Get pending payments for review
+     */
+    public function getPendingPayments(Request $request)
+    {
+        try {
+            $limit = $request->query('limit', 20);
+            
+            $pendingPayments = Transaksi::with(['toPesanan.toUser.toAuth', 'toMetodePembayaran'])
+                ->where('status_transaksi', 'menunggu_konfirmasi')
+                ->whereNotNull('bukti_pembayaran')
+                ->orderBy('waktu_pembayaran', 'asc')
+                ->paginate($limit);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Daftar pembayaran pending berhasil diambil',
+                'data' => $pendingPayments
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getting pending payments: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengambil daftar pembayaran pending'
+            ], 500);
+        }
+    }
+    /**
+     * Get user transactions with filtering
+     */
+    public function getUserTransactions(Request $request)
+    {
+        try {
+            $status = $request->query('status');
+            $limit = $request->query('limit', 10);
+            
+            $query = Transaksi::with(['toMetodePembayaran', 'toPesanan.toJasa'])
+                ->whereHas('toPesanan', function ($query) use ($request) {
+                    $query->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user);
+                });
+            
+            if ($status && in_array($status, ['belum_bayar', 'menunggu_konfirmasi', 'lunas', 'dibatalkan', 'expired'])) {
+                $query->where('status_transaksi', $status);
+            }
+            
+            $transactions = $query->orderBy('created_at', 'desc')
+                ->paginate($limit);
+                
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Riwayat transaksi berhasil diambil',
+                'data' => $transactions
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error getting user transactions: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengambil riwayat transaksi'
+            ], 500);
+        }
+    }
     public function showReports(Request $request){
         // Get filter parameters
         $startDate = $request->input('start_date', Carbon::now()->subDays(30)->format('Y-m-d'));
@@ -111,5 +174,21 @@ class TransaksiController extends Controller
         ];
         
         return view('page.transaksi.reports', $dataShow);
+    }
+    public function exportTransactions(Request $request)
+    {
+        try {
+            $fileName = 'transactions_' . date('Y-m-d') . '.xlsx';
+            
+            // Filter parameters
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            $status = $request->input('status');
+            
+            return Excel::download(new TransaksiExport($startDate, $endDate, $status), $fileName);
+            
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to export transactions: ' . $e->getMessage());
+        }
     }
 }

@@ -42,6 +42,7 @@ class PesananSeeder extends Seeder
                 'id_user' => $jsonData['user'][rand(0, min(40, count($jsonData['user'])-1))],
                 'id_jasa' => $jsonData['jasa'][rand(0, min(2, count($jsonData['jasa'])-1))],
                 'id_paket_jasa' => $jsonData['paket_jasa'][rand(0, min(5, count($jsonData['paket_jasa'])-1))],
+                'id_editor' => $jsonData['editor'][rand(0, min(5, count($jsonData['editor'])-1))],
                 'created_at' => $createdAt,
                 'updated_at' => $createdAt
             ]);
@@ -61,6 +62,7 @@ class PesananSeeder extends Seeder
                 'id_user' => $jsonData['user'][rand(0, min(40, count($jsonData['user'])-1))],
                 'id_jasa' => $jsonData['jasa'][rand(0, min(2, count($jsonData['jasa'])-1))],
                 'id_paket_jasa' => $jsonData['paket_jasa'][rand(0, min(5, count($jsonData['paket_jasa'])-1))],
+                'id_editor' => $jsonData['editor'][rand(0, min(5, count($jsonData['editor'])-1))],
                 'created_at' => $createdAt,
                 'updated_at' => $createdAt
             ]);
@@ -83,6 +85,7 @@ class PesananSeeder extends Seeder
                 'id_user' => $jsonData['user'][rand(0, min(40, count($jsonData['user'])-1))],
                 'id_jasa' => $jsonData['jasa'][rand(0, min(2, count($jsonData['jasa'])-1))],
                 'id_paket_jasa' => $jsonData['paket_jasa'][rand(0, min(5, count($jsonData['paket_jasa'])-1))],
+                'id_editor' => $jsonData['editor'][rand(0, min(5, count($jsonData['editor'])-1))],
                 'created_at' => $createdAt,
                 'updated_at' => $assignedAt
             ]);
@@ -106,6 +109,7 @@ class PesananSeeder extends Seeder
                 'id_user' => $jsonData['user'][rand(0, min(40, count($jsonData['user'])-1))],
                 'id_jasa' => $jsonData['jasa'][rand(0, min(2, count($jsonData['jasa'])-1))],
                 'id_paket_jasa' => $jsonData['paket_jasa'][rand(0, min(5, count($jsonData['paket_jasa'])-1))],
+                'id_editor' => $jsonData['editor'][rand(0, min(5, count($jsonData['editor'])-1))],
                 'created_at' => $createdAt,
                 'updated_at' => $revisionAt
             ]);
@@ -130,6 +134,7 @@ class PesananSeeder extends Seeder
                 'id_user' => $jsonData['user'][rand(0, min(40, count($jsonData['user'])-1))],
                 'id_jasa' => $jsonData['jasa'][rand(0, min(2, count($jsonData['jasa'])-1))],
                 'id_paket_jasa' => $jsonData['paket_jasa'][rand(0, min(5, count($jsonData['paket_jasa'])-1))],
+                'id_editor' => $jsonData['editor'][rand(0, min(5, count($jsonData['editor'])-1))],
                 'created_at' => $createdAt,
                 'updated_at' => $completedAt
             ]);
@@ -149,6 +154,7 @@ class PesananSeeder extends Seeder
                 'id_user' => $jsonData['user'][rand(0, min(40, count($jsonData['user'])-1))],
                 'id_jasa' => $jsonData['jasa'][rand(0, min(2, count($jsonData['jasa'])-1))],
                 'id_paket_jasa' => $jsonData['paket_jasa'][rand(0, min(5, count($jsonData['paket_jasa'])-1))],
+                'id_editor' => $jsonData['editor'][rand(0, min(5, count($jsonData['editor'])-1))],
                 'created_at' => $createdAt,
                 'updated_at' => $createdAt
             ]);

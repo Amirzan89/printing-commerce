@@ -17,4 +17,17 @@ class Editor extends Model
     {
         return $this->hasMany(RevisiEditor::class, 'id_editor');
     }
+    
+    // Current assigned pesanan
+    public function currentPesanan()
+    {
+        return $this->hasMany(Pesanan::class, 'id_editor')
+            ->whereIn('status_pesanan', ['dikerjakan', 'revisi']);
+    }
+    
+    // All pesanan ever assigned to this editor
+    public function allPesanan()
+    {
+        return $this->hasMany(Pesanan::class, 'id_editor');
+    }
 }

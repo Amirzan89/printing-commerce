@@ -15,7 +15,7 @@ class RevisiEditor extends Model
     public $timestamps = true;
     
     protected $fillable = [
-        'nama_file', 'type', 'catatan_editor', 'uploaded_at', 'id_editor', 'id_revisi'
+        'nama_file', 'catatan_editor', 'uploaded_at', 'id_editor', 'id_revisi'
     ];
     
     protected $casts = [
@@ -39,15 +39,5 @@ class RevisiEditor extends Model
     public function getFileUrlAttribute()
     {
         return asset('uploads/revisi_editor/' . $this->nama_file);
-    }
-    
-    public function isPreviewFile()
-    {
-        return $this->type === 'preview';
-    }
-    
-    public function isFinalFile()
-    {
-        return $this->type === 'final';
     }
 } 
