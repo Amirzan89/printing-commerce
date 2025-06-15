@@ -11,7 +11,7 @@ class Jasa extends Model
     protected $keyType = 'integer';
     public $timestamps = false;
     protected $fillable = [
-        'uuid', 'nama_jasa', 'thumbnail_jasa', 'kategori'
+        'uuid', 'thumbnail_jasa', 'kategori'
     ];
     public function fromPaketJasa()
     {

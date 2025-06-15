@@ -16,9 +16,8 @@ class JasaSeeder extends Seeder
         for($i = 1; $i <= 3; $i++){
             $idJasa = Jasa::insertGetId([
                 'uuid' =>  Str::uuid(),
-                'nama_jasa' => 'Jasa '. $i,
                 'thumbnail_jasa' => '/1.jpg',
-                'kategori' => ['printing', 'desain'][rand(0,1)],
+                'kategori' => ['logo', 'banner', 'poster'][rand(0,2)],
             ]);
             $idJasas[] = $idJasa;
             for($l = 1; $l <= 3; $l++){

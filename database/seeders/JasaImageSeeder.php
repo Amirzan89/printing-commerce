@@ -72,7 +72,7 @@ class JasaImageSeeder extends Seeder
             ->values(); // Reset keys
         
         if ($imageFiles->isEmpty()) {
-            $this->command->warn("No images found for jasa {$jasa->nama_jasa} in {$categoryDir}");
+            $this->command->warn("No images found for jasa {$jasa->kategori} in {$categoryDir}");
             return;
         }
         
@@ -88,7 +88,7 @@ class JasaImageSeeder extends Seeder
             $jasa->thumbnail_jasa = $thumbnailName;
             $jasa->save();
             
-            $this->command->info("Thumbnail added for jasa {$jasa->nama_jasa}: {$thumbnailName}");
+            $this->command->info("Thumbnail added for jasa {$jasa->kategori}: {$thumbnailName}");
         }
         
         // Use 2-4 random images for the gallery
@@ -107,7 +107,7 @@ class JasaImageSeeder extends Seeder
                 'image_path' => $imageName
             ]);
             
-            $this->command->info("Gallery image added for jasa {$jasa->nama_jasa}: {$imageName}");
+            $this->command->info("Gallery image added for jasa {$jasa->kategori}: {$imageName}");
         }
     }
 } 

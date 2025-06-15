@@ -57,7 +57,7 @@ class PesananController extends Controller
             'pesananData' => [
                 'uuid' => $pesanan->uuid,
                 'nama_pelanggan' => $pesanan->toUser->nama_user ?? '-',
-                'jenis_jasa' => $pesanan->toJasa->nama_jasa ?? '-',
+                'jenis_jasa' => $pesanan->toJasa->kategori ?? '-',
                 'kelas_jasa' => $pesanan->toPaketJasa->kelas_jasa,
                 'maksimal_revisi' => $pesanan->maksimal_revisi ?? 0,
                 'revisi_used' => $pesanan->revisi_used,

@@ -11,7 +11,7 @@ class JasaController extends Controller
 {
     public function showAll(Request $request){
         $dataShow = [
-            'jasaData' => Jasa::select('uuid', 'nama_jasa', 'kategori')->get(),
+            'jasaData' => Jasa::select('uuid','kategori')->get(),
             'headerData' => UtilityController::getHeaderData(),
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
         ];
@@ -40,7 +40,6 @@ class JasaController extends Controller
         
         $jasaData = [
             'uuid' => $jasa->uuid,
-            'nama_jasa' => $jasa->nama_jasa,
             'thumbnail_jasa' => $jasa->thumbnail_jasa,
             'kategori' => $jasa->kategori,
             'kelas_jasa' => $paketJasa->kelas_jasa,

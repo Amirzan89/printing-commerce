@@ -13,11 +13,10 @@ use App\Models\JasaImage;
 class JasaController extends Controller
 {
     public function createJasa(Request $rt){
-        $v = Validator::make($rt->only('nama_jasa', 'thumbnail_jasa', 'images', 'kategori', 'kelas_jasa', 'deskripsi_paket_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'fitur'), [
-            'nama_jasa' => 'required|min:6|max:30',
+        $v = Validator::make($rt->only('thumbnail_jasa', 'images', 'kategori', 'kelas_jasa', 'deskripsi_paket_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'fitur'), [
             'thumbnail_jasa' => 'required|image|mimes:jpeg,png,jpg|max:5120',
             'images.*' => 'image|mimes:jpeg,png,jpg|max:5120',
-            'kategori' => 'required|in:printing,desain',
+            'kategori' => 'required|in:logo,banner,poster',
             'kelas_jasa' => 'required|in:basic,standard,premium',
             'deskripsi_paket_jasa' => 'required|max:500',
             'harga_paket_jasa' => 'required|integer',
@@ -25,9 +24,6 @@ class JasaController extends Controller
             'maksimal_revisi' => 'required|integer|max:20',
             'fitur' => 'required|max:300',
         ], [
-            'nama_jasa.required' => 'Nama Jasa wajib di isi',
-            'nama_jasa.min' => 'Nama Jasa minimal 6 karakter',
-            'nama_jasa.max' => 'Nama Jasa maksimal 30 karakter',
             'thumbnail_jasa.required' => 'Thumbnail Jasa wajib di isi',
             'thumbnail_jasa.image' => 'Thumbnail Jasa harus berupa gambar',
             'thumbnail_jasa.mimes' => 'Format Thumbnail Jasa tidak valid. Gunakan format jpeg, png, jpg',
@@ -36,7 +32,7 @@ class JasaController extends Controller
             'images.*.mimes' => 'Format Gambar tambahan tidak valid. Gunakan format jpeg, png, jpg',
             'images.*.max' => 'Ukuran Gambar tambahan tidak boleh lebih dari 5MB',
             'kategori.required' => 'Kategori wajib di isi',
-            'kategori.in' => 'Kategori harus Printing atau Desain',
+            'kategori.in' => 'Kategori harus Logo, Banner, atau Poster',
             'kelas_jasa.required' => 'Kelas Jasa wajib di isi',
             'kelas_jasa.in' => 'Kelas Jasa harus Basic, Standard, atau Premium',
             'deskripsi_paket_jasa.required' => 'Deskripsi Paket Jasa wajib di isi',
@@ -72,7 +68,6 @@ class JasaController extends Controller
         
         $idJasa = Jasa::insertGetId([
             'uuid' =>  Str::uuid(),
-            'nama_jasa' => $rt->input('nama_jasa'),
             'thumbnail_jasa' => $fh,
             'kategori' => $rt->input('kategori'),
         ]);
@@ -112,12 +107,11 @@ class JasaController extends Controller
     }
     
     public function updateJasa(Request $rt){
-        $v = Validator::make($rt->only('id_jasa', 'nama_jasa', 'thumbnail_jasa', 'images', 'kategori', 'kelas_jasa', 'deskripsi_paket_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'fitur', 'deleted_images'), [
+        $v = Validator::make($rt->only('id_jasa', 'thumbnail_jasa', 'images', 'kategori', 'kelas_jasa', 'deskripsi_paket_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'fitur', 'deleted_images'), [
             'id_jasa' => 'required',
-            'nama_jasa' => 'required|min:6|max:30',
             'thumbnail_jasa' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-            'kategori' => 'required|in:printing,desain',
+            'kategori' => 'required|in:logo,banner,poster',
             'kelas_jasa' => 'required|in:basic,standard,premium',
             'deskripsi_paket_jasa' => 'required|max:500',
             'harga_paket_jasa' => 'required|integer',
@@ -127,9 +121,6 @@ class JasaController extends Controller
             'deleted_images' => 'nullable|string',
         ], [
             'id_jasa.required' => 'ID Jasa wajib di isi',
-            'nama_jasa.required' => 'Nama Jasa wajib di isi',
-            'nama_jasa.min' => 'Nama Jasa minimal 6 karakter',
-            'nama_jasa.max' => 'Nama Jasa maksimal 30 karakter',
             'thumbnail_jasa.image' => 'Thumbnail Jasa harus berupa gambar',
             'thumbnail_jasa.mimes' => 'Format Thumbnail Jasa tidak valid. Gunakan format jpeg, png, jpg',
             'thumbnail_jasa.max' => 'Ukuran Thumbnail Jasa tidak boleh lebih dari 5MB',
@@ -137,7 +128,7 @@ class JasaController extends Controller
             'images.*.mimes' => 'Format Gambar tambahan tidak valid. Gunakan format jpeg, png, jpg',
             'images.*.max' => 'Ukuran Gambar tambahan tidak boleh lebih dari 5MB',
             'kategori.required' => 'Kategori wajib di isi',
-            'kategori.in' => 'Kategori harus Printing atau Desain',
+            'kategori.in' => 'Kategori harus Logo, Banner, atau Poster',
             'kelas_jasa.required' => 'Kelas Jasa wajib di isi',
             'kelas_jasa.in' => 'Kelas Jasa harus Basic, Standard, atau Premium',
             'deskripsi_paket_jasa.required' => 'Deskripsi Paket Jasa wajib di isi',
@@ -211,7 +202,6 @@ class JasaController extends Controller
         }
         
         $jasa->update([
-            'nama_jasa' => $rt->input('nama_jasa'),
             'thumbnail_jasa' => $thumbnailPath,
             'kategori' => $rt->input('kategori'),
         ]);

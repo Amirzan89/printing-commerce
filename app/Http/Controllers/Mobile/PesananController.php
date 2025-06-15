@@ -117,7 +117,7 @@ class PesananController extends Controller
             $validator = Validator::make($request->only('id_jasa', 'id_paket_jasa', 'catatan_user', 'gambar_referensi', 'maksimal_revisi'), [
                 'id_jasa' => 'required|exists:jasa,id_jasa',
                 'id_paket_jasa' => 'required|exists:paket_jasa,id_paket_jasa',
-                'catatan_user' => 'required|string|max:1000',
+                'catatan_user' => 'nullable|string|max:1000',
                 'gambar_referensi' => 'nullable|file|mimes:jpeg,png,jpg|max:5120',
                 'maksimal_revisi' => 'nullable|integer|min:0|max:5'
             ], [
@@ -125,7 +125,6 @@ class PesananController extends Controller
                 'id_jasa.exists' => 'Jasa tidak valid',
                 'id_paket_jasa.required' => 'Pilih paket jasa terlebih dahulu',
                 'id_paket_jasa.exists' => 'Paket jasa tidak valid',
-                'catatan_user.required' => 'Catatan revisi wajib diisi',
                 'catatan_user.max' => 'Catatan revisi maksimal 1000 karakter',
                 'gambar_referensi.mimes' => 'Format gambar harus jpeg, png, atau jpg',
                 'gambar_referensi.max' => 'Ukuran gambar maksimal 5MB'
@@ -179,7 +178,7 @@ class PesananController extends Controller
                 Storage::disk('pesanan')->put('catatan_pesanan/' . $filename, file_get_contents($file));
             }
             // Create revisi record
-            if($request->input('catatan_user') != null){
+            if($request->input('catatan_user') != null && $request->input('catatan_user') != ''){
                 CatatanPesanan::create([
                     'catatan_pesanan' => $request->input('catatan_user'),
                     'gambar_referensi' => $filename,
