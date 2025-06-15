@@ -2,17 +2,11 @@ const domain = window.location.protocol + '//' + window.location.hostname +":"+w
 const popup = document.querySelector('div#popup');
 const redPopup = document.querySelector('div#redPopup');
 const greenPopup = document.querySelector('div#greenPopup');
-const inpEmail = document.getElementById('inpEmail');
-const inpPassword = document.getElementById('inpPassword');
-const loginForm = document.getElementById('loginForm');
 function showLoading(){
     document.querySelector('div#preloader').style.display = 'block';
 }
 function closeLoading(){
     document.querySelector('div#preloader').style.display = 'none';
-}
-function dashboardPage(){
-    window.location.href = '/page/dashboard';
 }
 function showGreenPopup(data, div = null){
     if(div == 'dashboard'){

@@ -279,7 +279,6 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/page/modalDelete.js') }}"></script>
-    
 </body>
 
 </html>

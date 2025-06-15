@@ -13,7 +13,7 @@ function showGreenPopup(message, div = null) {
         `;
         greenPopup.style.display = "block";
         setTimeout(() => {
-            dashboardPage();
+            window.location.href = "/dashboard";
         }, 2000);
     } else {
         greenPopup.innerHTML = `

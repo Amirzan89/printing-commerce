@@ -119,10 +119,7 @@ if(app()->environment('local')){
     </script>
     <script src="{{ asset($tPath.'assets/libs/jquery/dist/jquery.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset($tPath.'assets2/js/page/login.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
-    <script>
-        showGreenPopup('Jasa berhasil ditambahkan');
-    </script>
+    <script src="{{ asset($tPath.'assets2/js/page/login.js') }}"></script>
 </body>
 </html>
