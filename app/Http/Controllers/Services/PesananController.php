@@ -129,9 +129,8 @@ class PesananController extends Controller
             ], 500);
         }
     }
-
     /**
-     * ADMIN: Delete pesanan (hard delete)
+     * ADMIN: Delete pesanan
      */
     public function deletePesanan(Request $request)
     {
@@ -151,34 +150,41 @@ class PesananController extends Controller
                 return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
             }
             $pesanan = Pesanan::where('uuid', $request->input('id_pesanan'))->first();
-
             if (!$pesanan) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Pesanan tidak ditemukan'
                 ], 404);
             }
-
-            // Check if pesanan can be deleted
             if (in_array($pesanan->status_pesanan, ['dikerjakan', 'revisi', 'menunggu_review', 'selesai'])) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Pesanan yang sedang dikerjakan, revisi, menunggu review, atau selesai tidak dapat dihapus'
                 ], 422);
             }
-
-            // Delete related records
             $pesanan->fromCatatanPesanan()->delete();
             $pesanan->revisions()->delete();
             $pesanan->fromTransaksi()->delete();
-            unlink(self::$destinationPath . '/' . $pesanan->uuid);
+            $dirPath = $this->dirPath($pesanan->uuid);
+            if (file_exists($dirPath) && is_dir($dirPath)) {
+                $files = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($dirPath, \RecursiveDirectoryIterator::SKIP_DOTS),
+                    \RecursiveIteratorIterator::CHILD_FIRST
+                );
+                foreach ($files as $file) {
+                    if ($file->isDir()) {
+                        rmdir($file->getRealPath());
+                    } else {
+                        unlink($file->getRealPath());
+                    }
+                }
+                rmdir($dirPath);
+            }
             $pesanan->delete();
-
             return response()->json([
                 'status' => 'success',
                 'message' => 'Pesanan berhasil dihapus'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',

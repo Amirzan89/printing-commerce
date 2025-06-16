@@ -15,12 +15,13 @@ use App\Exports\TransaksiExport;
 use Illuminate\Support\Facades\Log;
 class TransaksiController extends Controller
 {
-    private function dirPath($idPesanan){
+    private static $destinationPath;
+    public function __construct(){
         if(env('APP_ENV', 'local') == 'local'){
-            return public_path('assets3/img/bukti_pembayaran');
+            self::$destinationPath = public_path('assets3/img/bukti_pembayaran');
         }else{
             $path = env('PUBLIC_PATH', '/../public_html');
-            return base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/bukti_pembayaran';
+            self::$destinationPath = base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/bukti_pembayaran';
         }
     }
     /**
@@ -136,7 +137,6 @@ class TransaksiController extends Controller
             if($transaksi->bukti_pembayaran != null){
                 unlink(self::$destinationPath . '/' . $transaksi->bukti_pembayaran);
             }
-            // Update transaction back to belum_bayar
             $transaksi->update([
                 'status_transaksi' => 'dibatalkan',
                 'bukti_pembayaran' => null,
@@ -145,7 +145,6 @@ class TransaksiController extends Controller
                 'expired_at' => Carbon::now()->addHours(24)
             ]);
 
-            // Update pesanan status
             $pesanan = Pesanan::find($transaksi->id_pesanan);
             $pesanan->update([
                 'status_pesanan' => 'pending',
@@ -170,28 +169,4 @@ class TransaksiController extends Controller
             ], 500);
         }
     }
-    public function delete(Request $request){
-        $validator = Validator::make($request->only('order_id'), [
-            'order_id' => 'required'
-        ], [
-            'order_id.required' => 'Order ID wajib diisi'
-        ]);
-        if ($validator->fails()) {
-            $errors = [];
-            foreach($validator->errors()->toArray() as $field => $errorMessages){
-                $errors[$field] = $errorMessages[0];
-                break;
-            }
-            return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
-        }
-        $transaksi = Transaksi::where('order_id', $request->input('order_id'))->first();
-        if (!$transaksi) {
-            return response()->json(['status' => 'error', 'message' => 'Transaksi tidak ditemukan'], 404);
-        }   
-        if($transaksi->bukti_pembayaran != null){
-            unlink(self::$destinationPath . '/' . $transaksi->bukti_pembayaran);
-        }
-        $transaksi->delete();
-        return response()->json(['status' => 'success', 'message' => 'Transaksi berhasil dihapus'], 200);
-    }
-} 
+}

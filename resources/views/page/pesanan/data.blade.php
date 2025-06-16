@@ -389,5 +389,21 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
+    
+    @if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            showRedPopup("{{ session('error') }}");
+        });
+    </script>
+    @endif
+    
+    @if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            showGreenPopup("{{ session('success') }}");
+        });
+    </script>
+    @endif
 </body>
 </html>

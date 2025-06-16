@@ -40,13 +40,10 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
     Route::group(['prefix'=>'/pesanan'], function(){
         //page pesanan
         Route::get('/',[ShowPesananController::class,'showAll']);
-        Route::get('/detail/{any}',[ShowPesananController::class,'showDetail']);
+        Route::get('/detail/{uuid}',[ShowPesananController::class,'showDetail']);
         Route::get('/statistics', [PesananController::class, 'getStatistics']);
         Route::get('/tambah',[ShowPesananController::class,'showTambah']);
         Route::get('/edit/{any}',[ShowPesananController::class,'showEdit']);
-        Route::get('/edit', function(){
-            return redirect('/pesanan');
-        });
         // route for pesanan
         Route::put('/update', [PesananController::class, 'updateStatus']);
         Route::delete('/delete', [PesananController::class, 'deletePesanan']);

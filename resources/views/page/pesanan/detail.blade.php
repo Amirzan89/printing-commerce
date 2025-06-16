@@ -1,6 +1,5 @@
 <?php
 $tPath = app()->environment('local') ? '' : '';
-exit();
 ?>
 <!DOCTYPE html>
 <html lang="en">

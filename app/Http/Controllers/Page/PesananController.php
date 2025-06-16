@@ -48,7 +48,7 @@ class PesananController extends Controller
             'fromCatatanPesanan',
             'revisions.userFiles',
             'revisions.editorFiles.editor'
-        ])->join('catatan_pesanan', 'catatan_pesanan.id_pesanan', '=', 'pesanan.id_pesanan')->where('uuid', $uuid)->first();
+        ])->join('catatan_pesanan', 'catatan_pesanan.id_pesanan', '=', 'pesanan.id_pesanan')->where('pesanan.uuid', $uuid)->first();
         if (!$pesanan) {
             return redirect('/pesanan')->with('error', 'Data Pesanan tidak ditemukan');
         }

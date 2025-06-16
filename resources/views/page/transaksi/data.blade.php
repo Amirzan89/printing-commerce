@@ -242,9 +242,6 @@ $tPath = app()->environment('local') ? '' : '';
                                                 <a href="/transaksi/detail/{{ $data['order_id'] }}" class="btn btn-warning btn-detail m-1" style="width: fit-content; height: fit-content; padding: 12px;">
                                                     <img src="{{ asset($tPath.'assets2/icon/detail.svg') }}" alt="">
                                                 </a>
-                                                <button type="button" class="btn btn-danger btn-delete m-1" style="width: fit-content; height: fit-content; padding: 12px;" onclick="showModalDelete('{{ $data['order_id'] }}')">
-                                                    <img src="{{ asset($tPath.'assets2/icon/delete.svg') }}" alt="">
-                                                </button>
                                             </td>
                                         </tr>
                                         @endforeach
