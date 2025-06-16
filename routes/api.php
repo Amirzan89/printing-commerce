@@ -29,6 +29,7 @@ Route::group(['prefix'=>'/mobile'], function(){
             // Route::post('/create', [PesananController::class, 'create']);
             Route::post('/create-with-transaction', [PesananController::class, 'createPesananWithTransaction']);
             Route::post('/cancel', [PesananController::class, 'cancel']);
+            Route::post('/download', [PesananController::class, 'downloadFiles']);
         });
         
         //API only pengerjaan route
