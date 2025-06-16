@@ -107,7 +107,7 @@ class JasaController extends Controller
                 foreach ($deletedImages as $imageId) {
                     $image = JasaImage::find($imageId);
                     if ($image) {
-                        $imagePath = public_path('assets3/img/jasa/' . $jasa->kategori .'/') . $image->image_path;
+                        $imagePath = $this->dirPath($jasa->kategori) . '/' . $image->image_path;
                         if (file_exists($imagePath) && !is_dir($imagePath)) {
                             unlink($imagePath);
                         }
@@ -117,7 +117,7 @@ class JasaController extends Controller
             } else {
                 $image = JasaImage::find($rt->input('deleted_images'));
                 if ($image) {
-                    $imagePath = public_path('assets3/img/jasa/' . $jasa->kategori .'/') . $image->image_path;
+                    $imagePath = $this->dirPath($jasa->kategori) . '/' . $image->image_path;
                     if (file_exists($imagePath) && !is_dir($imagePath)) {
                         unlink($imagePath);
                     }
@@ -128,7 +128,7 @@ class JasaController extends Controller
         // Process new images
         if ($rt->hasFile('images')) {
             // Make sure the directory exists
-            $targetDir = public_path('assets3/img/jasa/' . $jasa->kategori .'/');
+            $targetDir = $this->dirPath($jasa->kategori);
             if (!file_exists($targetDir)) {
                 mkdir($targetDir, 0755, true);
             }

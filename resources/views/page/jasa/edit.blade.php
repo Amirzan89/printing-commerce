@@ -507,15 +507,11 @@ $tPath = app()->environment('local') ? '' : '';
                 // This is an existing image, add to deletedImageIds
                 deletedImageIds.push(imageId);
                 document.getElementById('deletedImages').value = JSON.stringify(deletedImageIds);
-                console.log('Image marked for deletion:', imageId);
-                console.log('Current deleted images:', deletedImageIds);
             } else if (item.dataset.new === 'true') {
                 // This is a new image, remove from selectedFiles
                 const filename = item.dataset.filename;
                 if (filename) {
                     selectedFiles = selectedFiles.filter(f => f.name !== filename);
-                    console.log('New image removed:', filename);
-                    console.log('Remaining selected files:', selectedFiles);
                 }
             }
             
@@ -563,7 +559,6 @@ $tPath = app()->environment('local') ? '' : '';
             
             // Check if date is valid
             if (isNaN(date.getTime())) {
-                console.error('Invalid date:', dateString);
                 return '';
             }
             
@@ -653,7 +648,6 @@ $tPath = app()->environment('local') ? '' : '';
             kelasJasaSelect.addEventListener('change', function() {
                 if (this.value) {
                     additionalFields.style.display = 'block';
-                    console.log(this.value);
                     populateFields(this.value);
                 } else {
                     additionalFields.style.display = 'none';
@@ -684,10 +678,6 @@ $tPath = app()->environment('local') ? '' : '';
                 formData.set('_method', 'PUT');
                 formData.set('id_jasa', uuid);
                 formData.set('deleted_images', JSON.stringify(deletedImageIds));
-                
-                // Debug log to check what's being sent
-                console.log('Selected files:', selectedFiles);
-                console.log('Deleted images:', deletedImageIds);
                 
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', domain + '/jasa/update', true);
