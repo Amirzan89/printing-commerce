@@ -15,10 +15,10 @@ class TransaksiController extends Controller
 {
     private function dirPath($uuid){
         if(env('APP_ENV', 'local') == 'local'){
-            return public_path('assets3/img/pesanan/' . $uuid . '/bukti_pembayaran');
+            return public_path('assets3/img/pesanan/' . $uuid);
         }else{
             $path = env('PUBLIC_PATH', '/../public_html');
-            return base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/pesanan/' . $uuid . '/bukti_pembayaran';
+            return base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/pesanan/' . $uuid;
         }
     }
     public function getAll(Request $request){
@@ -152,10 +152,10 @@ class TransaksiController extends Controller
             // Store the uploaded file
             $file = $request->file('bukti_pembayaran');
             $fileName = $file->hashName();
-            if (!file_exists($this->dirPath($transaksi->uuid) . '/bukti_pembayaran')) {
-                mkdir($this->dirPath($transaksi->uuid) . '/bukti_pembayaran');
+            if (!file_exists($this->dirPath($transaksi->uuid) . '/bukti-pembayaran')) {
+                mkdir($this->dirPath($transaksi->uuid) . '/bukti-pembayaran');
             }
-            file_put_contents($this->dirPath($transaksi->uuid) . '/bukti_pembayaran/' . $fileName, file_get_contents($file));
+            file_put_contents($this->dirPath($transaksi->uuid) . '/bukti-pembayaran/' . $fileName, file_get_contents($file));
             
             // Update transaction
             $transaksi->update([
