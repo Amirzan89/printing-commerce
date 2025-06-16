@@ -12,6 +12,14 @@ use Carbon\Carbon;
 
 class PesananController extends Controller
 {
+    private function dirPath($idPesanan){
+        if(env('APP_ENV', 'local') == 'local'){
+            return public_path('assets3/img/pesanan/' . $idPesanan);
+        }else{
+            $path = env('PUBLIC_PATH', '/../public_html');
+            return base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/pesanan/' . $idPesanan;
+        }
+    }
     /**
      * ADMIN: Update pesanan status
      */
@@ -163,7 +171,7 @@ class PesananController extends Controller
             $pesanan->fromCatatanPesanan()->delete();
             $pesanan->revisions()->delete();
             $pesanan->fromTransaksi()->delete();
-            Storage::disk('pesanan')->delete(''. $pesanan->uuid);
+            unlink(self::$destinationPath . '/' . $pesanan->uuid);
             $pesanan->delete();
 
             return response()->json([

@@ -5,18 +5,22 @@ namespace App\Http\Controllers\Mobile;
 use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
 use App\Models\Pesanan;
-use App\Models\MetodePembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
 
 class TransaksiController extends Controller
 {
+    private function dirPath($uuid){
+        if(env('APP_ENV', 'local') == 'local'){
+            return public_path('assets3/img/pesanan/' . $uuid . '/bukti_pembayaran');
+        }else{
+            $path = env('PUBLIC_PATH', '/../public_html');
+            return base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/pesanan/' . $uuid . '/bukti_pembayaran';
+        }
+    }
     public function getAll(Request $request){
         $transaksi = Transaksi::select('order_id')->join('pesanan', 'pesanan.id_pesanan', '=', 'transaksi.id_pesanan')
             ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
@@ -73,125 +77,6 @@ class TransaksiController extends Controller
             ], 500);
         }
     }
-    // /**
-    //  * Create transaction (Step 2 in manual payment flow)
-    //  */
-    // public function createTransaction(Request $request): JsonResponse
-    // {
-    //     $validator = Validator::make($request->only('id_pesanan', 'id_metode_pembayaran'), [
-    //         'id_pesanan' => 'required|exists:pesanan,uuid',
-    //         'id_metode_pembayaran' => 'required'
-    //     ], [
-    //         'id_pesanan.required' => 'UUID pesanan wajib diisi',
-    //         'id_pesanan.exists' => 'Pesanan tidak ditemukan',
-    //         'id_metode_pembayaran.required' => 'Metode pembayaran wajib dipilih'
-    //     ]);
-
-    //     if ($validator->fails()){
-    //         $errors = [];
-    //         foreach ($validator->errors()->toArray() as $field => $errorMessages){
-    //             $errors[$field] = $errorMessages[0];
-    //             break;
-    //         }
-    //         return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
-    //     }
-
-    //     try {
-    //         // Get pesanan by UUID and check ownership
-    //         $pesanan = Pesanan::where('uuid', $request->input('id_pesanan'))
-    //         ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
-    //         ->first();
-            
-    //     if (!$pesanan) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //                 'message' => 'Pesanan tidak ditemukan'
-    //             ], 404);
-    //         }
-    //         // Get metode pembayaran by UUID
-    //         $metodePembayaran = MetodePembayaran::where('uuid', $request->input('id_metode_pembayaran'))->first();
-    //         if (!$metodePembayaran) {
-    //             return response()->json([
-    //                 'status' => 'error',
-    //                 'message' => 'Metode pembayaran tidak ditemukan'
-    //         ], 404);
-    //     }
-
-    //         // Check if pesanan status allows payment
-    //         if ($pesanan->status_pesanan !== 'pending') {
-    //             return response()->json([
-    //                 'status' => 'error',
-    //                 'message' => 'Pesanan tidak dapat dibayar pada status ini'
-    //             ], 422);
-    //         }
-
-    //         // Check if there's already active transaction
-    //         $existingTransaction = Transaksi::where('id_pesanan', $pesanan->id_pesanan)
-    //             ->whereIn('status_transaksi', ['belum_bayar', 'menunggu_konfirmasi'])
-    //             ->first();
-
-    //         if ($existingTransaction) {
-    //             return response()->json([
-    //                 'status' => 'error',
-    //                 'message' => 'Sudah ada transaksi aktif untuk pesanan ini',
-    //                 'data' => [
-    //                     'existing_transaction' => $existingTransaction
-    //                 ]
-    //             ], 422);
-    //     }
-
-    //     // Generate unique order ID
-    //         $orderId = 'TRX-' . date('Ymd') . '-' . strtoupper(Str::random(8));
-        
-    //     // Set expiration time (24 hours from now)
-    //     $expiredAt = Carbon::now()->addHours(24);
-        
-    //         $transaksi = Transaksi::create([
-    //             'order_id' => $orderId,
-    //             'jumlah' => $pesanan->total_harga,
-    //             'status_transaksi' => 'belum_bayar',
-    //             'bukti_pembayaran' => null,
-    //             'waktu_pembayaran' => null,
-    //             'expired_at' => $expiredAt,
-    //             'id_metode_pembayaran' => $metodePembayaran->id_metode_pembayaran,
-    //             'id_pesanan' => $pesanan->id_pesanan
-    //         ]);
-            
-    //         // Update pesanan payment status to menunggu_konfirmasi for UI flow
-    //         $pesanan->update([
-    //             'status_pesanan' => 'pending',
-    //         ]);
-            
-    //         return response()->json([
-    //             'status' => 'success',
-    //             'message' => 'Transaksi berhasil dibuat. Silakan lakukan pembayaran dan upload bukti transfer.',
-    //             'data' => [
-    //                 'transaksi' => $transaksi,
-    //                 'payment_method' => $metodePembayaran,
-    //                 'expired_at' => $expiredAt->format('Y-m-d H:i:s'),
-    //                 'payment_instructions' => [
-    //                     'step1' => 'Transfer ke rekening: ' . $metodePembayaran->no_metode_pembayaran,
-    //                     'step2' => 'Atas nama: ' . $metodePembayaran->deskripsi_1,
-    //                     'step2-2' => 'Atas nama: ' . $metodePembayaran->deskripsi_2,
-    //                     'step3' => 'Nominal: Rp ' . number_format($pesanan->total_harga, 0, ',', '.'),
-    //                     'step4' => 'Upload bukti transfer untuk konfirmasi'
-    //                 ]
-    //             ]
-    //         ], 201);
-            
-    //     } catch (\Exception $e) {
-    //         Log::error('Error creating transaction: ' . $e->getMessage());
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Gagal membuat transaksi',
-    //             'data' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-    
-    /**
-     * Upload payment proof (Step 3 in manual payment flow)
-     */
     public function uploadPaymentProof(Request $request)
     {
         $validator = Validator::make($request->only('order_id', 'bukti_pembayaran', 'catatan'), [
@@ -267,10 +152,10 @@ class TransaksiController extends Controller
             // Store the uploaded file
             $file = $request->file('bukti_pembayaran');
             $fileName = $file->hashName();
-            if (!Storage::disk('transaksi')->exists('bukti_pembayaran')) {
-                Storage::disk('transaksi')->makeDirectory('bukti_pembayaran');
+            if (!file_exists($this->dirPath($transaksi->uuid) . '/bukti_pembayaran')) {
+                mkdir($this->dirPath($transaksi->uuid) . '/bukti_pembayaran');
             }
-            Storage::disk('transaksi')->put('bukti_pembayaran/' . $fileName, file_get_contents($file));
+            file_put_contents($this->dirPath($transaksi->uuid) . '/bukti_pembayaran/' . $fileName, file_get_contents($file));
             
             // Update transaction
             $transaksi->update([

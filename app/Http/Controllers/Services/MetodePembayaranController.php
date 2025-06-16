@@ -12,10 +12,10 @@ class MetodePembayaranController extends Controller
     private static $destinationPath;
     public function __construct(){
         if(env('APP_ENV', 'local') == 'local'){
-            self::$destinationPath = public_path('metode-pembayaran');
+            self::$destinationPath = public_path('assets3/img/metode_pembayaran');
         }else{
             $path = env('PUBLIC_PATH', '/../public_html');
-            self::$destinationPath = base_path($path == '/../public_html' ? $path : '/../public_html') .'/metode-pembayaran';
+            self::$destinationPath = base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/metode_pembayaran';
         }
     }
     public function createMPembayaran(Request $rt){

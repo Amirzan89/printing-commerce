@@ -7,7 +7,6 @@ use App\Models\Pesanan;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use DataTables;
 use Excel;
@@ -16,6 +15,14 @@ use App\Exports\TransaksiExport;
 use Illuminate\Support\Facades\Log;
 class TransaksiController extends Controller
 {
+    private function dirPath($idPesanan){
+        if(env('APP_ENV', 'local') == 'local'){
+            return public_path('assets3/img/bukti_pembayaran');
+        }else{
+            $path = env('PUBLIC_PATH', '/../public_html');
+            return base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/bukti_pembayaran';
+        }
+    }
     /**
      * Admin: Confirm payment (Step 4 in manual payment flow)
      * This should be called from admin panel
@@ -127,7 +134,7 @@ class TransaksiController extends Controller
                 ], 422);
             }
             if($transaksi->bukti_pembayaran != null){
-                Storage::disk('transaksi')->delete('bukti_pembayaran/' . $transaksi->bukti_pembayaran);
+                unlink(self::$destinationPath . '/' . $transaksi->bukti_pembayaran);
             }
             // Update transaction back to belum_bayar
             $transaksi->update([
@@ -182,7 +189,7 @@ class TransaksiController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Transaksi tidak ditemukan'], 404);
         }   
         if($transaksi->bukti_pembayaran != null){
-            Storage::disk('transaksi')->delete('bukti_pembayaran/' . $transaksi->bukti_pembayaran);
+            unlink(self::$destinationPath . '/' . $transaksi->bukti_pembayaran);
         }
         $transaksi->delete();
         return response()->json(['status' => 'success', 'message' => 'Transaksi berhasil dihapus'], 200);

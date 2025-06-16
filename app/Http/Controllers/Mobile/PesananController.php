@@ -12,7 +12,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +19,14 @@ use App\Models\MetodePembayaran;
 
 class PesananController extends Controller
 {
+    public function dirPath($idPesanan){
+        if(env('APP_ENV', 'local') == 'local'){
+            return public_path('assets3/img/pesanan/' . $idPesanan);
+        }else{
+            $path = env('PUBLIC_PATH', '/../public_html');
+            return base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/pesanan/' . $idPesanan;
+        }
+    }
     public function getAll(Request $request){
         try {
             // Ambil ID user dari ID auth
@@ -130,20 +137,13 @@ class PesananController extends Controller
                     'id_jasa' => $request->input('id_jasa'),
                     'id_paket_jasa' => $request->input('id_paket_jasa')
                 ]);
-                // Handle image upload for gambar referensi
+                mkdir($this->dirPath($uuid));
                 $filename = null;
                 if ($request->hasFile('gambar_referensi') && $request->file('gambar_referensi')->isValid() && in_array($request->file('gambar_referensi')->extension(), ['jpeg', 'png', 'jpg'])) {
                     $file = $request->file('gambar_referensi');
-                    ///goorongg mari
                     $filename = $file->hashName();
-                    $path = public_path('pesanan/catatan_pesanan/' . $filename);
-                    $file->move(public_path('pesanan/catatan_pesanan/'), $filename);
-                    // // Checking folder existence
-                    // if (!Storage::disk('pesanan')->exists('catatan_pesanan')) {
-                    //     Storage::disk('pesanan')->makeDirectory('catatan_pesanan');
-                    // }
-                    // // Uploading file
-                    // Storage::disk('pesanan')->put('catatan_pesanan/' . $filename, file_get_contents($file));
+                    mkdir($this->dirPath($uuid . '/catatan_pesanan'));
+                    $file->move($this->dirPath($uuid . '/catatan_pesanan/'), $filename);
                 }
                 // Create catatan pesanan record
                 if($request->input('catatan_user') != null && $request->input('catatan_user') != ''){
@@ -205,104 +205,6 @@ class PesananController extends Controller
         }
     }
 
-    /**
-     * Create new pesanan (Step 1 in flow)
-     */
-    // public function create(Request $request){
-    //     try {
-    //         $validator = Validator::make($request->only('id_jasa', 'id_paket_jasa', 'catatan_user', 'gambar_referensi', 'maksimal_revisi'), [
-    //             'id_jasa' => 'required|exists:jasa,id_jasa',
-    //             'id_paket_jasa' => 'required|exists:paket_jasa,id_paket_jasa',
-    //             'catatan_user' => 'nullable|string|max:1000',
-    //             'gambar_referensi' => 'nullable|file|mimes:jpeg,png,jpg|max:5120',
-    //             'maksimal_revisi' => 'nullable|integer|min:0|max:5'
-    //         ], [
-    //             'id_jasa.required' => 'Pilih jasa terlebih dahulu',
-    //             'id_jasa.exists' => 'Jasa tidak valid',
-    //             'id_paket_jasa.required' => 'Pilih paket jasa terlebih dahulu',
-    //             'id_paket_jasa.exists' => 'Paket jasa tidak valid',
-    //             'catatan_user.max' => 'Catatan revisi maksimal 1000 karakter',
-    //             'gambar_referensi.mimes' => 'Format gambar harus jpeg, png, atau jpg',
-    //             'gambar_referensi.max' => 'Ukuran gambar maksimal 5MB'
-    //         ]);
-    //         if ($validator->fails()) {
-    //             $errors = [];
-    //             foreach($validator->errors()->toArray() as $field => $errorMessages){
-    //                 $errors[$field] = $errorMessages[0];
-    //                 break;
-    //             }
-    //             return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
-    //         }
-
-    //         // Get jasa and paket details for pricing
-    //         $jasa = Jasa::find($request->input('id_jasa'));
-    //         $paketJasa = PaketJasa::find($request->input('id_paket_jasa'));
-    //         if (!$jasa || !$paketJasa) {
-    //             return response()->json([
-    //                 'status' => 'error',
-    //                 'message' => 'Jasa atau paket tidak ditemukan'
-    //             ], 404);
-    //         }
-    //         // Calculate total price and estimation
-    //         $estimasiWaktu = Carbon::now();
-    //         $jumlahRevisi = $request->input('maksimal_revisi') ?? $paketJasa->maksimal_revisi;
-    //         $uuid = Str::uuid();
-    //         $idPesanan = Pesanan::insertGetId([
-    //             'uuid' => $uuid,
-    //             'deskripsi' => $request->catatan_user,
-    //             'status_pesanan' => 'pending',
-    //             'total_harga' => $paketJasa->harga_paket_jasa,
-    //             'estimasi_waktu' => $estimasiWaktu,
-    //             'maksimal_revisi' => $jumlahRevisi,
-    //             'created_at' => Carbon::now(),
-    //             'updated_at' => Carbon::now(),
-    //             'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user,
-    //             'id_jasa' => $request->input('id_jasa'),
-    //             'id_paket_jasa' => $request->input('id_paket_jasa')
-    //         ]);
-
-    //         // Handle image upload for revisi
-    //         $filename = null;
-    //         if ($request->hasFile('gambar_referensi') && $request->file('gambar_referensi')->isValid() && in_array($request->file('gambar_referensi')->extension(), ['jpeg', 'png', 'jpg'])) {
-    //             $file = $request->file('gambar_referensi');
-    //             $filename = $file->hashName();
-    //             // Checking folder existence
-    //             if (!Storage::disk('pesanan')->exists('catatan_pesanan')) {
-    //                 Storage::disk('pesanan')->makeDirectory('catatan_pesanan');
-    //             }
-    //             // Uploading file
-    //             Storage::disk('pesanan')->put('catatan_pesanan/' . $filename, file_get_contents($file));
-    //         }
-    //         // Create revisi record
-    //         if($request->input('catatan_user') != null && $request->input('catatan_user') != ''){
-    //             CatatanPesanan::create([
-    //                 'catatan_pesanan' => $request->input('catatan_user'),
-    //                 'gambar_referensi' => $filename,
-    //                 'uploaded_at' => now(),
-    //                 'id_pesanan' => $idPesanan,
-    //                 'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user
-    //             ]);
-    //         }
-    //         return response()->json([
-    //             'status' => 'success',
-    //             'message' => 'Pesanan berhasil dibuat. Silahkan lanjutkan ke pembayaran.',
-    //             'data' => [
-    //                 'id_pesanan' => $uuid,
-    //             ]
-    //         ], 201);
-    //     } catch (\Exception $e) {
-    //         Log::error('Error creating order: ' . $e->getMessage());
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Gagal membuat pesanan',
-    //             'data' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
-    /**
-     * Cancel pesanan (only if pending)
-     */
     public function cancel(Request $request){
         try {
             $validator = Validator::make($request->only('id_pesanan'), [
@@ -343,16 +245,17 @@ class PesananController extends Controller
                 ], 422);
             }
             if($pesanan->gambar_referensi != null){
-                Storage::disk('pesanan')->delete('catatan_pesanan/' . $pesanan->gambar_referensi);
+                $path = $this->dirPath($pesanan->uuid . '/catatan_pesanan/' . $pesanan->gambar_referensi);
+                if(file_exists($path)){
+                    unlink($path);
+                }
             }
             // Cancel related transactions
             Transaksi::where('id_pesanan', $pesanan->id_pesanan)
                 ->update(['status_transaksi' => 'dibatalkan']);
-
             $pesanan->update([
                 'status_pesanan' => 'dibatalkan',
             ]);
-
             return response()->json([
                 'status' => 'success',
                 'message' => 'Pesanan berhasil dibatalkan'
@@ -365,153 +268,5 @@ class PesananController extends Controller
                 'data' => $e->getMessage()
             ], 500);
         }
-    }
-    public function downloadFiles(Request $request){
-        try {
-            $validator = Validator::make($request->only('id_pesanan', 'download_type'), [
-                'id_pesanan' => 'required',
-                'download_type' => 'nullable|in:binary,json,info'
-            ], [
-                'id_pesanan.required' => 'ID pesanan wajib di isi',
-                'download_type.in' => 'Tipe download harus binary, json, atau info'
-            ]);
-            if ($validator->fails()){
-                $errors = [];
-                foreach ($validator->errors()->toArray() as $field => $errorMessages){
-                    $errors[$field] = $errorMessages[0];
-                    break;
-                }
-                return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
-            }
-            $pesanan = Pesanan::where('uuid', $request->input('id_pesanan'))
-                ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
-                ->first();
-                
-            if (!$pesanan) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Pesanan tidak ditemukan'
-                ], 404);
-            }
-            // Check if pesanan allows download
-            if (!in_array($pesanan->status_pesanan, ['menunggu_review', 'selesai'])) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'File belum dapat didownload'
-                ], 403);
-            }
-            // Find available file with fallback logic
-            $fileInfo = $this->findAvailableFile($pesanan);
-            if (!$fileInfo) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Tidak ada file hasil yang tersedia'
-                ], 404);
-            }
-            $downloadType = $request->input('download_type', 'json');
-            switch ($downloadType) {
-                case 'binary':
-                    return $this->downloadBinary($fileInfo);
-                case 'info':
-                    return $this->downloadInfo($fileInfo);
-                case 'json':
-                default:
-                    return $this->downloadWithJson($fileInfo);
-            }
-        } catch (\Exception $e) {
-            Log::error('Error downloading files: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengambil file',
-                'data' => $e->getMessage()
-            ], 500);
-        }
-    }
-    /**
-     * Find available file with fallback logic (loop sampai awal)
-     */
-    private function findAvailableFile($pesanan) {
-        // Start from latest revision and work backwards
-        $editorFiles = CatatanPesanan::where('id_pesanan', $pesanan->id_pesanan)->get();
-        foreach ($editorFiles as $editorFile) {
-            $filePath = 'catatan_pesanan/' . $pesanan->uuid . '/' . $editorFile->nama_file;
-            
-            // Check if file exists in storage
-            if (Storage::disk('pesanan')->exists($filePath)) {
-                return [
-                    'file_path' => $filePath,
-                    'nama_file' => $editorFile->nama_file,
-                    'catatan_pesanan' => $editorFile->catatan_pesanan,
-                    'uploaded_at' => $editorFile->created_at,
-                    'file_size' => Storage::disk('pesanan')->size($filePath),
-                    'mime_type' => Storage::disk('pesanan')->mimeType($filePath)
-                ];
-            }
-        }
-        return null; // No file found after checking all revisions
-    }
-    /**
-     * 1. Download file langsung sebagai binary
-     */
-    private function downloadBinary($fileInfo) {
-        $filePath = $fileInfo['file_path'];
-        $fileName = $fileInfo['nama_file'];
-        
-        // Get file content as binary
-        $fileContent = Storage::disk('pesanan')->get($filePath);
-        $mimeType = $fileInfo['mime_type'];
-        
-        return response($fileContent)
-            ->header('Content-Type', $mimeType)
-            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"')
-            ->header('Content-Length', strlen($fileContent))
-            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-            ->header('Pragma', 'no-cache')
-            ->header('Expires', '0');
-    }
-    /**
-     * 2. Download info only (JSON saja)
-     */
-    private function downloadInfo($fileInfo) {
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Informasi file tersedia',
-            'data' => [
-                'nama_file' => $fileInfo['nama_file'],
-                'catatan_pesanan' => $fileInfo['catatan_pesanan'],
-                'uploaded_at' => $fileInfo['uploaded_at'],
-                'file_size' => $fileInfo['file_size'],
-                'mime_type' => $fileInfo['mime_type']
-            ]
-        ]);
-    }
-    /**
-     * 3. Gabungan JSON + File (multipart response)
-     */
-    private function downloadWithJson($fileInfo) {
-        $filePath = $fileInfo['file_path'];
-        $fileName = $fileInfo['nama_file'];
-        
-        // Get file content as base64
-        $fileContent = Storage::disk('pesanan')->get($filePath);
-        $base64Content = base64_encode($fileContent);
-        
-        return response()->json([
-            'status' => 'success',
-            'message' => 'File dan informasi tersedia',
-            'data' => [
-                'file_info' => [
-                    'nama_file' => $fileInfo['nama_file'],
-                    'catatan_pesanan' => $fileInfo['catatan_pesanan'],
-                    'uploaded_at' => $fileInfo['uploaded_at'],
-                    'file_size' => $fileInfo['file_size'],
-                    'mime_type' => $fileInfo['mime_type']
-                ],
-                'file_content' => [
-                    'base64' => $base64Content,
-                    'encoding' => 'base64'
-                ]
-            ]
-        ]);
     }
 }

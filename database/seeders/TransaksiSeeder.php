@@ -3,7 +3,6 @@ namespace Database\Seeders;
 use App\Models\Transaksi;
 use App\Models\Pesanan;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 class TransaksiSeeder extends Seeder
@@ -125,10 +124,10 @@ class TransaksiSeeder extends Seeder
 
         // Create sample payment proof files if they don't exist
         foreach ($sampleFiles as $file) {
-            if (!Storage::disk('transaksi')->exists($file)) {
+            if (!file_exists($file)) {
                 // Create a simple placeholder file
                 $content = "Sample payment proof for testing - $file";
-                Storage::disk('transaksi')->put($file, $content);
+                file_put_contents($file, $content);
             }
         }
     }

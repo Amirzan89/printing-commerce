@@ -11,10 +11,17 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 class PengerjaanController extends Controller
 {
+    public function dirPath($idPesanan){
+        if(env('APP_ENV', 'local') == 'local'){
+            return public_path('assets3/img/pesanan/' . $idPesanan);
+        }else{
+            $path = env('PUBLIC_PATH', '/../public_html');
+            return base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/pesanan/' . $idPesanan;
+        }
+    }
     /**
      * Get all revisi for the authenticated user 
      */
@@ -206,11 +213,11 @@ class PengerjaanController extends Controller
             // Handle file uploads for this specific revision
             if ($request->hasFile('file_revisi')) {
                 $file = $request->file('file_revisi');
-                $filename = $file->hashName();
-                if (!Storage::disk('pesanan')->exists('revisi_user')) {
-                    Storage::disk('pesanan')->makeDirectory('revisi_user');
+                $filename = $file->hashName();  
+                if (!file_exists($this->dirPath($pesanan->uuid) . '/revisi_user')) {
+                    mkdir($this->dirPath($pesanan->uuid) . '/revisi_user');
                 }
-                Storage::disk('pesanan')->put('revisi_user/' . $filename, file_get_contents($file));
+                file_put_contents($this->dirPath($pesanan->uuid) . '/revisi_user/' . $filename, file_get_contents($file));
 
                 // Store user files for this revision
                 RevisiUser::create([
@@ -285,164 +292,5 @@ class PengerjaanController extends Controller
                 'data' => $e->getMessage()
             ], 500);
         }
-    }
-    /**
-     * Download final files - Multiple approaches
-     */
-    public function downloadFiles(Request $request){
-        try {
-            $validator = Validator::make($request->only('id_pesanan', 'download_type'), [
-                'id_pesanan' => 'required',
-                'download_type' => 'nullable|in:binary,json,info'
-            ], [
-                'id_pesanan.required' => 'ID pesanan wajib di isi',
-                'download_type.in' => 'Tipe download harus binary, json, atau info'
-            ]);
-            if ($validator->fails()){
-                $errors = [];
-                foreach ($validator->errors()->toArray() as $field => $errorMessages){
-                    $errors[$field] = $errorMessages[0];
-                    break;
-                }
-                return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
-            }
-            $pesanan = Pesanan::where('uuid', $request->input('id_pesanan'))
-                ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
-                ->first();
-                
-            if (!$pesanan) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Pesanan tidak ditemukan'
-                ], 404);
-            }
-            // Check if pesanan allows download
-            if (!in_array($pesanan->status_pesanan, ['menunggu_review', 'selesai'])) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'File belum dapat didownload'
-                ], 403);
-            }
-            // Find available file with fallback logic
-            $fileInfo = $this->findAvailableFile($pesanan);
-            if (!$fileInfo) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Tidak ada file hasil yang tersedia'
-                ], 404);
-            }
-            $downloadType = $request->input('download_type', 'json');
-            switch ($downloadType) {
-                case 'binary':
-                    return $this->downloadBinary($fileInfo);
-                case 'info':
-                    return $this->downloadInfo($fileInfo);
-                case 'json':
-                default:
-                    return $this->downloadWithJson($fileInfo);
-            }
-        } catch (\Exception $e) {
-            Log::error('Error downloading files: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengambil file',
-                'data' => $e->getMessage()
-            ], 500);
-        }
-    }
-    /**
-     * Find available file with fallback logic (loop sampai awal)
-     */
-    private function findAvailableFile($pesanan) {
-        // Start from latest revision and work backwards
-        $revisions = Revisi::where('id_pesanan', $pesanan->id_pesanan)
-            ->orderBy('urutan_revisi', 'desc')
-            ->get();
-        foreach ($revisions as $revision) {
-            $editorFiles = RevisiEditor::where('id_revisi', $revision->id_revisi)->get();
-            foreach ($editorFiles as $editorFile) {
-                $filePath = 'revisi_editor/' . $pesanan->uuid . '/' . $editorFile->nama_file;
-                
-                // Check if file exists in storage
-                if (Storage::disk('pesanan')->exists($filePath)) {
-                    return [
-                        'file_path' => $filePath,
-                        'nama_file' => $editorFile->nama_file,
-                        'catatan_editor' => $editorFile->catatan_editor,
-                        'urutan_revisi' => $revision->urutan_revisi,
-                        'uploaded_at' => $editorFile->created_at,
-                        'file_size' => Storage::disk('pesanan')->size($filePath),
-                        'mime_type' => Storage::disk('pesanan')->mimeType($filePath)
-                    ];
-                }
-            }
-        }
-        return null; // No file found after checking all revisions
-    }
-    /**
-     * 1. Download file langsung sebagai binary
-     */
-    private function downloadBinary($fileInfo) {
-        $filePath = $fileInfo['file_path'];
-        $fileName = $fileInfo['nama_file'];
-        
-        // Get file content as binary
-        $fileContent = Storage::disk('pesanan')->get($filePath);
-        $mimeType = $fileInfo['mime_type'];
-        
-        return response($fileContent)
-            ->header('Content-Type', $mimeType)
-            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"')
-            ->header('Content-Length', strlen($fileContent))
-            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-            ->header('Pragma', 'no-cache')
-            ->header('Expires', '0');
-    }
-    /**
-     * 2. Download info only (JSON saja)
-     */
-    private function downloadInfo($fileInfo) {
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Informasi file tersedia',
-            'data' => [
-                'nama_file' => $fileInfo['nama_file'],
-                'catatan_editor' => $fileInfo['catatan_editor'],
-                'urutan_revisi' => $fileInfo['urutan_revisi'],
-                'uploaded_at' => $fileInfo['uploaded_at'],
-                'file_size' => $fileInfo['file_size'],
-                'mime_type' => $fileInfo['mime_type']
-            ]
-        ]);
-    }
-    /**
-     * 3. Gabungan JSON + File (multipart response)
-     */
-    private function downloadWithJson($fileInfo) {
-        $filePath = $fileInfo['file_path'];
-        $fileName = $fileInfo['nama_file'];
-        
-        // Get file content as base64
-        $fileContent = Storage::disk('pesanan')->get($filePath);
-        $base64Content = base64_encode($fileContent);
-        
-        return response()->json([
-            'status' => 'success',
-            'message' => 'File dan informasi tersedia',
-            'data' => [
-                'file_info' => [
-                    'nama_file' => $fileInfo['nama_file'],
-                    'catatan_editor' => $fileInfo['catatan_editor'],
-                    'urutan_revisi' => $fileInfo['urutan_revisi'],
-                    'uploaded_at' => $fileInfo['uploaded_at'],
-                    'file_size' => $fileInfo['file_size'],
-                    'mime_type' => $fileInfo['mime_type']
-                ],
-                'file_content' => [
-                    'base64' => $base64Content,
-                    'encoding' => 'base64'
-                ]
-            ]
-        ]);
     }
 }

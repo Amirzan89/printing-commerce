@@ -12,6 +12,14 @@ use App\Models\JasaImage;
 
 class JasaController extends Controller
 {
+    private function dirPath($kategori){
+        if(env('APP_ENV', 'local') == 'local'){
+            return public_path('assets3/img/jasa/' . $kategori);
+        }else{
+            $path = env('PUBLIC_PATH', '/../public_html');
+            return base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/jasa/' . $kategori;
+        }
+    }
     public function updateJasa(Request $rt){
         // Debug logging
         \Log::info('Update Jasa request received', [

@@ -9,13 +9,20 @@ use App\Models\Editor;
 use App\Models\Revisi;
 use App\Models\RevisiEditor;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 class PengerjaanController extends Controller
 {
+    private function dirPath($idPesanan){
+        if(env('APP_ENV', 'local') == 'local'){
+            return public_path('assets3/img/pesanan/' . $idPesanan);
+        }else{
+            $path = env('PUBLIC_PATH', '/../public_html');
+            return base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/pesanan/' . $idPesanan;
+        }
+    }
     /**
      * ADMIN: Assign editor to handle order or revision
      */
@@ -186,15 +193,15 @@ class PengerjaanController extends Controller
                     'message' => 'Pesanan tidak dalam status dikerjakan atau revisi'
                 ], 400);
             }
-            if(!Storage::disk('pesanan')->exists('revisi_editor')){
-                Storage::disk('pesanan')->makeDirectory('revisi_editor');
+            if(!file_exists($this->dirPath($pesanan->uuid) . '/revisi_editor')){
+                mkdir($this->dirPath($pesanan->uuid) . '/revisi_editor');
             }
             if($pesanan->revisions()->count() == 0){
-                if(!Storage::disk('pesanan')->exists('revisi_editor/' . $pesanan->uuid)){
-                    Storage::disk('pesanan')->makeDirectory('revisi_editor/' . $pesanan->uuid);
+                if(!file_exists($this->dirPath($pesanan->uuid) . '/revisi_editor')){
+                    mkdir($this->dirPath($pesanan->uuid) . '/revisi_editor');
                 }
                 $file_name = $pesanan->uuid . '_revisi_' . $pesanan->revisions()->count() . '.' . $request->file('file_hasil')->getClientOriginalExtension();
-                Storage::disk('pesanan')->put('revisi_editor/' . $pesanan->uuid . '/' . $file_name, file_get_contents($request->file('file_hasil')));
+                file_put_contents($this->dirPath($pesanan->uuid) . '/revisi_editor/' . $file_name, file_get_contents($request->file('file_hasil')));
                 $idRevisi = Revisi::insertGetId([
                     'urutan_revisi' => 0,
                     'created_at' => Carbon::now(),
@@ -204,7 +211,7 @@ class PengerjaanController extends Controller
             }
             else{
                 $file_name = $pesanan->uuid . '_revisi_' . $pesanan->revisions()->count() . '.' . $request->file('file_hasil')->getClientOriginalExtension();
-                Storage::disk('pesanan')->put('revisi_editor/' . $pesanan->uuid . '/' . $file_name, file_get_contents($request->file('file_hasil')));
+                file_put_contents($this->dirPath($pesanan->uuid) . '/revisi_editor/' . $file_name, file_get_contents($request->file('file_hasil')));
                 $idRevisi = Revisi::where('id_pesanan', $pesanan->id_pesanan)->where('urutan_revisi', $pesanan->revisions()->count())->first()->id_revisi;
                 Revisi::where('id_pesanan', $pesanan->id_pesanan)->where('urutan_revisi', $pesanan->revisions()->count())->update([
                     'updated_at' => Carbon::now(),
