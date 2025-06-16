@@ -19,6 +19,7 @@ class TransaksiController extends Controller
                 ->join('pesanan', 'transaksi.id_pesanan', '=', 'pesanan.id_pesanan')
                 ->join('users', 'pesanan.id_user', '=', 'users.id_user')
                 ->join('metode_pembayaran', 'transaksi.id_metode_pembayaran', '=', 'metode_pembayaran.id_metode_pembayaran')
+                ->orderBy('transaksi.status_transaksi', 'asc')
                 ->orderBy('transaksi.created_at', 'desc')
                 ->get()
                 ->map(function($item) {

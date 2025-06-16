@@ -23,27 +23,18 @@ class JasaController extends Controller
         if(is_null($jasa)){
             return redirect('/jasa')->with('error', 'Data Jasa tidak ditemukan');
         }
-        
-        $paketJasa = PaketJasa::where('id_jasa', $jasa->id_jasa)->first();
+        $paketJasa = PaketJasa::where('id_jasa', $jasa->id_jasa)->get();
         $jasaImages = JasaImage::where('id_jasa', $jasa->id_jasa)->get();
-        
         if(is_null($paketJasa)){
             return redirect('/jasa')->with('error', 'Data Paket Jasa tidak ditemukan');
         }
-        
         $jasaData = [
             'uuid' => $jasa->uuid,
-            'thumbnail_jasa' => $jasa->thumbnail_jasa,
+            'deskripsi_jasa' => $jasa->deskripsi_jasa,
             'kategori' => $jasa->kategori,
-            'kelas_jasa' => $paketJasa->kelas_jasa,
-            'deskripsi_paket_jasa' => $paketJasa->deskripsi_paket_jasa,
-            'harga_paket_jasa' => $paketJasa->harga_paket_jasa,
-            'waktu_pengerjaan' => $paketJasa->waktu_pengerjaan,
-            'maksimal_revisi' => $paketJasa->maksimal_revisi,
-            'fitur' => $paketJasa->fitur,
-            'images' => $jasaImages
+            "paket_jasa" => PaketJasa::where('id_jasa', $jasa->id_jasa)->get(),
+            'images' => JasaImage::where('id_jasa', $jasa->id_jasa)->get()
         ];
-        
         $dataShow = [
             'headerData' => UtilityController::getHeaderData(),
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),

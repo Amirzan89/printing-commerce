@@ -228,8 +228,9 @@ $tPath = app()->environment('local') ? '' : '';
                 <!-- Status filter buttons -->
                 <div class="status-filters mb-3">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ url('/pesanan?status=menunggu') }}" class="btn {{ $currentStatus == 'menunggu' ? 'btn-secondary' : 'btn-outline-secondary' }}">Menunggu</a>
-                        <a href="{{ url('/pesanan?status=proses') }}" class="btn {{ $currentStatus == 'proses' ? 'btn-secondary' : 'btn-outline-secondary' }}">Proses</a>
+                        <a href="{{ url('/pesanan?status=menunggu') }}" class="btn {{ $currentStatus == 'pending' ? 'btn-secondary' : 'btn-outline-secondary' }}">Menunggu</a>
+                        <a href="{{ url('/pesanan?status=proses') }}" class="btn {{ $currentStatus == 'diproses' ? 'btn-secondary' : 'btn-outline-secondary' }}">Proses</a>
+                        <a href="{{ url('/pesanan?status=menunggu_editor') }}" class="btn {{ $currentStatus == 'menunggu_editor' ? 'btn-secondary' : 'btn-outline-secondary' }}">Menunggu Editor</a>
                         <a href="{{ url('/pesanan?status=dikerjakan') }}" class="btn {{ $currentStatus == 'dikerjakan' ? 'btn-secondary' : 'btn-outline-secondary' }}">Dikerjakan</a>
                         <a href="{{ url('/pesanan?status=revisi') }}" class="btn {{ $currentStatus == 'revisi' ? 'btn-secondary' : 'btn-outline-secondary' }}">Revisi</a>
                         <a href="{{ url('/pesanan?status=selesai') }}" class="btn {{ $currentStatus == 'selesai' ? 'btn-secondary' : 'btn-outline-secondary' }}">Selesai</a>
@@ -253,9 +254,11 @@ $tPath = app()->environment('local') ? '' : '';
                                             <th class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">Deadline</h6>
                                             </th>
+                                            @if(in_array($currentStatus, ['menunggu_editor', 'dikerjakan', 'revisi']))
                                             <th class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">Nama Editor</h6>
                                             </th>
+                                            @endif
                                             <th class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">Aksi</h6>
                                             </th>
@@ -275,9 +278,11 @@ $tPath = app()->environment('local') ? '' : '';
                                             <td class="border-bottom-0">
                                                 <p class="mb-0 fw-normal">{{ $data['estimasi_waktu']}}</p>
                                             </td>
+                                            @if(in_array($currentStatus, ['menunggu_editor', 'dikerjakan', 'revisi']))
                                             <td class="border-bottom-0">
                                                 <p class="mb-0 fw-normal">{{ $data['nama_editor']}}</p>
                                             </td>
+                                            @endif
                                             <td class="border-bottom-0">
                                                 <a href="/pesanan/detail/{{ $data['uuid'] }}" class="btn btn-warning btn-edit m-1" style="width: fit-content; height: fit-content; padding: 12px;">
                                                     <img src="{{ asset($tPath.'assets2/icon/detail.svg') }}" alt="">
@@ -305,6 +310,75 @@ $tPath = app()->environment('local') ? '' : '';
     @include('components.preloader')
     <div id="greenPopup" style="display:none"></div>
     <div id="redPopup" style="display:none"></div>
+    <script>
+        const modalDelete = document.querySelector('#modalDelete');
+        const deleteForm = document.getElementById('deleteForm');
+        const inpID = document.getElementById('inpID');
+        let isAnimating = false;
+        deleteForm.addEventListener('click',function(event){
+            event.stopPropagation();
+        });
+        function showModalDelete(id){
+            inpID.value = id;
+            modalDelete.style.display = 'block';
+            animateModalDelete('20%');
+        }
+        function closeModalDelete(){
+            animateModalDelete('-20%');
+        }
+        function animateModalDelete(finalTop) {
+            let currentTop = parseInt(deleteForm.style.top) || 0;
+            let increment = currentTop < parseInt(finalTop) ? 1 : -1;
+            function frame() {
+                currentTop += increment;
+                deleteForm.style.top = currentTop + '%';
+                if ((increment === 1 && currentTop >= parseInt(finalTop)) || (increment === -1 && currentTop <= parseInt(finalTop))) {
+                    clearInterval(animationInterval);
+                    if (finalTop === '20%') {
+                        isAnimating = false;
+                    } else {
+                        modalDelete.style.display = 'none';
+                    }
+                }
+            }
+            let animationInterval = setInterval(frame, 5);
+        }
+        function showLoading() {
+            document.querySelector("div#preloader").style.display = "block";
+        }
+        function closeLoading() {
+            document.querySelector("div#preloader").style.display = "none";
+        }
+        deleteForm.onsubmit = function (event) {
+            event.preventDefault();
+            showLoading();
+            var xhr = new XMLHttpRequest();
+            var requestBody = {
+                id_pesanan: inpID.value.trim(),
+            };
+            xhr.open("DELETE", "/pesanan/delete");
+            xhr.setRequestHeader("X-CSRF-TOKEN", csrfToken);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.send(JSON.stringify(requestBody));
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        closeLoading();
+                        var response = JSON.parse(xhr.responseText);
+                        showGreenPopup(response.message);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        closeLoading();
+                        var response = JSON.parse(xhr.responseText);
+                        showRedPopup(response.message);
+                    }
+                }
+            };
+            return false;
+        };
+    </script>
     <script src="{{ asset($tPath.'assets/libs/jquery/dist/jquery.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/sidebarmenu.js') }}"></script>
@@ -312,7 +386,5 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
-    <script src="{{ asset($tPath.'assets2/js/page/modalDelete.js') }}"></script>
 </body>
-
 </html>

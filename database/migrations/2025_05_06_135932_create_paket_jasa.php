@@ -9,11 +9,10 @@ return new class extends Migration
         Schema::create('paket_jasa', function (Blueprint $table) {
             $table->id('id_paket_jasa');
             $table->enum('kelas_jasa', ['basic', 'standard', 'premium']);
-            $table->string('deskripsi_paket_jasa', 500);
+            $table->string('deskripsi_singkat', 300);
             $table->integer('harga_paket_jasa');
-            $table->dateTime('waktu_pengerjaan');
+            $table->string('waktu_pengerjaan', 50);
             $table->tinyInteger('maksimal_revisi');
-            $table->string('fitur', 300);
             $table->unsignedBigInteger('id_jasa');
             $table->foreign('id_jasa')->references('id_jasa')->on('jasa')->onDelete('cascade'); 
         });

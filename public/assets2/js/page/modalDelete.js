@@ -45,8 +45,6 @@ deleteForm.onsubmit = function (event) {
     };
     if(reff == '/admin'){
         xhr.open("DELETE", "/admin/delete");
-    }else if(reff == '/metode-pembayaran'){
-        xhr.open("DELETE", "/metode-pembayaran/delete");
     }else{
         xhr.open("DELETE", reff + "/delete");
     }

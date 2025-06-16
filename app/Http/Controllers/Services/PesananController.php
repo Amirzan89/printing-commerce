@@ -163,7 +163,7 @@ class PesananController extends Controller
             $pesanan->fromCatatanPesanan()->delete();
             $pesanan->revisions()->delete();
             $pesanan->fromTransaksi()->delete();
-            
+            Storage::disk('pesanan')->delete(''. $pesanan->uuid);
             $pesanan->delete();
 
             return response()->json([

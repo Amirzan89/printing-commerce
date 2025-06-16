@@ -13,115 +13,141 @@ use App\Models\JasaImage;
 class JasaController extends Controller
 {
     public function updateJasa(Request $rt){
-        $v = Validator::make($rt->only('id_jasa', 'thumbnail_jasa', 'images', 'kategori', 'kelas_jasa', 'deskripsi_paket_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'fitur', 'deleted_images'), [
+        // Debug logging
+        \Log::info('Update Jasa request received', [
+            'has_images' => $rt->hasFile('images'),
+            'image_count' => $rt->hasFile('images') ? count($rt->file('images')) : 0,
+            'has_deleted_images' => $rt->has('deleted_images'),
+            'deleted_images' => $rt->input('deleted_images')
+        ]);
+        
+        $vJasa = Validator::make($rt->only('id_jasa', 'images', 'kelas_jasa', 'deskripsi_jasa', 'harga_paket_jasa', 'waktu_pengerjaan', 'maksimal_revisi', 'deskripsi_singkat', 'deleted_images'), [
             'id_jasa' => 'required',
-            'thumbnail_jasa' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-            'kategori' => 'required|in:logo,banner,poster',
             'kelas_jasa' => 'required|in:basic,standard,premium',
-            'deskripsi_paket_jasa' => 'required|max:500',
+            'deskripsi_jasa' => 'required|max:500',
             'harga_paket_jasa' => 'required|integer',
-            'waktu_pengerjaan' => 'required|date',
+            'waktu_pengerjaan' => 'required',
             'maksimal_revisi' => 'required|integer|max:20',
-            'fitur' => 'required|max:300',
+            'deskripsi_singkat' => 'required|max:300',
             'deleted_images' => 'nullable|string',
         ], [
             'id_jasa.required' => 'ID Jasa wajib di isi',
-            'thumbnail_jasa.image' => 'Thumbnail Jasa harus berupa gambar',
-            'thumbnail_jasa.mimes' => 'Format Thumbnail Jasa tidak valid. Gunakan format jpeg, png, jpg',
-            'thumbnail_jasa.max' => 'Ukuran Thumbnail Jasa tidak boleh lebih dari 5MB',
-            'images.*.image' => 'Gambar tambahan harus berupa gambar',
-            'images.*.mimes' => 'Format Gambar tambahan tidak valid. Gunakan format jpeg, png, jpg',
-            'images.*.max' => 'Ukuran Gambar tambahan tidak boleh lebih dari 5MB',
-            'kategori.required' => 'Kategori wajib di isi',
-            'kategori.in' => 'Kategori harus Logo, Banner, atau Poster',
+            'images.*.image' => 'Galeri Jasa harus berupa gambar',
+            'images.*.mimes' => 'Format Galeri Jasa tidak valid. Gunakan format jpeg, png, jpg',
+            'images.*.max' => 'Ukuran Galeri Jasa tidak boleh lebih dari 5MB',
             'kelas_jasa.required' => 'Kelas Jasa wajib di isi',
             'kelas_jasa.in' => 'Kelas Jasa harus Basic, Standard, atau Premium',
-            'deskripsi_paket_jasa.required' => 'Deskripsi Paket Jasa wajib di isi',
-            'deskripsi_paket_jasa.max' => 'Deskripsi Paket Jasa maksimal 500 karakter',
+            'deskripsi_jasa.required' => 'Deskripsi Jasa wajib di isi',
+            'deskripsi_jasa.max' => 'Deskripsi Jasa maksimal 500 karakter',
             'harga_paket_jasa.required' => 'Harga Paket Jasa wajib di isi',
             'harga_paket_jasa.integer'=>'Harga Paket Jasa harus berupa angka',
             'waktu_pengerjaan.required' => 'Waktu Pengerjaan wajib di isi',
-            'waktu_pengerjaan.date' => 'Format Waktu Pengerjaan tidak valid',
             'maksimal_revisi.required' => 'Maksimal Revisi wajib di isi',
             'maksimal_revisi.integer'=>'Maksimal Revisi harus berupa angka',
             'maksimal_revisi.max'=>'Maksimal Revisi maksimal 20',
-            'fitur.required' => 'Fitur wajib di isi',
-            'fitur.max' => 'Fitur maksimal 300 karakter',
+            'deskripsi_singkat.required' => 'Deskripsi Singkat wajib di isi',
+            'deskripsi_singkat.max' => 'Deskripsi Singkat maksimal 300 karakter',
+            'deleted_images.string' => 'Deleted Image harus String',
         ]);
-        if ($v->fails()){
+        
+        if ($vJasa->fails()){
             $errors = [];
-            foreach ($v->errors()->toArray() as $field => $errorMessages){
+            foreach ($vJasa->errors()->toArray() as $field => $errorMessages){
                 $errors[$field] = $errorMessages[0];
                 break;
             }
             return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
         }
         
-        $jasa = Jasa::where('uuid', $rt->input('id_jasa'))->firstOrFail();
-        $paketJasa = PaketJasa::where('id_jasa', $jasa->id_jasa)->firstOrFail();
+        $jasa = Jasa::where('uuid', $rt->input('id_jasa'))->first();
+        if(!$jasa){
+            return response()->json(['status' => 'error', 'message' => 'Data Jasa tidak ditemukan'], 404);
+        }
+        $paketJasa = PaketJasa::where('id_jasa', $jasa->id_jasa)->where('kelas_jasa', $rt->input('kelas_jasa'))->first();
+        if(!$paketJasa){
+            return response()->json(['status' => 'error', 'message' => 'Data Paket Jasa tidak ditemukan'], 404);
+        }
+        // Update jasa description
+        $jasa->update([
+            'deskripsi_jasa' => $rt->input('deskripsi_jasa')
+        ]);
+        $waktuPengerjaan = $rt->input('waktu_pengerjaan');
+        if (empty($waktuPengerjaan)) {
+            $waktuPengerjaan = '7 hari';
+        }
+        $existingImagesCount = JasaImage::where('id_jasa', $jasa->id_jasa)->count();
+        $deletedImagesCount = 0;
+        if ($rt->has('deleted_images') && !empty($rt->input('deleted_images'))) {
+            $deletedImages = json_decode($rt->input('deleted_images'), true);
+            $deletedImagesCount = is_array($deletedImages) ? count($deletedImages) : 1;
+        }
+        $newImagesCount = $rt->hasFile('images') ? count($rt->file('images')) : 0;
+        $finalImageCount = $existingImagesCount - $deletedImagesCount + $newImagesCount;
         
-        $thumbnailPath = $jasa->thumbnail_jasa;
-        if($rt->hasFile('thumbnail_jasa')){
-            $thumbnail = $rt->file('thumbnail_jasa');
-            if(!($thumbnail->isValid() && in_array($thumbnail->extension(), ['jpeg', 'png', 'jpg']))){
-                return response()->json(['status'=>'error','message'=>'Format Thumbnail Jasa tidak valid. Gunakan format jpeg, png, jpg'], 400);
-            }
-            
-            $oldThumbnailPath = public_path('assets3/img/jasa/') . $jasa->thumbnail_jasa;
-            if($jasa->thumbnail_jasa && file_exists($oldThumbnailPath) && !is_dir($oldThumbnailPath)){
-                unlink($oldThumbnailPath);
-            }
-            
-            $thumbnailPath = $thumbnail->hashName();
-            $thumbnail->move(public_path('assets3/img/jasa/'), $thumbnailPath);
+        if ($finalImageCount <= 0) {
+            return response()->json(['status' => 'error', 'message' => 'Jasa harus memiliki minimal 1 gambar'], 400);
         }
         
-        if ($rt->hasFile('images')) {
-            foreach ($rt->file('images') as $image) {
-                if ($image->isValid() && in_array($image->extension(), ['jpeg', 'png', 'jpg'])) {
-                    $imageName = $image->hashName();
-                    $image->move(public_path('assets3/img/jasa/gallery/'), $imageName);
-                    
-                    JasaImage::create([
-                        'id_jasa' => $jasa->id_jasa,
-                        'image_path' => $imageName
-                    ]);
-                }
-            }
+        if ($finalImageCount > 5) {
+            return response()->json(['status' => 'error', 'message' => 'Maksimal 5 gambar untuk setiap jasa'], 400);
         }
-        
+        // Process deleted images
         if ($rt->has('deleted_images') && !empty($rt->input('deleted_images'))) {
             $deletedImages = json_decode($rt->input('deleted_images'), true);
             if (is_array($deletedImages)) {
                 foreach ($deletedImages as $imageId) {
                     $image = JasaImage::find($imageId);
                     if ($image) {
-                        $imagePath = public_path('assets3/img/jasa/gallery/') . $image->image_path;
+                        $imagePath = public_path('assets3/img/jasa/' . $jasa->kategori .'/') . $image->image_path;
                         if (file_exists($imagePath) && !is_dir($imagePath)) {
                             unlink($imagePath);
                         }
                         $image->delete();
                     }
                 }
+            } else {
+                $image = JasaImage::find($rt->input('deleted_images'));
+                if ($image) {
+                    $imagePath = public_path('assets3/img/jasa/' . $jasa->kategori .'/') . $image->image_path;
+                    if (file_exists($imagePath) && !is_dir($imagePath)) {
+                        unlink($imagePath);
+                    }
+                    $image->delete();
+                }
+            }
+        }
+        // Process new images
+        if ($rt->hasFile('images')) {
+            // Make sure the directory exists
+            $targetDir = public_path('assets3/img/jasa/' . $jasa->kategori .'/');
+            if (!file_exists($targetDir)) {
+                mkdir($targetDir, 0755, true);
+            }
+            foreach ($rt->file('images') as $image) {
+                if ($image->isValid() && in_array($image->extension(), ['jpeg', 'png', 'jpg'])) {
+                    try {
+                        $imageName = $image->hashName();
+                        $image->move($targetDir, $imageName);
+                        
+                        JasaImage::create([
+                            'image_path' => $imageName,
+                            'id_jasa' => $jasa->id_jasa,
+                        ]);
+                    } catch (\Exception $e) {
+                        \Log::error('Error uploading image: ' . $e->getMessage());
+                        return response()->json(['status' => 'error', 'message' => 'Gagal mengupload gambar'], 500);
+                    }
+                }
             }
         }
         
-        $jasa->update([
-            'thumbnail_jasa' => $thumbnailPath,
-            'kategori' => $rt->input('kategori'),
-        ]);
-        
-        // Parse and format the date for MySQL datetime
-        $waktuPengerjaan = Carbon::parse($rt->input('waktu_pengerjaan'))->format('Y-m-d H:i:s');
-        
+        // Update paket jasa data
         $paketJasa->update([
-            'kelas_jasa' => $rt->input('kelas_jasa'),
-            'deskripsi_paket_jasa' => $rt->input('deskripsi_paket_jasa'),
             'harga_paket_jasa' => $rt->input('harga_paket_jasa'),
             'waktu_pengerjaan' => $waktuPengerjaan,
             'maksimal_revisi' => $rt->input('maksimal_revisi'),
-            'fitur' => $rt->input('fitur'),
+            'deskripsi_singkat' => $rt->input('deskripsi_singkat'),
         ]);
         
         return response()->json(['status'=>'success','message'=>'Data Jasa berhasil diupdate']);

@@ -15,7 +15,6 @@ $tPath = app()->environment('local') ? '' : '';
     <link rel="stylesheet" href="{{ asset($tPath.'assets/css/styles.min.css') }}" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/popup.css') }}" />
     <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/preloader.css') }}" />
-    <link rel="stylesheet" href="{{ asset($tPath.'assets2/css/page/editJasa.css') }}" />
     <!-- Carousel CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css" />
@@ -340,67 +339,69 @@ $tPath = app()->environment('local') ? '' : '';
                 <div class="card">
                     <form id="editForm">
                         <input type="hidden" name="id_jasa" value="{{ $jasa['uuid'] }}">
-
                         <div class="section-title">
                             <h5>Gambar Produk</h5>
-                            <button type="button" class="btn-add-new" onclick="document.getElementById('inpImages').click()">
+                            <button type="button" class="btn-add-new" onclick="document.getElementById('inpImages').click()" style="{{ count($jasa['images']) >= 5 ? 'display: none;' : '' }}">
                                 <i class="fas fa-plus"></i> Tambah Baru
                             </button>
                         </div>
 
                         <div class="image-gallery" id="imageGallery">
-                            @if(isset($jasa['images']) && count($jasa['images']) > 0)
                                 @foreach($jasa['images'] as $image)
-                                    <div class="gallery-item" data-id="{{ $image['id'] }}">
-                                        <img src="{{ asset($tPath.'assets3/img/jasa/gallery/'.$image['image_path']) }}" alt="Gallery Image">
+                                <div class="gallery-item" data-id="{{ $image['id_jasa_image'] }}">
+                                    <img src="{{ asset($tPath.'assets3/img/jasa/'.$jasa['kategori'].'/'.$image['image_path']) }}" alt="Gallery Image">
                                         <button type="button" class="remove-btn" onclick="removeImage(this)">×</button>
                                     </div>
                                 @endforeach
-                            @endif
-                            <div class="add-image-btn" onclick="document.getElementById('inpImages').click()">
+                            <div class="add-image-btn" onclick="document.getElementById('inpImages').click()" style="{{ count($jasa['images']) >= 5 ? 'display: none;' : '' }}">
                                 <i class="fas fa-plus"></i>
                                 <span>Tambah Gambar</span>
                             </div>
                         </div>
-                        <input type="file" id="inpImages" name="images[]" hidden multiple onchange="handleImagesChange(event)">
+                        <input type="file" id="inpImages" name="images[]" hidden multiple accept="image/jpeg,image/png,image/jpg" onchange="handleImagesChange(event)">
                         <input type="hidden" id="deletedImages" name="deleted_images" value="">
 
                         <div class="form-group">
                             <label class="form-label">Deskripsi Produk</label>
-                            <textarea class="form-control" name="deskripsi_paket_jasa" rows="4" placeholder="Masukkan deskripsi produk">{{ $jasa['deskripsi_paket_jasa'] ?? '' }}</textarea>
+                            <textarea class="form-control" name="deskripsi_jasa" rows="4" placeholder="Masukkan deskripsi produk">{{ $jasa['deskripsi_jasa'] ?? '' }}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Kategori</label>
+                            <input type="text" class="form-control" name="kategori" value="{{ $jasa['kategori'] }}" disabled>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Kelas Jasa</label>
-                            <select class="form-control" name="kelas_jasa">
+                            <select class="form-control" id="kelasJasaSelect" name="kelas_jasa">
                                 <option value="">Pilih Kelas Jasa</option>
-                                <option value="basic" {{ $jasa['kategori'] == 'basic' ? 'selected' : '' }}>Basic</option>
-                                <option value="standard" {{ $jasa['kategori'] == 'standard' ? 'selected' : '' }}>Standard</option>
-                                <option value="premium" {{ $jasa['kategori'] == 'premium' ? 'selected' : '' }}>Premium</option>
+                                <option value="basic">Basic</option>
+                                <option value="standard">Standard</option>
+                                <option value="premium">Premium</option>
                             </select>
-                            <small class="text-muted">Ketika dipilih yang bawah baru muncul</small>
                         </div>
 
+                        <div id="additionalFields" style="display: none">
                         <div class="form-group">
                             <label class="form-label">Harga Jasa</label>
-                            <input type="number" class="form-control" name="harga_paket_jasa" value="{{ $jasa['harga_paket_jasa'] ?? '' }}" placeholder="Masukkan harga jasa">
+                            <input type="number" class="form-control" name="harga_paket_jasa" placeholder="Masukkan harga jasa">
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Deskripsi Singkat</label>
-                            <textarea class="form-control" name="fitur" rows="3" placeholder="Masukkan deskripsi singkat">{{ $jasa['fitur'] ?? '' }}</textarea>
+                            <textarea class="form-control" name="deskripsi_singkat" rows="3" placeholder="Masukkan deskripsi singkat"></textarea>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Waktu Pengerjaan</label>
-                            <input type="text" class="form-control" name="waktu_pengerjaan" value="{{ $jasa['waktu_pengerjaan'] ?? '' }}" placeholder="Isi waktu pengerjaan">
+                            <input type="text" class="form-control" name="waktu_pengerjaan" placeholder="Contoh: 3 hari, 1 minggu, dst">
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Total Revisi</label>
-                            <input type="number" class="form-control" name="maksimal_revisi" value="{{ $jasa['maksimal_revisi'] ?? '' }}" placeholder="Masukkan jumlah revisi">
+                            <input type="number" class="form-control" name="maksimal_revisi" placeholder="Masukkan jumlah revisi">
                         </div>
-
+                        </div>
                         <div class="d-flex justify-content-end gap-2 mt-4">
                             <button type="button" class="btn-secondary" onclick="window.location.href='/jasa'">Cancel</button>
                             <button type="submit" class="btn-primary">Save</button>
@@ -423,66 +424,278 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
     <script>
-        // Store deleted image IDs
         let deletedImageIds = [];
+        let originalData = {};
+        let currentData = {};
+        let dataChanged = false;
+        let selectedFiles = []; // Array to store selected files
+        
+        // Initialize data from the fetched JSON
+        function initializeData() {
+            originalData = JSON.parse(JSON.stringify(dataFetch));
+            currentData = JSON.parse(JSON.stringify(dataFetch));
+        }
 
         function handleImagesChange(event) {
             const files = event.target.files;
             const gallery = document.getElementById('imageGallery');
             const addButton = gallery.querySelector('.add-image-btn');
+            
+            // Check if adding these files would exceed the 5 image limit
+            const currentImageCount = gallery.querySelectorAll('.gallery-item').length - 1; // -1 to exclude the add button
+            const newImageCount = files.length;
+            
+            if (currentImageCount + newImageCount > 5) {
+                showRedPopup("Maksimal 5 gambar untuk setiap jasa");
+                event.target.value = '';
+                return;
+            }
+
+            // Store the selected files for later submission
+            for (let i = 0; i < files.length; i++) {
+                selectedFiles.push(files[i]);
+            }
 
             for (let file of files) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const galleryItem = document.createElement('div');
                     galleryItem.className = 'gallery-item';
+                    galleryItem.dataset.new = 'true';
+                    galleryItem.dataset.filename = file.name; // Store filename for reference
                     
                     const img = document.createElement('img');
                     img.src = e.target.result;
+                    img.alt = 'Gallery Image';
                     
                     const removeBtn = document.createElement('button');
                     removeBtn.className = 'remove-btn';
                     removeBtn.innerHTML = '×';
                     removeBtn.onclick = function() {
+                        // Remove file from selectedFiles array
+                        const filename = galleryItem.dataset.filename;
+                        selectedFiles = selectedFiles.filter(f => f.name !== filename);
                         gallery.removeChild(galleryItem);
+                        dataChanged = true;
                     };
                     
                     galleryItem.appendChild(img);
                     galleryItem.appendChild(removeBtn);
                     gallery.insertBefore(galleryItem, addButton);
+                    
+                    // Mark data as changed
+                    dataChanged = true;
                 };
                 reader.readAsDataURL(file);
+            }
+            // Clear the input value but keep the files in our selectedFiles array
+            event.target.value = '';
+            
+            // Hide add button if we've reached 5 images
+            if (gallery.querySelectorAll('.gallery-item').length - 1 >= 5) {
+                addButton.style.display = 'none';
             }
         }
 
         function removeImage(button) {
             const item = button.parentElement;
             const imageId = item.dataset.id;
+            const gallery = document.getElementById('imageGallery');
+            const addButton = gallery.querySelector('.add-image-btn');
+            
             if (imageId) {
+                // This is an existing image, add to deletedImageIds
                 deletedImageIds.push(imageId);
                 document.getElementById('deletedImages').value = JSON.stringify(deletedImageIds);
+                console.log('Image marked for deletion:', imageId);
+                console.log('Current deleted images:', deletedImageIds);
+            } else if (item.dataset.new === 'true') {
+                // This is a new image, remove from selectedFiles
+                const filename = item.dataset.filename;
+                if (filename) {
+                    selectedFiles = selectedFiles.filter(f => f.name !== filename);
+                    console.log('New image removed:', filename);
+                    console.log('Remaining selected files:', selectedFiles);
+                }
             }
+            
+            // Mark data as changed
+            dataChanged = true;
+            
+            // Remove the item from DOM
             item.remove();
+            
+            // Show add button if we now have fewer than 5 images
+            if (gallery.querySelectorAll('.gallery-item').length - 1 < 5) {
+                addButton.style.display = 'block';
+            }
         }
 
-        $(document).ready(function() {
-            $('#editForm').submit(function(e) {
-                e.preventDefault();
-                $('#preloader').show();
+        // Populate form fields based on selected kelas_jasa
+        function populateFields(kelasJasa) {
+            const paketJasaData = dataFetch.paket_jasa.find(paket => paket.kelas_jasa === kelasJasa);
+            if (paketJasaData) {
+                document.querySelector('input[name="harga_paket_jasa"]').value = paketJasaData.harga_paket_jasa;
+                document.querySelector('textarea[name="deskripsi_singkat"]').value = paketJasaData.deskripsi_singkat;
+                document.querySelector('input[name="waktu_pengerjaan"]').value = paketJasaData.waktu_pengerjaan;
+                document.querySelector('input[name="maksimal_revisi"]').value = paketJasaData.maksimal_revisi;
+                currentData.selectedPaket = paketJasaData;
+            } else {
+                document.querySelector('input[name="harga_paket_jasa"]').value = '';
+                document.querySelector('textarea[name="deskripsi_singkat"]').value = '';
+                document.querySelector('input[name="waktu_pengerjaan"]').value = '';
+                document.querySelector('input[name="maksimal_revisi"]').value = '';
+                
+                currentData.selectedPaket = null;
+            }
+            
+            dataChanged = false;
+        }
+        
+        // Format date for display
+        function formatDate(dateString, format) {
+            // Handle null or undefined dates
+            if (!dateString) {
+                return '';
+            }
+            // Parse the date string
+            const date = new Date(dateString);
+            
+            // Check if date is valid
+            if (isNaN(date.getTime())) {
+                console.error('Invalid date:', dateString);
+                return '';
+            }
+            
+            if (format === 'dd-mm-yyyy') {
+                // Ensure day and month are padded with leading zeros if needed
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}-${month}-${year}`;
+            } else if (format === 'yyyy-mm-dd') {
+                // Format for input[type="date"]
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${year}-${month}-${day}`;
+            } else {
+                // Default format
+                return date.toISOString().slice(0, 16).replace('T', ' ');
+            }
+        }
+        
+        function hasDataChanged() {
+            if (dataChanged || deletedImageIds.length > 0) {
+                return true;
+            }
+            
+            const selectedKelasJasa = document.getElementById('kelasJasaSelect').value;
+            if (!selectedKelasJasa || !currentData.selectedPaket) {
+                return false;
+            }
+            
+            const hargaInput = document.querySelector('input[name="harga_paket_jasa"]').value;
+            const waktuInput = document.querySelector('input[name="waktu_pengerjaan"]').value;
+            const revisiInput = document.querySelector('input[name="maksimal_revisi"]').value;
+            const deskripsiSingkatInput = document.querySelector('textarea[name="deskripsi_singkat"]').value;
+            const deskripsiInput = document.querySelector('textarea[name="deskripsi_jasa"]').value;
+            
+            if (
+                parseInt(hargaInput) !== currentData.selectedPaket.harga_paket_jasa ||
+                waktuInput !== currentData.selectedPaket.waktu_pengerjaan ||
+                parseInt(revisiInput) !== currentData.selectedPaket.maksimal_revisi ||
+                deskripsiSingkatInput !== currentData.selectedPaket.deskripsi_singkat ||
+                deskripsiInput !== dataFetch.deskripsi_jasa
+            ) {
+                return true;
+            }
+            
+            return false;
+        }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize data
+            initializeData();
+            
+            const kelasJasaSelect = document.getElementById('kelasJasaSelect');
+            const additionalFields = document.getElementById('additionalFields');
+            
+            // Set up change event listeners for all form fields
+            const formInputs = document.querySelectorAll('input, textarea, select');
+            formInputs.forEach(input => {
+                if (input.id !== 'kelasJasaSelect') {
+                    input.addEventListener('change', function() {
+                        dataChanged = true;
+                    });
+                    
+                    if (input.tagName === 'TEXTAREA' || input.type === 'text' || input.type === 'number') {
+                        input.addEventListener('input', function() {
+                            dataChanged = true;
+                        });
+                    }
+                }
+            });
+            
+            // Set the initial selected value from dataFetch if available
+            if (dataFetch && dataFetch.paket_jasa && dataFetch.paket_jasa.length > 0) {
+                // Default to the first package
+                const defaultPaket = dataFetch.paket_jasa[0];
+                kelasJasaSelect.value = defaultPaket.kelas_jasa;
+                
+                // Show the fields
+                additionalFields.style.display = 'block';
+                
+                // Populate fields with the default package data
+                populateFields(defaultPaket.kelas_jasa);
+            }
+            
+            kelasJasaSelect.addEventListener('change', function() {
+                if (this.value) {
+                    additionalFields.style.display = 'block';
+                    console.log(this.value);
+                    populateFields(this.value);
+                } else {
+                    additionalFields.style.display = 'none';
+                }
+            });
+            
+            document.getElementById('editForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Check if data has been changed
+                if (!hasDataChanged()) {
+                    showRedPopup('Data belum diubah. Tidak ada perubahan untuk disimpan.');
+                    return;
+                }
+                
+                document.getElementById('preloader').style.display = 'block';
                 const formData = new FormData(this);
                 
-                $.ajax({
-                    url: domain + '/api/jasa/update',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    success: function(response) {
-                        $('#preloader').hide();
+                // Add selected files to the form data
+                selectedFiles.forEach((file, index) => {
+                    formData.append('images[]', file);
+                });
+                
+                const selectedKelasJasa = kelasJasaSelect.value;
+                if (selectedKelasJasa) {
+                    formData.set('kelas_jasa', selectedKelasJasa);
+                }
+                formData.set('_method', 'PUT');
+                formData.set('id_jasa', uuid);
+                formData.set('deleted_images', JSON.stringify(deletedImageIds));
+                
+                // Debug log to check what's being sent
+                console.log('Selected files:', selectedFiles);
+                console.log('Deleted images:', deletedImageIds);
+                
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', domain + '/jasa/update', true);
+                xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+                xhr.onload = function() {
+                    document.getElementById('preloader').style.display = 'none';
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        const response = JSON.parse(xhr.responseText);
                         if (response.status === 'success') {
                             showGreenPopup(response.message);
                             setTimeout(function() {
@@ -491,17 +704,25 @@ $tPath = app()->environment('local') ? '' : '';
                         } else {
                             showRedPopup(response.message);
                         }
-                    },
-                    error: function(xhr) {
-                        $('#preloader').hide();
-                        const response = xhr.responseJSON;
+                    } else {
+                        let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+                        try {
+                            const response = JSON.parse(xhr.responseText);
                         if (response && response.message) {
-                            showRedPopup(response.message);
-                        } else {
-                            showRedPopup('Terjadi kesalahan. Silakan coba lagi.');
+                                errorMessage = response.message;
+                            }
+                        } catch (e) {
                         }
+                        showRedPopup(errorMessage);
                     }
-                });
+                };
+                
+                xhr.onerror = function() {
+                    document.getElementById('preloader').style.display = 'none';
+                    showRedPopup('Terjadi kesalahan jaringan. Silakan coba lagi.');
+                };
+                
+                xhr.send(formData);
             });
         });
     </script>

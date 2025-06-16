@@ -9,8 +9,8 @@ return new class extends Migration
         Schema::create('jasa', function (Blueprint $table) {
             $table->id('id_jasa');
             $table->uuid();
-            $table->string('thumbnail_jasa', 50);
             $table->enum('kategori', ['logo', 'banner', 'poster']);
+            $table->string('deskripsi_jasa', 500);
         });
     }
 

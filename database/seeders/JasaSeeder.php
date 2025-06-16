@@ -13,21 +13,20 @@ class JasaSeeder extends Seeder
     }
     public function run(): void
     {
-        for($i = 1; $i <= 3; $i++){
+        for($i = 0; $i <= 2; $i++){
             $idJasa = Jasa::insertGetId([
                 'uuid' =>  Str::uuid(),
-                'thumbnail_jasa' => '/1.jpg',
-                'kategori' => ['logo', 'banner', 'poster'][rand(0,2)],
+                'kategori' => ['logo', 'banner', 'poster'][$i],
+                'deskripsi_jasa' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla, placeat? Vitae quam error laudantium suscipit nulla soluta? Vero nobis cupiditate, quam similique nisi eligendi veniam nesciunt odit ipsam, at quis?',
             ]);
             $idJasas[] = $idJasa;
-            for($l = 1; $l <= 3; $l++){
+            for($l = 0; $l <= 2; $l++){
                 $idPaketJasas[] = PaketJasa::insertGetId([
-                    'kelas_jasa' => ['basic', 'standard', 'premium'][rand(0,2)],
-                    'deskripsi_paket_jasa' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla, placeat? Vitae quam error laudantium suscipit nulla soluta? Vero nobis cupiditate, quam similique nisi eligendi veniam nesciunt odit ipsam, at quis?',
-                    'harga_paket_jasa' => 20000,
-                    'waktu_pengerjaan' => Carbon::now(),
-                    'maksimal_revisi' => 3,
-                    'fitur' => 'terserahh',
+                    'kelas_jasa' => ['basic', 'standard', 'premium'][$l],
+                    'harga_paket_jasa' => rand(10000, 100000),
+                    'waktu_pengerjaan' => ['3 hari', '7 hari', '14 hari'][$l],
+                    'maksimal_revisi' => rand(1, 5),
+                    'deskripsi_singkat' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla, placeat? Vitae quam error laudantium suscipit nulla soluta? Vero nobis cupiditate, quam similique nisi eligendi veniam nesciunt odit ipsam, at quis?',
                     'id_jasa' => $idJasa,
                 ]);
             }

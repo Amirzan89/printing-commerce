@@ -11,6 +11,9 @@ class PesananController extends Controller
 {
     public function showAll(Request $request){
         $status = $request->query('status', 'pending');
+        if($status == 'proses'){
+            $status = 'diproses';
+        }
         $validStatuses = ['pending', 'diproses', 'menunggu_editor', 'dikerjakan', 'revisi', 'selesai', 'dibatalkan'];
         if (!in_array($status, $validStatuses)) {
             $status = 'pending';
@@ -25,7 +28,6 @@ class PesananController extends Controller
             ->orderBy('pesanan.created_at', $orderBy)
             ->where('status_pesanan', $status)
             ->get();
-        
         $pesananList->each(function($pesanan) {
             $latestEditor = $pesanan->editorFiles()->with('editor')->latest('updated_at')->first();
             $pesanan->nama_editor = $latestEditor ? $latestEditor->editor->nama_editor : '-';
@@ -46,7 +48,7 @@ class PesananController extends Controller
             'fromCatatanPesanan',
             'revisions.userFiles',
             'revisions.editorFiles.editor'
-        ])->where('uuid', $uuid)->first();
+        ])->join('catatan_pesanan', 'catatan_pesanan.id_pesanan', '=', 'pesanan.id_pesanan')->where('uuid', $uuid)->first();
         if (!$pesanan) {
             return redirect('/pesanan')->with('error', 'Data Pesanan tidak ditemukan');
         }
@@ -67,7 +69,8 @@ class PesananController extends Controller
                 'revisions' => $pesanan->revisions,
                 'estimasi_waktu' => [
                     'dari' => $pesanan->estimasi_waktu ? Carbon::parse($pesanan->estimasi_waktu)->format('Y-m-d') : null,
-                    'sampai' => $pesanan->estimasi_waktu ? Carbon::parse($pesanan->estimasi_waktu)->addDays($pesanan->toPaketJasa->waktu_pengerjaan ?? 0)->format('Y-m-d') : null
+                    'sampai' => $pesanan->estimasi_waktu ? Carbon::parse($pesanan->estimasi_waktu)->format('Y-m-d') : null,
+                    'durasi' => $pesanan->toPaketJasa->waktu_pengerjaan ?? '-'
                 ],
                 'editors' => $workingEditors,
                 'latest_editor' => $workingEditors->first(),

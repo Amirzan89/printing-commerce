@@ -17,31 +17,15 @@ class JasaImageSeeder extends Seeder
     public function run()
     {
         // Make sure the destination directories exist
-        $thumbnailDir = public_path('assets3/img/jasa');
-        $galleryDir = public_path('assets3/img/jasa/gallery');
-        
-        if (!File::exists($thumbnailDir)) {
-            File::makeDirectory($thumbnailDir, 0755, true);
-        }
-        
+        $galleryDir = public_path('assets3/img/jasa');
         if (!File::exists($galleryDir)) {
             File::makeDirectory($galleryDir, 0755, true);
         }
-        
         // Get all jasas
         $jasas = Jasa::all();
-        
-        // Source directories
-        $sourceDir = base_path('seeder/resources/img/jasa');
-        
-        if (!File::exists($sourceDir)) {
-            $this->command->error('Source directory not found: ' . $sourceDir);
-            return;
-        }
-        
         // Process each jasa
         foreach ($jasas as $jasa) {
-            $this->seedImagesForJasa($jasa, $sourceDir, $thumbnailDir, $galleryDir);
+            $this->seedImagesForJasa($jasa, $galleryDir);
         }
         
         $this->command->info('JasaImage seeding completed successfully!');
@@ -52,62 +36,37 @@ class JasaImageSeeder extends Seeder
      * 
      * @param Jasa $jasa
      * @param string $sourceDir
-     * @param string $thumbnailDir
      * @param string $galleryDir
      */
-    private function seedImagesForJasa($jasa, $sourceDir, $thumbnailDir, $galleryDir)
+    private function seedImagesForJasa($jasa, $galleryDir)
     {
-        // If the category-specific folder exists, use that
-        $categoryDir = $sourceDir . '/' . $jasa->kategori;
+        $categoryDir = $galleryDir . '/' . $jasa->kategori;
         if (!File::exists($categoryDir)) {
-            $categoryDir = $sourceDir; // Fallback to main source directory
+            $categoryDir = $galleryDir;
         }
-        
-        // Get all image files from the source directory
-        $imageFiles = collect(File::files($categoryDir))
-            ->filter(function ($file) {
-                return in_array($file->getExtension(), ['jpg', 'jpeg', 'png']);
-            })
-            ->shuffle() // Randomize the order
-            ->values(); // Reset keys
-        
-        if ($imageFiles->isEmpty()) {
-            $this->command->warn("No images found for jasa {$jasa->kategori} in {$categoryDir}");
-            return;
-        }
-        
-        // Use the first image as thumbnail if the jasa doesn't already have one
-        if (empty($jasa->thumbnail_jasa) && $imageFiles->isNotEmpty()) {
-            $thumbnailFile = $imageFiles->shift();
-            $thumbnailName = $jasa->id_jasa . '_' . uniqid() . '.' . $thumbnailFile->getExtension();
-            
-            // Copy the file to the thumbnail directory
-            File::copy($thumbnailFile->getPathname(), $thumbnailDir . '/' . $thumbnailName);
-            
-            // Update the jasa record
-            $jasa->thumbnail_jasa = $thumbnailName;
-            $jasa->save();
-            
-            $this->command->info("Thumbnail added for jasa {$jasa->kategori}: {$thumbnailName}");
-        }
-        
-        // Use 2-4 random images for the gallery
-        $galleryCount = min(rand(2, 4), $imageFiles->count());
-        $galleryFiles = $imageFiles->take($galleryCount);
-        
-        foreach ($galleryFiles as $index => $file) {
-            $imageName = $jasa->id_jasa . '_gallery_' . ($index + 1) . '_' . uniqid() . '.' . $file->getExtension();
-            
-            // Copy the file to the gallery directory
-            File::copy($file->getPathname(), $galleryDir . '/' . $imageName);
-            
-            // Create a record in the database
+        $galleryCount = rand(3, 5);
+        for($i = 0; $i < $galleryCount; $i++){
+            $sourceDir = database_path('seeders/resources/img/jasa');
+            $imageFiles = collect(File::files($sourceDir))
+                ->filter(function ($file) {
+                    return in_array($file->getExtension(), ['jpg', 'jpeg', 'png']);
+                })
+                ->shuffle()
+                ->first();
+            if (!$imageFiles) {
+                continue;
+            }
+            $imageName = $jasa->id_jasa . ($i + 1) . '.' . $imageFiles->getExtension();
+            $categoryDir = $jasa->kategori;
+            $destinationPath = $galleryDir . '/' . $categoryDir;
+            if (!File::exists($destinationPath)) {
+                File::makeDirectory($destinationPath, 0755, true);
+            }
+            File::copy($imageFiles->getPathname(), $destinationPath . '/' . $imageName);
             JasaImage::create([
+                'image_path' => $imageName,
                 'id_jasa' => $jasa->id_jasa,
-                'image_path' => $imageName
             ]);
-            
-            $this->command->info("Gallery image added for jasa {$jasa->kategori}: {$imageName}");
         }
     }
 } 
