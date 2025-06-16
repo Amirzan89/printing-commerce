@@ -176,7 +176,7 @@ $tPath = app()->environment('local') ? '' : '';
                                 <div class="form-group">
                                     <label class="form-label">Thumbnail</label>
                                     <div class="image-preview" onclick="document.getElementById('inpThumbnail').click()">
-                                        <img src="{{ asset($tPath.'metode-pembayaran/'.$metodePembayaranData['thumbnail']) }}"
+                                        <img src="{{ asset($tPath.'assets3/img/metode_pembayaran/'.$metodePembayaranData['thumbnail']) }}"
                                             alt="Thumbnail Preview" id="thumbnailPreview" style="display: block;">
                                         <div class="placeholder" id="thumbnailPlaceholder" style="display: none;">
                                             <i class="fas fa-image"></i>
@@ -191,7 +191,7 @@ $tPath = app()->environment('local') ? '' : '';
                                 <div class="form-group">
                                     <label class="form-label">Icon</label>
                                     <div class="image-preview" onclick="document.getElementById('inpIcon').click()">
-                                        <img src="{{ asset($tPath.'metode-pembayaran/'.$metodePembayaranData['icon']) }}"
+                                        <img src="{{ asset($tPath.'assets3/img/metode_pembayaran/'.$metodePembayaranData['icon']) }}"
                                             alt="Icon Preview" id="iconPreview" style="display: block;">
                                         <div class="placeholder" id="iconPlaceholder" style="display: none;">
                                             <i class="fas fa-image"></i>

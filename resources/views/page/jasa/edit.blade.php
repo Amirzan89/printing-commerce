@@ -362,7 +362,7 @@ $tPath = app()->environment('local') ? '' : '';
                         <input type="hidden" id="deletedImages" name="deleted_images" value="">
 
                         <div class="form-group">
-                            <label class="form-label">Deskripsi Produk</label>
+                            <label class="form-label">Deskripsi Jasa</label>
                             <textarea class="form-control" name="deskripsi_jasa" rows="4" placeholder="Masukkan deskripsi produk">{{ $jasa['deskripsi_jasa'] ?? '' }}</textarea>
                         </div>
 
