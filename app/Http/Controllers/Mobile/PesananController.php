@@ -134,13 +134,16 @@ class PesananController extends Controller
                 $filename = null;
                 if ($request->hasFile('gambar_referensi') && $request->file('gambar_referensi')->isValid() && in_array($request->file('gambar_referensi')->extension(), ['jpeg', 'png', 'jpg'])) {
                     $file = $request->file('gambar_referensi');
+                    ///goorongg mari
                     $filename = $file->hashName();
-                    // Checking folder existence
-                    if (!Storage::disk('pesanan')->exists('catatan_pesanan')) {
-                        Storage::disk('pesanan')->makeDirectory('catatan_pesanan');
-                    }
-                    // Uploading file
-                    Storage::disk('pesanan')->put('catatan_pesanan/' . $filename, file_get_contents($file));
+                    $path = public_path('pesanan/catatan_pesanan/' . $filename);
+                    $file->move(public_path('pesanan/catatan_pesanan/'), $filename);
+                    // // Checking folder existence
+                    // if (!Storage::disk('pesanan')->exists('catatan_pesanan')) {
+                    //     Storage::disk('pesanan')->makeDirectory('catatan_pesanan');
+                    // }
+                    // // Uploading file
+                    // Storage::disk('pesanan')->put('catatan_pesanan/' . $filename, file_get_contents($file));
                 }
                 // Create catatan pesanan record
                 if($request->input('catatan_user') != null && $request->input('catatan_user') != ''){

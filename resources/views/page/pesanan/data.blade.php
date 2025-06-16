@@ -305,6 +305,9 @@ $tPath = app()->environment('local') ? '' : '';
     </div>
     @php
     $modalDelete = 'pesanan';
+    $modalTitle = 'Konfirmasi Hapus Pesanan';
+    $modalMessage = 'Apakah Anda yakin ingin menghapus pesanan ini? Tindakan ini tidak dapat dibatalkan.';
+    $confirmText = 'Hapus Pesanan';
     @endphp
     @include('components.admin.modalDelete')
     @include('components.preloader')
