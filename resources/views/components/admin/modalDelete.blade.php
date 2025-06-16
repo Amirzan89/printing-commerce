@@ -6,7 +6,7 @@
         <p>{{ isset($modalMessage) ? $modalMessage : 'Apakah Anda yakin ingin menghapus ' . $modalDelete . ' ini?' }}</p>
         <div>
             <button type="button" class="btn-cancel" onclick="closeModalDelete()">{{ isset($cancelText) ? $cancelText : 'Batal' }}</button>
-            <button type="submit" class="btn-delete">{{ isset($confirmText) ? $confirmText : 'Hapus' }}</button>
+            <button type="submit" class="btn-delete" style="width: fit-content; height: fit-content;">{{ isset($confirmText) ? $confirmText : 'Hapus' }}</button>
         </div>
     </form>
 </div>

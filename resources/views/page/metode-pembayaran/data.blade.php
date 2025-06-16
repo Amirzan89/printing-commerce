@@ -248,7 +248,10 @@ $tPath = app()->environment('local') ? '' : '';
         </div>
     </div>
     @php
-    $modalDelete = 'admin';
+    $modalDelete = 'metode-pembayaran';
+    $modalTitle = 'Konfirmasi Hapus Metode Pembayaran';
+    $modalMessage = 'Apakah Anda yakin ingin menghapus metode pembayaran ini? Tindakan ini tidak dapat dibatalkan.';
+    $confirmText = 'Hapus Metode Pembayaran';
     @endphp
     @include('components.admin.modalDelete')
     @include('components.preloader')
