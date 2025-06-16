@@ -98,18 +98,16 @@ class PesananController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Create new pesanan (Step 1 in flow)
-     */
-    public function create(Request $request){
+    public function createPesananWithTransaction(Request $request){
         try {
-            $validator = Validator::make($request->only('id_jasa', 'id_paket_jasa', 'catatan_user', 'gambar_referensi', 'maksimal_revisi'), [
+            // Validate pesanan data
+            $validator = Validator::make($request->only('id_jasa', 'id_paket_jasa', 'catatan_user', 'gambar_referensi', 'maksimal_revisi', 'id_metode_pembayaran'), [
                 'id_jasa' => 'required|exists:jasa,id_jasa',
                 'id_paket_jasa' => 'required|exists:paket_jasa,id_paket_jasa',
                 'catatan_user' => 'nullable|string|max:1000',
                 'gambar_referensi' => 'nullable|file|mimes:jpeg,png,jpg|max:5120',
-                'maksimal_revisi' => 'nullable|integer|min:0|max:5'
+                'maksimal_revisi' => 'nullable|integer|min:0|max:5',
+                'id_metode_pembayaran' => 'required'
             ], [
                 'id_jasa.required' => 'Pilih jasa terlebih dahulu',
                 'id_jasa.exists' => 'Jasa tidak valid',
@@ -117,8 +115,10 @@ class PesananController extends Controller
                 'id_paket_jasa.exists' => 'Paket jasa tidak valid',
                 'catatan_user.max' => 'Catatan revisi maksimal 1000 karakter',
                 'gambar_referensi.mimes' => 'Format gambar harus jpeg, png, atau jpg',
-                'gambar_referensi.max' => 'Ukuran gambar maksimal 5MB'
+                'gambar_referensi.max' => 'Ukuran gambar maksimal 5MB',
+                'id_metode_pembayaran.required' => 'Metode pembayaran wajib dipilih'
             ]);
+            
             if ($validator->fails()) {
                 $errors = [];
                 foreach($validator->errors()->toArray() as $field => $errorMessages){
@@ -127,7 +127,6 @@ class PesananController extends Controller
                 }
                 return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
             }
-
             // Get jasa and paket details for pricing
             $jasa = Jasa::find($request->input('id_jasa'));
             $paketJasa = PaketJasa::find($request->input('id_paket_jasa'));
@@ -137,62 +136,201 @@ class PesananController extends Controller
                     'message' => 'Jasa atau paket tidak ditemukan'
                 ], 404);
             }
+            // Get metode pembayaran
+            $metodePembayaran = MetodePembayaran::where('uuid', $request->input('id_metode_pembayaran'))->first();
+            if (!$metodePembayaran) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Metode pembayaran tidak ditemukan'
+                ], 404);
+            }
             // Calculate total price and estimation
             $estimasiWaktu = Carbon::now();
             $jumlahRevisi = $request->input('maksimal_revisi') ?? $paketJasa->maksimal_revisi;
             $uuid = Str::uuid();
-            $idPesanan = Pesanan::insertGetId([
-                'uuid' => $uuid,
-                'deskripsi' => $request->catatan_user,
-                'status_pesanan' => 'pending',
-                'total_harga' => $paketJasa->harga_paket_jasa,
-                'estimasi_waktu' => $estimasiWaktu,
-                'maksimal_revisi' => $jumlahRevisi,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-                'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user,
-                'id_jasa' => $request->input('id_jasa'),
-                'id_paket_jasa' => $request->input('id_paket_jasa')
-            ]);
-
-            // Handle image upload for revisi
-            $filename = null;
-            if ($request->hasFile('gambar_referensi') && $request->file('gambar_referensi')->isValid() && in_array($request->file('gambar_referensi')->extension(), ['jpeg', 'png', 'jpg'])) {
-                $file = $request->file('gambar_referensi');
-                $filename = $file->hashName();
-                // Checking folder existence
-                if (!Storage::disk('pesanan')->exists('catatan_pesanan')) {
-                    Storage::disk('pesanan')->makeDirectory('catatan_pesanan');
-                }
-                // Uploading file
-                Storage::disk('pesanan')->put('catatan_pesanan/' . $filename, file_get_contents($file));
-            }
-            // Create revisi record
-            if($request->input('catatan_user') != null && $request->input('catatan_user') != ''){
-                CatatanPesanan::create([
-                    'catatan_pesanan' => $request->input('catatan_user'),
-                    'gambar_referensi' => $filename,
-                    'uploaded_at' => now(),
-                    'id_pesanan' => $idPesanan,
-                    'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user
+            // Begin transaction
+            DB::beginTransaction();
+            try {
+                // Create pesanan
+                $idPesanan = Pesanan::insertGetId([
+                    'uuid' => $uuid,
+                    'deskripsi' => $request->catatan_user,
+                    'status_pesanan' => 'pending',
+                    'total_harga' => $paketJasa->harga_paket_jasa,
+                    'estimasi_waktu' => $estimasiWaktu,
+                    'maksimal_revisi' => $jumlahRevisi,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                    'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user,
+                    'id_jasa' => $request->input('id_jasa'),
+                    'id_paket_jasa' => $request->input('id_paket_jasa')
                 ]);
+                // Handle image upload for gambar referensi
+                $filename = null;
+                if ($request->hasFile('gambar_referensi') && $request->file('gambar_referensi')->isValid() && in_array($request->file('gambar_referensi')->extension(), ['jpeg', 'png', 'jpg'])) {
+                    $file = $request->file('gambar_referensi');
+                    $filename = $file->hashName();
+                    // Checking folder existence
+                    if (!Storage::disk('pesanan')->exists('catatan_pesanan')) {
+                        Storage::disk('pesanan')->makeDirectory('catatan_pesanan');
+                    }
+                    // Uploading file
+                    Storage::disk('pesanan')->put('catatan_pesanan/' . $filename, file_get_contents($file));
+                }
+                // Create catatan pesanan record
+                if($request->input('catatan_user') != null && $request->input('catatan_user') != ''){
+                    CatatanPesanan::create([
+                        'catatan_pesanan' => $request->input('catatan_user'),
+                        'gambar_referensi' => $filename,
+                        'uploaded_at' => now(),
+                        'id_pesanan' => $idPesanan,
+                        'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user
+                    ]);
+                }
+                
+                // Generate unique order ID for transaction
+                $orderId = 'TRX-' . date('Ymd') . '-' . strtoupper(Str::random(8));
+                
+                // Set expiration time (24 hours from now)
+                $expiredAt = Carbon::now()->addHours(24);
+                
+                // Create transaction
+                $transaksi = Transaksi::create([
+                    'order_id' => $orderId,
+                    'jumlah' => $paketJasa->harga_paket_jasa,
+                    'status_transaksi' => 'belum_bayar',
+                    'bukti_pembayaran' => null,
+                    'waktu_pembayaran' => null,
+                    'expired_at' => $expiredAt,
+                    'id_metode_pembayaran' => $metodePembayaran->id_metode_pembayaran,
+                    'id_pesanan' => $idPesanan
+                ]);
+                DB::commit();
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Pesanan dan transaksi berhasil dibuat. Silakan lakukan pembayaran dan upload bukti transfer.',
+                    'data' => [
+                        'id_pesanan' => $uuid,
+                        'transaksi' => $transaksi,
+                        'payment_method' => $metodePembayaran,
+                        'expired_at' => $expiredAt->format('Y-m-d H:i:s'),
+                        'payment_instructions' => [
+                            'step1' => 'Transfer ke rekening: ' . $metodePembayaran->no_metode_pembayaran,
+                            'step2' => 'Atas nama: ' . $metodePembayaran->deskripsi_1,
+                            'step2-2' => 'Atas nama: ' . $metodePembayaran->deskripsi_2,
+                            'step3' => 'Nominal: Rp ' . number_format($paketJasa->harga_paket_jasa, 0, ',', '.'),
+                            'step4' => 'Upload bukti transfer untuk konfirmasi'
+                        ]
+                    ]
+                ], 201);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
             }
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Pesanan berhasil dibuat. Silahkan lanjutkan ke pembayaran.',
-                'data' => [
-                    'id_pesanan' => $uuid,
-                ]
-            ], 201);
         } catch (\Exception $e) {
-            Log::error('Error creating order: ' . $e->getMessage());
+            Log::error('Error creating order with transaction: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal membuat pesanan',
+                'message' => 'Gagal membuat pesanan dan transaksi',
                 'data' => $e->getMessage()
             ], 500);
         }
     }
+
+    /**
+     * Create new pesanan (Step 1 in flow)
+     */
+    // public function create(Request $request){
+    //     try {
+    //         $validator = Validator::make($request->only('id_jasa', 'id_paket_jasa', 'catatan_user', 'gambar_referensi', 'maksimal_revisi'), [
+    //             'id_jasa' => 'required|exists:jasa,id_jasa',
+    //             'id_paket_jasa' => 'required|exists:paket_jasa,id_paket_jasa',
+    //             'catatan_user' => 'nullable|string|max:1000',
+    //             'gambar_referensi' => 'nullable|file|mimes:jpeg,png,jpg|max:5120',
+    //             'maksimal_revisi' => 'nullable|integer|min:0|max:5'
+    //         ], [
+    //             'id_jasa.required' => 'Pilih jasa terlebih dahulu',
+    //             'id_jasa.exists' => 'Jasa tidak valid',
+    //             'id_paket_jasa.required' => 'Pilih paket jasa terlebih dahulu',
+    //             'id_paket_jasa.exists' => 'Paket jasa tidak valid',
+    //             'catatan_user.max' => 'Catatan revisi maksimal 1000 karakter',
+    //             'gambar_referensi.mimes' => 'Format gambar harus jpeg, png, atau jpg',
+    //             'gambar_referensi.max' => 'Ukuran gambar maksimal 5MB'
+    //         ]);
+    //         if ($validator->fails()) {
+    //             $errors = [];
+    //             foreach($validator->errors()->toArray() as $field => $errorMessages){
+    //                 $errors[$field] = $errorMessages[0];
+    //                 break;
+    //             }
+    //             return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
+    //         }
+
+    //         // Get jasa and paket details for pricing
+    //         $jasa = Jasa::find($request->input('id_jasa'));
+    //         $paketJasa = PaketJasa::find($request->input('id_paket_jasa'));
+    //         if (!$jasa || !$paketJasa) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => 'Jasa atau paket tidak ditemukan'
+    //             ], 404);
+    //         }
+    //         // Calculate total price and estimation
+    //         $estimasiWaktu = Carbon::now();
+    //         $jumlahRevisi = $request->input('maksimal_revisi') ?? $paketJasa->maksimal_revisi;
+    //         $uuid = Str::uuid();
+    //         $idPesanan = Pesanan::insertGetId([
+    //             'uuid' => $uuid,
+    //             'deskripsi' => $request->catatan_user,
+    //             'status_pesanan' => 'pending',
+    //             'total_harga' => $paketJasa->harga_paket_jasa,
+    //             'estimasi_waktu' => $estimasiWaktu,
+    //             'maksimal_revisi' => $jumlahRevisi,
+    //             'created_at' => Carbon::now(),
+    //             'updated_at' => Carbon::now(),
+    //             'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user,
+    //             'id_jasa' => $request->input('id_jasa'),
+    //             'id_paket_jasa' => $request->input('id_paket_jasa')
+    //         ]);
+
+    //         // Handle image upload for revisi
+    //         $filename = null;
+    //         if ($request->hasFile('gambar_referensi') && $request->file('gambar_referensi')->isValid() && in_array($request->file('gambar_referensi')->extension(), ['jpeg', 'png', 'jpg'])) {
+    //             $file = $request->file('gambar_referensi');
+    //             $filename = $file->hashName();
+    //             // Checking folder existence
+    //             if (!Storage::disk('pesanan')->exists('catatan_pesanan')) {
+    //                 Storage::disk('pesanan')->makeDirectory('catatan_pesanan');
+    //             }
+    //             // Uploading file
+    //             Storage::disk('pesanan')->put('catatan_pesanan/' . $filename, file_get_contents($file));
+    //         }
+    //         // Create revisi record
+    //         if($request->input('catatan_user') != null && $request->input('catatan_user') != ''){
+    //             CatatanPesanan::create([
+    //                 'catatan_pesanan' => $request->input('catatan_user'),
+    //                 'gambar_referensi' => $filename,
+    //                 'uploaded_at' => now(),
+    //                 'id_pesanan' => $idPesanan,
+    //                 'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user
+    //             ]);
+    //         }
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'message' => 'Pesanan berhasil dibuat. Silahkan lanjutkan ke pembayaran.',
+    //             'data' => [
+    //                 'id_pesanan' => $uuid,
+    //             ]
+    //         ], 201);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error creating order: ' . $e->getMessage());
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Gagal membuat pesanan',
+    //             'data' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
     /**
      * Cancel pesanan (only if pending)
@@ -256,156 +394,6 @@ class PesananController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal membatalkan pesanan',
-                'data' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function createPesananWithTransaction(Request $request){
-        try {
-            // Validate pesanan data
-            $validator = Validator::make($request->only('id_jasa', 'id_paket_jasa', 'catatan_user', 'gambar_referensi', 'maksimal_revisi', 'id_metode_pembayaran'), [
-                'id_jasa' => 'required|exists:jasa,id_jasa',
-                'id_paket_jasa' => 'required|exists:paket_jasa,id_paket_jasa',
-                'catatan_user' => 'nullable|string|max:1000',
-                'gambar_referensi' => 'nullable|file|mimes:jpeg,png,jpg|max:5120',
-                'maksimal_revisi' => 'nullable|integer|min:0|max:5',
-                'id_metode_pembayaran' => 'required'
-            ], [
-                'id_jasa.required' => 'Pilih jasa terlebih dahulu',
-                'id_jasa.exists' => 'Jasa tidak valid',
-                'id_paket_jasa.required' => 'Pilih paket jasa terlebih dahulu',
-                'id_paket_jasa.exists' => 'Paket jasa tidak valid',
-                'catatan_user.max' => 'Catatan revisi maksimal 1000 karakter',
-                'gambar_referensi.mimes' => 'Format gambar harus jpeg, png, atau jpg',
-                'gambar_referensi.max' => 'Ukuran gambar maksimal 5MB',
-                'id_metode_pembayaran.required' => 'Metode pembayaran wajib dipilih'
-            ]);
-            
-            if ($validator->fails()) {
-                $errors = [];
-                foreach($validator->errors()->toArray() as $field => $errorMessages){
-                    $errors[$field] = $errorMessages[0];
-                    break;
-                }
-                return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
-            }
-
-            // Get jasa and paket details for pricing
-            $jasa = Jasa::find($request->input('id_jasa'));
-            $paketJasa = PaketJasa::find($request->input('id_paket_jasa'));
-            if (!$jasa || !$paketJasa) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Jasa atau paket tidak ditemukan'
-                ], 404);
-            }
-            
-            // Get metode pembayaran
-            $metodePembayaran = MetodePembayaran::where('uuid', $request->input('id_metode_pembayaran'))->first();
-            if (!$metodePembayaran) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Metode pembayaran tidak ditemukan'
-                ], 404);
-            }
-            
-            // Calculate total price and estimation
-            $estimasiWaktu = Carbon::now();
-            $jumlahRevisi = $request->input('maksimal_revisi') ?? $paketJasa->maksimal_revisi;
-            $uuid = Str::uuid();
-            
-            // Begin transaction
-            DB::beginTransaction();
-            
-            try {
-                // Create pesanan
-                $idPesanan = Pesanan::insertGetId([
-                    'uuid' => $uuid,
-                    'deskripsi' => $request->catatan_user,
-                    'status_pesanan' => 'pending',
-                    'total_harga' => $paketJasa->harga_paket_jasa,
-                    'estimasi_waktu' => $estimasiWaktu,
-                    'maksimal_revisi' => $jumlahRevisi,
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now(),
-                    'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user,
-                    'id_jasa' => $request->input('id_jasa'),
-                    'id_paket_jasa' => $request->input('id_paket_jasa')
-                ]);
-
-                // Handle image upload for revisi
-                $filename = null;
-                if ($request->hasFile('gambar_referensi') && $request->file('gambar_referensi')->isValid() && in_array($request->file('gambar_referensi')->extension(), ['jpeg', 'png', 'jpg'])) {
-                    $file = $request->file('gambar_referensi');
-                    $filename = $file->hashName();
-                    // Checking folder existence
-                    if (!Storage::disk('pesanan')->exists('catatan_pesanan')) {
-                        Storage::disk('pesanan')->makeDirectory('catatan_pesanan');
-                    }
-                    // Uploading file
-                    Storage::disk('pesanan')->put('catatan_pesanan/' . $filename, file_get_contents($file));
-                }
-                
-                // Create revisi record
-                if($request->input('catatan_user') != null && $request->input('catatan_user') != ''){
-                    CatatanPesanan::create([
-                        'catatan_pesanan' => $request->input('catatan_user'),
-                        'gambar_referensi' => $filename,
-                        'uploaded_at' => now(),
-                        'id_pesanan' => $idPesanan,
-                        'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user
-                    ]);
-                }
-                
-                // Generate unique order ID for transaction
-                $orderId = 'TRX-' . date('Ymd') . '-' . strtoupper(Str::random(8));
-                
-                // Set expiration time (24 hours from now)
-                $expiredAt = Carbon::now()->addHours(24);
-                
-                // Create transaction
-                $transaksi = Transaksi::create([
-                    'order_id' => $orderId,
-                    'jumlah' => $paketJasa->harga_paket_jasa,
-                    'status_transaksi' => 'belum_bayar',
-                    'bukti_pembayaran' => null,
-                    'waktu_pembayaran' => null,
-                    'expired_at' => $expiredAt,
-                    'id_metode_pembayaran' => $metodePembayaran->id_metode_pembayaran,
-                    'id_pesanan' => $idPesanan
-                ]);
-                
-                DB::commit();
-                
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Pesanan dan transaksi berhasil dibuat. Silakan lakukan pembayaran dan upload bukti transfer.',
-                    'data' => [
-                        'id_pesanan' => $uuid,
-                        'transaksi' => $transaksi,
-                        'payment_method' => $metodePembayaran,
-                        'expired_at' => $expiredAt->format('Y-m-d H:i:s'),
-                        'payment_instructions' => [
-                            'step1' => 'Transfer ke rekening: ' . $metodePembayaran->no_metode_pembayaran,
-                            'step2' => 'Atas nama: ' . $metodePembayaran->deskripsi_1,
-                            'step2-2' => 'Atas nama: ' . $metodePembayaran->deskripsi_2,
-                            'step3' => 'Nominal: Rp ' . number_format($paketJasa->harga_paket_jasa, 0, ',', '.'),
-                            'step4' => 'Upload bukti transfer untuk konfirmasi'
-                        ]
-                    ]
-                ], 201);
-                
-            } catch (\Exception $e) {
-                DB::rollBack();
-                throw $e;
-            }
-            
-        } catch (\Exception $e) {
-            Log::error('Error creating order with transaction: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal membuat pesanan dan transaksi',
                 'data' => $e->getMessage()
             ], 500);
         }

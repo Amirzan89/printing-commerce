@@ -26,7 +26,8 @@ Route::group(['prefix'=>'/mobile'], function(){
         Route::group(['prefix'=>'/pesanan'], function(){
             Route::get('/', [PesananController::class, 'getAll']);
             Route::get('/detail/{uuid}', [PesananController::class, 'getDetail']);
-            Route::post('/create', [PesananController::class, 'create']);
+            // Route::post('/create', [PesananController::class, 'create']);
+            Route::post('/create-with-transaction', [PesananController::class, 'createPesananWithTransaction']);
             Route::post('/cancel', [PesananController::class, 'cancel']);
         });
         
@@ -52,7 +53,7 @@ Route::group(['prefix'=>'/mobile'], function(){
         Route::group(['prefix'=>'/transaksi'], function(){
             Route::get('/', [TransaksiController::class, 'getAll']);
             Route::get('/{order_id}', [TransaksiController::class, 'getDetail']);
-            Route::post('/create', [TransaksiController::class, 'createTransaction']);
+            // Route::post('/create', [TransaksiController::class, 'createTransaction']);
             Route::post('/upload-payment', [TransaksiController::class, 'uploadPaymentProof']);
             Route::get('/details/{orderId}', [TransaksiController::class, 'getTransactionDetails']);
             Route::get('/user-transactions', [TransaksiController::class, 'getUserTransactions']);
