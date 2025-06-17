@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Contract\Messaging;
-use Kreait\Firebase\Contract\Storage;
 use Illuminate\Support\Facades\Storage as LaravelStorage;
 use App\Models\User;
 use App\Models\Order;
@@ -13,24 +11,20 @@ use Illuminate\Support\Facades\Http;
 
 class ChatService
 {
-    protected $database;
     protected $messaging;
-    protected $storage;
     protected $googleClient;
     protected $projectId;
 
-    public function __construct(Database $database, Messaging $messaging, Storage $storage)
+    public function __construct(Messaging $messaging)
     {
-        $this->database = $database;
         $this->messaging = $messaging;
-        $this->storage = $storage;
-        $this->projectId = config('services.fcm.project_id');
+        $this->projectId = config('firebase.project_id');
         $this->initializeGoogleClient();
     }
 
     protected function initializeGoogleClient()
     {
-        $credentialsFilePath = LaravelStorage::path('app/json/firebase-credentials.json');
+        $credentialsFilePath = config('firebase.credentials.file');
         $this->googleClient = new GoogleClient();
         $this->googleClient->setAuthConfig($credentialsFilePath);
         $this->googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');

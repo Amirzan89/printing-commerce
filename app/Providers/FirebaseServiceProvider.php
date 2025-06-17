@@ -5,26 +5,17 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Google\Client as GoogleClient;
 use Kreait\Firebase\Factory;
-use Kreait\Firebase\Contract\Database;
-use Kreait\Firebase\Contract\Storage;
+use Kreait\Firebase\Contract\Messaging;
 
 class FirebaseServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->singleton(Database::class, function ($app) {
-            $factory = (new Factory)
-                ->withServiceAccount(config('firebase.credentials.file'))
-                ->withDatabaseUri(config('firebase.database.url'));
-
-            return $factory->createDatabase();
-        });
-
-        $this->app->singleton(Storage::class, function ($app) {
+        $this->app->singleton(Messaging::class, function ($app) {
             $factory = (new Factory)
                 ->withServiceAccount(config('firebase.credentials.file'));
 
-            return $factory->createStorage();
+            return $factory->createMessaging();
         });
 
         $this->app->singleton(GoogleClient::class, function ($app) {

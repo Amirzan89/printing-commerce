@@ -30,6 +30,7 @@ class ChatController extends Controller
 
     public function show($uuid)
     {
+        return view('page.chat.detail');
         // Get chat details from MySQL (user and order info)
         $chat = [
             'user' => User::where('uuid', $uuid)->first(),
@@ -49,9 +50,9 @@ class ChatController extends Controller
         return view('page.chat.index',$dataShow);
     }
     public function showDetail(Request $request, $uuid){
+        return view('page.chat.detail');
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
         ];
-        return view('page.chat.detail',$dataShow);
     }
 }
