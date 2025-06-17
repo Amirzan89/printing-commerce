@@ -34,7 +34,6 @@ class PesananSeeder extends Seeder
             $createdAt = $now->copy()->subDays(rand(1, 3));
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => Str::uuid(),
-                'deskripsi' => $descriptions[rand(0, count($descriptions) - 1)],
                 'status_pesanan' => 'pending',
                 'total_harga' => [250000, 350000, 500000, 750000, 1000000][rand(0, 4)],
                 'estimasi_waktu' => $createdAt->copy()->addDays(rand(3, 7)),
@@ -54,7 +53,6 @@ class PesananSeeder extends Seeder
             $createdAt = $now->copy()->subDays(rand(1, 5));
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => Str::uuid(),
-                'deskripsi' => $descriptions[rand(0, count($descriptions) - 1)],
                 'status_pesanan' => 'menunggu_editor',
                 'total_harga' => [250000, 350000, 500000, 750000, 1000000][rand(0, 4)],
                 'estimasi_waktu' => $createdAt->copy()->addDays(rand(3, 7)),
@@ -75,7 +73,6 @@ class PesananSeeder extends Seeder
             $assignedAt = $createdAt->copy()->addHours(rand(2, 24));
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => Str::uuid(),
-                'deskripsi' => $descriptions[rand(0, count($descriptions) - 1)],
                 'status_pesanan' => 'dikerjakan',
                 'total_harga' => [250000, 350000, 500000, 750000, 1000000][rand(0, 4)],
                 'estimasi_waktu' => $createdAt->copy()->addDays(rand(3, 7)),
@@ -99,7 +96,6 @@ class PesananSeeder extends Seeder
             $revisionAt = $assignedAt->copy()->addDays(rand(1, 3));
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => Str::uuid(),
-                'deskripsi' => $descriptions[rand(0, count($descriptions) - 1)],
                 'status_pesanan' => 'revisi',
                 'total_harga' => [250000, 350000, 500000, 750000, 1000000][rand(0, 4)],
                 'estimasi_waktu' => $createdAt->copy()->addDays(rand(3, 7)),
@@ -123,7 +119,6 @@ class PesananSeeder extends Seeder
             $completedAt = $assignedAt->copy()->addDays(rand(2, 5));
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => Str::uuid(),
-                'deskripsi' => $descriptions[rand(0, count($descriptions) - 1)],
                 'status_pesanan' => 'selesai',
                 'total_harga' => [250000, 350000, 500000, 750000, 1000000][rand(0, 4)],
                 'estimasi_waktu' => $createdAt->copy()->addDays(rand(3, 7)),
@@ -146,7 +141,6 @@ class PesananSeeder extends Seeder
             $createdAt = $now->copy()->subDays(rand(7, 20));
             $idPesanan = Pesanan::insertGetId([
                 'uuid' => Str::uuid(),
-                'deskripsi' => $descriptions[rand(0, count($descriptions) - 1)],
                 'status_pesanan' => 'dibatalkan',
                 'total_harga' => [250000, 350000, 500000, 750000, 1000000][rand(0, 4)],
                 'estimasi_waktu' => $createdAt->copy()->addDays(rand(3, 7)),

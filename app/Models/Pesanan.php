@@ -11,7 +11,7 @@ class Pesanan extends Model
     protected $keyType = 'integer';
     public $timestamps = true;
     protected $fillable = [
-        'uuid', 'deskripsi', 'status_pesanan', 'total_harga', 'estimasi_waktu', 'maksimal_revisi', 'confirmed_at', 'assigned_at', 'completed_at', 'id_user', 'id_jasa', 'id_paket_jasa', 'id_editor'
+        'uuid', 'status_pesanan', 'total_harga', 'estimasi_waktu', 'maksimal_revisi', 'confirmed_at', 'assigned_at', 'completed_at', 'id_user', 'id_jasa', 'id_paket_jasa', 'id_editor'
     ];
     protected $casts = [
         'estimasi_waktu' => 'datetime',

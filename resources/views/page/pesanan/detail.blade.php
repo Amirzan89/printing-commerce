@@ -476,7 +476,7 @@ $tPath = app()->environment('local') ? '' : '';
                     <h5 class="modal-title" id="imageModalLabel">
                         <i class="fas fa-image me-2"></i>Gambar Referensi
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" tabindex="0"></button>
                 </div>
                 <div class="modal-body text-center p-0">
                     <img id="modalImage" src="" alt="Gambar Referensi" class="img-fluid" style="max-height: 70vh;">
@@ -515,7 +515,6 @@ $tPath = app()->environment('local') ? '' : '';
             const modalImage = document.getElementById('modalImage');
             const imageFileName = document.getElementById('imageFileName');
             const downloadBtn = document.getElementById('downloadBtn');
-            
             // Set image source
             modalImage.src = imageSrc;
             modalImage.onerror = function() {
@@ -523,18 +522,24 @@ $tPath = app()->environment('local') ? '' : '';
                 imageFileName.textContent = 'Gambar tidak dapat dimuat';
                 downloadBtn.style.display = 'none';
             };
-            
             // Set file name
             const fileName = imageSrc.split('/').pop();
             imageFileName.textContent = fileName;
-            
             // Set download link
             downloadBtn.href = imageSrc;
             downloadBtn.download = fileName;
             downloadBtn.style.display = 'inline-block';
-            
             // Show modal
             modal.show();
+            const modalElement = document.getElementById('imageModal');
+            modalElement.addEventListener('hide.bs.modal', function () {
+                if (modalElement.contains(document.activeElement)) {
+                    document.activeElement.blur();
+                }
+            });
+            modalElement.addEventListener('hidden.bs.modal', function () {
+                document.querySelector('.btn-close')?.blur();
+            });
         }
         // Handle image load errors on thumbnail
         document.addEventListener('DOMContentLoaded', function() {
@@ -680,8 +685,11 @@ $tPath = app()->environment('local') ? '' : '';
                 input.setAttribute('readonly', true);
                 input.setAttribute('disabled', true);
             });
-            form.querySelector('input[name="gambar_hasil_desain"]').removeAttribute('readonly');
-            form.querySelector('input[name="gambar_hasil_desain"]').removeAttribute('disabled');
+            const gambar_hasil_desain = form.querySelector('input[name="gambar_hasil_desain"]');
+            if(gambar_hasil_desain) {
+                gambar_hasil_desain.removeAttribute('readonly');
+                gambar_hasil_desain.removeAttribute('disabled');
+            }
         }
         // Enhance download functionality
         function downloadImage(imageSrc, fileName) {

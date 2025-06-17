@@ -9,7 +9,6 @@ return new class extends Migration
         Schema::create('pesanan', function (Blueprint $table) {
             $table->id('id_pesanan');
             $table->uuid();
-            $table->string('deskripsi');
             $table->enum('status_pesanan', ['pending', 'diproses', 'menunggu_editor', 'dikerjakan', 'revisi', 'menunggu_review', 'selesai', 'dibatalkan']);
             $table->unsignedInteger('total_harga');
             $table->dateTime('estimasi_waktu');

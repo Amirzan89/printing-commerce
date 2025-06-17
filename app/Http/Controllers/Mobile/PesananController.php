@@ -44,7 +44,7 @@ public function getAll(Request $request)
         $pesanan = Pesanan::select(
                 'pesanan.id_pesanan', 
                 'pesanan.uuid', 
-                'pesanan.deskripsi', 
+                'catatan_pesanan.catatan_pesanan',
                 'pesanan.status_pesanan', 
                 'paket_jasa.harga_paket_jasa', 
                 'jasa.kategori', 
@@ -165,6 +165,12 @@ public function getAll(Request $request)
                     'message' => 'Metode pembayaran tidak ditemukan'
                 ], 404);
             }
+            if(($request->input('catatan_user') == null || $request->input('catatan_user') == '') && !$request->hasFile('gambar_referensi')){
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Catatan User atau gambar referensi wajib diisi'
+                ], 400);
+            }
             // Calculate total price and estimation
             $estimasiWaktu = Carbon::now();
             $jumlahRevisi = $request->input('maksimal_revisi') ?? $paketJasa->maksimal_revisi;
@@ -175,7 +181,6 @@ public function getAll(Request $request)
                 // Create pesanan
                 $idPesanan = Pesanan::insertGetId([
                     'uuid' => $uuid,
-                    'deskripsi' => $request->catatan_user,
                     'status_pesanan' => 'pending',
                     'total_harga' => $paketJasa->harga_paket_jasa,
                     'estimasi_waktu' => $estimasiWaktu,
