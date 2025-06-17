@@ -19,7 +19,11 @@ class PesananController extends Controller
             $status = 'pending';
         }
         if (!$request->has('status')) {
-            return redirect('/pesanan?status='.$status);
+            $redirect = redirect('/pesanan?status=' . $status);
+            if (session()->has('errorNotFound')) {
+                $redirect = $redirect->with('errorNotFound', session('errorNotFound'));
+            }
+            return $redirect;
         }
         $orderBy = 'asc';
         $pesananList = Pesanan::select('pesanan.uuid', 'nama_user', 'status_pesanan', 'estimasi_waktu')
@@ -52,7 +56,7 @@ class PesananController extends Controller
         ])->where('pesanan.uuid', $uuid)->first();
         
         if (!$pesanan) {
-            return redirect('/pesanan')->with('error', 'Data Pesanan tidak ditemukan');
+            return redirect('/pesanan')->with('errorNotFound', 'Data Pesanan tidak ditemukan');
         }
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),

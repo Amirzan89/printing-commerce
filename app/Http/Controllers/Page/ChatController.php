@@ -10,6 +10,7 @@ use App\Models\Chat;
 use App\Services\ChatService;
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Pesanan;
 
 class ChatController extends Controller
 {
@@ -22,37 +23,84 @@ class ChatController extends Controller
     
     public function index()
     {
+        // Tampilkan halaman index chat
         return view('page.chat.index');
-        return view('page.chat.index', compact('conversations'));
-        // Get all chat conversations for current user
-        $conversations = $this->chatService->getUserConversations(auth()->id());
     }
 
     public function show($uuid)
     {
+        // Tampilkan halaman detail chat
         return view('page.chat.detail');
-        // Get chat details from MySQL (user and order info)
-        $chat = [
-            'user' => User::where('uuid', $uuid)->first(),
-            'order' => Order::where('user_uuid', $uuid)->latest()->first()
-        ];
-
-        // Get messages from Firebase
-        $messages = $this->chatService->getMessages($uuid);
-
-        return view('page.chat.detail', compact('chat', 'messages'));
     }
 
-    public function showAll(Request $request){
+    public function showAll(Request $request)
+    {
+        // Ambil semua user yang memiliki chat
+        $users = User::whereHas('pesanan')->get();
+        
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
+            'users' => $users
         ];
-        return view('page.chat.index',$dataShow);
+        
+        return view('page.chat.index', $dataShow);
     }
-    public function showDetail(Request $request, $uuid){
-        return view('page.chat.detail');
+    
+    public function showDetail(Request $request, $uuid)
+    {
+        // Ambil data user dan pesanan
+        $user = User::where('uuid', $uuid)->first();
+        $pesanan = Pesanan::where('user_uuid', $uuid)->latest()->first();
+        
+        if (!$user || !$pesanan) {
+            return redirect()->route('chat.index')->with('error', 'User atau pesanan tidak ditemukan');
+        }
+        
+        // Ambil pesan chat dari database
+        $messages = Chat::where('pesanan_uuid', $pesanan->uuid)
+                        ->orderBy('created_at', 'asc')
+                        ->get();
+        
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
+            'user' => $user,
+            'pesanan' => $pesanan,
+            'messages' => $messages
         ];
+        
+        return view('page.chat.detail', $dataShow);
+    }
+    
+    public function sendMessage(Request $request)
+    {
+        $request->validate([
+            'pesanan_uuid' => 'required|exists:pesanan,uuid',
+            'message' => 'required|string|max:1000'
+        ]);
+        
+        $admin = Admin::where('id_auth', $request->user()['id_auth'])->first();
+        $pesananUuid = $request->pesanan_uuid;
+        $message = $request->message;
+        
+        // Simpan pesan ke database MySQL
+        $chat = new Chat();
+        $chat->pesanan_uuid = $pesananUuid;
+        $chat->sender_uuid = $admin->uuid;
+        $chat->sender_type = 'admin';
+        $chat->message = $message;
+        $chat->is_read = false;
+        $chat->save();
+        
+        // Jika menggunakan FCM, kirim notifikasi ke user
+        $pesanan = Pesanan::where('uuid', $pesananUuid)->first();
+        if ($pesanan && $pesanan->user) {
+            $this->chatService->sendNotification($pesanan->user->uuid, [
+                'title' => 'Pesan Baru',
+                'body' => 'Admin mengirim pesan: ' . substr($message, 0, 50),
+                'order_id' => $pesananUuid
+            ]);
+        }
+        
+        return redirect()->back()->with('success', 'Pesan berhasil dikirim');
     }
 }

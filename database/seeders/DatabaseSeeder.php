@@ -33,11 +33,11 @@ class DatabaseSeeder extends Seeder
         $this->call(JasaSeeder::class);
         $this->call(JasaImageSeeder::class);
         $this->call(EditorSeeder::class);
-        $this->call(PesananSeeder::class);
-        $this->call(PesananCatatanSeeder::class);
-        $this->call(RevisiSeeder::class);
-        $this->call(TransaksiSeeder::class);
-        $this->call(ReviewSeeder::class);
+        // $this->call(PesananSeeder::class);
+        // $this->call(PesananCatatanSeeder::class);
+        // $this->call(RevisiSeeder::class);
+        // $this->call(TransaksiSeeder::class);
+        // $this->call(ReviewSeeder::class);
         unlink(self::$tempFile);
         if(is_dir($directory) && count(scandir($directory)) === 2){
             rmdir($directory);

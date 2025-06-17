@@ -237,7 +237,22 @@ $tPath = app()->environment('local') ? '' : '';
                         <a href="{{ url('/pesanan?status=dibatalkan') }}" class="btn {{ $currentStatus == 'dibatalkan' ? 'btn-secondary' : 'btn-outline-secondary' }}">Dibatalkan</a>
                     </div>
                 </div>
-                
+                @if(session('errorNotFound'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" id="errorAlert">
+                        {{ session('errorNotFound') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {{ session()->forget('errorNotFound') }}
+                    <script>
+                        setTimeout(function() {
+                            var errorAlert = document.getElementById('errorAlert');
+                            if (errorAlert) {
+                                var bsAlert = new bootstrap.Alert(errorAlert);
+                                bsAlert.close();
+                            }
+                        }, 3000);
+                    </script>
+                @endif
                 <div class="d-flex align-items-stretch">
                     <div class="card w-100">
                         <div class="card-body p-4" style="box-shadow: rgba(145,158,171,0.2) 0px 0px 2px 0px, rgba(145,158,171,0.12) 0px 12px 24px -4px;">

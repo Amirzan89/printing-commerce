@@ -25,46 +25,6 @@ class ChatController extends Controller
         $this->chatService = $chatService;
         $this->database = $database;
     }
-    private function assignEditor($sender_id, $pesanan, $editor){
-        // // Send notification message to chat
-            $isRevision = $pesanan->chatMessages()->where(function($q) {
-                $q->where('message', 'like', '%revisi%')
-                  ->orWhere('message', 'like', '%revision%')
-                  ->orWhere('message', 'like', '%perbaikan%');
-            })->exists();
-
-            $assignmentMessage = $isRevision 
-                ? "Editor {$editor->nama_editor} telah ditugaskan untuk menangani revisi Anda."
-                : "Editor {$editor->nama_editor} telah ditugaskan untuk mengerjakan pesanan Anda.";
-                
-            if ($pesanan->notes) {
-                $assignmentMessage .= " Catatan: " . $pesanan->notes;
-            }
-
-            ChatMessage::create([
-                'uuid' => Str::uuid(),
-                'message' => $assignmentMessage,
-                'sender_type' => 'admin',
-                'sender_id' => $sender_id,
-                'id_pesanan' => $pesanan->id_pesanan,
-                'created_at' => now()
-            ]);
-    // // Send completion message
-            // $completionMessage = "Revisi telah selesai dikerjakan dan pesanan Anda sudah siap.";
-            // if ($request->input('catatan_editor')) {
-            //     $completionMessage .= " Catatan: " . $request->catatan_editor;
-            // }
-
-            // ChatMessage::create([
-            //     'uuid' => Str::uuid(),
-            //     'message' => $completionMessage,
-            //     'sender_type' => 'admin',
-            //     'sender_id' => auth()->id(),
-            //     'id_pesanan' => $pesanan->id_pesanan,
-            //     'created_at' => now()
-            // ]);
-        }
-
     public function sendMessage(Request $request)
     {
         try {
