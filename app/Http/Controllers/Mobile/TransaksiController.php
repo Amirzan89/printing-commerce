@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Mobile;
 use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
 use App\Models\Pesanan;
+use App\Models\MetodePembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
 
@@ -77,6 +81,9 @@ class TransaksiController extends Controller
             ], 500);
         }
     }
+        /**
+     * Upload payment proof (Step 3 in manual payment flow)
+     */
     public function uploadPaymentProof(Request $request)
     {
         $validator = Validator::make($request->only('order_id', 'bukti_pembayaran', 'catatan'), [

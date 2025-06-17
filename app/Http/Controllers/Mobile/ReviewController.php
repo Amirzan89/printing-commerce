@@ -1,48 +1,142 @@
 <?php
 
 namespace App\Http\Controllers\Mobile;
-
 use App\Http\Controllers\Controller;
 use App\Models\Review;
 use App\Models\Pesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReviewController extends Controller
 {
+    
+    public function getAllReviews()
+{
+    $reviews = DB::table('review')
+        ->join('pesanan', 'review.id_pesanan', '=', 'pesanan.id_pesanan')
+        ->join('users', 'pesanan.id_user', '=', 'users.id_user')
+        ->join('jasa', 'pesanan.id_jasa', '=', 'jasa.id_jasa')
+        ->join('paket_jasa', 'pesanan.id_paket_jasa', '=', 'paket_jasa.id_paket_jasa')
+        ->select(
+            'users.nama_user as name',
+            'review.rating',
+            DB::raw("CONCAT(jasa.kategori, ', ', paket_jasa.kelas_jasa) as service"),
+            'review.review as feedback',
+            'users.foto as avatar'
+        )
+        ->get()
+        ->map(function ($item) {
+            return [
+                'name' => $item->name,
+                'rating' => (int) $item->rating, // konversi eksplisit ke integer
+                'service' => $item->service,
+                'feedback' => $item->feedback,
+                'avatar_url' => $item->avatar ? asset('storage/foto/' . $item->avatar) : null
+            ];
+        });
+
+    return response()->json($reviews);
+}
     /**
      * Create a new review for an order
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+public function addReviewByUUID(Request $request)
+{
+    try {
+        // Validasi input
+        $validator = Validator::make($request->all(), [
+            'uuid'   => 'required|exists:pesanan,uuid',
+            'review' => 'required|string|min:5|max:250',
+            'rating' => 'required|integer|between:1,5',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validasi gagal',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        // Cari pesanan berdasarkan UUID dan user login
+        $pesanan = Pesanan::where('uuid', $request->uuid)
+            ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)->first();
+
+        if (!$pesanan) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Pesanan tidak ditemukan atau tidak sesuai user',
+            ], 404);
+        }
+
+        // Optional: Cek apakah pesanan sudah selesai (jika perlu)
+        if ($pesanan->status_pesanan !== 'selesai') {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Hanya pesanan yang sudah selesai dapat direview',
+            ], 403);
+        }
+
+        // Cek apakah sudah pernah direview
+        $existingReview = Review::where('id_pesanan', $pesanan->id_pesanan)->first();
+        if ($existingReview) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Review untuk pesanan ini sudah ada',
+                'data'    => $existingReview,
+            ], 409);
+        }
+
+        // Bersihkan input review
+        $cleanedReview = htmlspecialchars(strip_tags($request->review), ENT_QUOTES, 'UTF-8');
+
+        // Simpan review baru
+        $review = Review::create([
+            'id_pesanan' => $pesanan->id_pesanan,
+            'review'     => $cleanedReview,
+            'rating'     => $request->rating,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Review berhasil ditambahkan',
+            'data'    => $review,
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Terjadi kesalahan saat menambahkan review',
+            'error'   => $e->getMessage(),
+        ], 500);
+    }
+}
+
+    public function addReview(Request $request)
     {
         try {
             // Validate input
             $validator = Validator::make($request->all(), [
-                'id_pesanan' => 'required',
+                'id_pesanan' => 'required|exists:pesanan,id_pesanan',
                 'review' => 'required|string|max:250|min:5',
                 'rating' => 'required|integer|between:1,5',
-            ], [
-                'id_pesanan.required' => 'ID pesanan wajib diisi',
-                'review.required' => 'Review wajib diisi',
-                'review.string' => 'Review harus berupa teks',
-                'review.max' => 'Review maksimal 250 karakter',
-                'review.min' => 'Review minimal 5 karakter',
-                'rating.required' => 'Rating wajib diisi',
-                'rating.integer' => 'Rating harus berupa angka',
-                'rating.between' => 'Rating harus antara 1 dan 5'
             ]);
 
             if ($validator->fails()) {
-                $errors = [];
-                foreach ($validator->errors()->toArray() as $field => $errorMessages){
-                    $errors[$field] = $errorMessages[0];
-                    break;
-                }
-                return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation error',
+                    'errors' => $validator->errors()
+                ], 422);
             }
 
             // Sanitize input
@@ -130,6 +224,34 @@ class ReviewController extends Controller
      * @param string $orderId
      * @return \Illuminate\Http\JsonResponse
      */
+     
+
+public function getReviews()
+{
+    $reviews = DB::table('review')
+        ->join('pesanan', 'review.id_pesanan', '=', 'pesanan.id_pesanan')
+        ->join('users', 'pesanan.id_user', '=', 'users.id_user')
+        ->join('jasa', 'pesanan.id_jasa', '=', 'jasa.id_jasa')
+        ->join('paket_jasa', 'pesanan.id_paket_jasa', '=', 'paket_jasa.id_paket_jasa')
+        ->select(
+            'users.nama_user as name',
+            DB::raw('CAST(review.rating AS UNSIGNED) as rating'),
+            DB::raw("CONCAT(jasa.kategori, ', ', paket_jasa.nama_paket_jasa) as service"),
+            'review.review as feedback',
+            'users.foto as avatar'
+        )
+        ->get()
+        ->map(function ($item) {
+            return [
+                'name' => $item->name,
+                'rating' =>(int) $item->rating,
+                'feedback' => $item->feedback,
+                'avatar_url' => $item->avatar ? asset('storage/foto/' . $item->avatar) : null
+            ];
+        });
+
+    return response()->json($reviews);
+}
     public function show($orderId)
     {
         try {
@@ -137,6 +259,7 @@ class ReviewController extends Controller
                 ->where('pesanan.uuid', $orderId)
                 ->where('pesanan.id_user', Auth::id())
                 ->select(
+                    
                     'review.*',
                     'pesanan.uuid as order_number',
                     'pesanan.deskripsi as order_description'

@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -27,49 +28,97 @@ class PesananController extends Controller
             return base_path($path == '/../public_html' ? $path : '/../public_html') .'/assets3/img/pesanan/' . $idPesanan;
         }
     }
-    public function getAll(Request $request){
-        try {
-            // Ambil ID user dari ID auth
-            $idUser = User::where('id_auth', $request->user()->id_auth)->value('id_user');
-            if (!$idUser) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'User tidak ditemukan'
-                ], 404);
-            }
-            $pesanan = Pesanan::select(
-                    'pesanan.id_pesanan', 
-                    'pesanan.uuid', 
-                    'pesanan.status_pesanan', 
-                    'paket_jasa.harga_paket_jasa', 
-                    'jasa.kategori', 
-                    'paket_jasa.kelas_jasa', 
-                    'pesanan.estimasi_waktu', 
-                    'pesanan.maksimal_revisi', 
-                    'pesanan.created_at'
-                )
-                ->join('paket_jasa', 'paket_jasa.id_paket_jasa', '=', 'pesanan.id_paket_jasa')
-                ->join('jasa', 'jasa.id_jasa', '=', 'paket_jasa.id_jasa')
-                ->where('pesanan.id_user', $idUser)
-                ->orderBy('pesanan.created_at', 'desc')
-                ->get();
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Pesanan berhasil diambil',
-                'data' => $pesanan,
-                'status_pesanan' => ['pending', 'diproses', 'menunggu_editor', 'dibatalkan', 'selesai', 'dikerjakan', 'revisi'],
-                'status_transaksi' => ['belum_bayar', 'menunggu_konfirmasi', 'lunas', 'dibatalkan', 'expired']
-            ], 200);
-        } catch (\Exception $e) {
-            \Log::error('Error retrieving pesanan: ' . $e->getMessage());
+public function getAll(Request $request)
+{
+    try {
+        // Ambil ID user dari ID auth
+        $idUser = User::where('id_auth', $request->user()->id_auth)->value('id_user');
+
+        if (!$idUser) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal mengambil pesanan',
-                'data' => $e->getMessage()
+                'message' => 'User tidak ditemukan'
+            ], 404);
+        }
+
+        $pesanan = Pesanan::select(
+                'pesanan.id_pesanan', 
+                'pesanan.uuid', 
+                'pesanan.deskripsi', 
+                'pesanan.status_pesanan', 
+                'paket_jasa.harga_paket_jasa', 
+                'jasa.kategori', 
+                'paket_jasa.kelas_jasa', 
+                'pesanan.estimasi_waktu', 
+                'catatan_pesanan.gambar_referensi', 
+                'pesanan.maksimal_revisi', 
+                'pesanan.created_at', 
+                'pesanan.updated_at'
+            )
+            ->join('paket_jasa', 'paket_jasa.id_paket_jasa', '=', 'pesanan.id_paket_jasa')
+            ->join('jasa', 'jasa.id_jasa', '=', 'paket_jasa.id_jasa')
+            ->leftJoin('catatan_pesanan', 'catatan_pesanan.id_pesanan', '=', 'pesanan.id_pesanan')
+            ->where('pesanan.id_user', $idUser)
+            ->orderBy('pesanan.created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Pesanan berhasil diambil',
+            'data' => $pesanan,
+            'status_pesanan' => ['pending', 'diproses', 'menunggu_editor', 'dibatalkan', 'selesai', 'dikerjakan', 'revisi'],
+            'status_transaksi' => ['belum_bayar', 'menunggu_konfirmasi', 'lunas', 'dibatalkan', 'expired']
+        ], 200);
+    } catch (\Exception $e) {
+        \Log::error('Error retrieving pesanan: ' . $e->getMessage());
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal mengambil pesanan',
+            'data' => $e->getMessage()
+        ], 500);
+    }
+}
+
+    /**
+     * Get detailed pesanan information
+     */
+    public function getDetail(Request $request, $uuid)
+    {
+        try {
+            $pesanan = Pesanan::with([
+                'fromPesananFile', 
+                'fromCatatanPesanan', 
+                'fromTransaksi.toMetodePembayaran',
+                'toJasa',
+                'toPaketJasa',
+                'toEditor'
+            ])
+                ->where('uuid', $uuid)
+                ->where('id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
+                ->first();
+
+            if (!$pesanan) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Detail Pesanan tidak ditemukan',
+                    'data' => null
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Detail pesanan berhasil diambil',
+                'data' => $pesanan
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error retrieving detail pesanan: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengambil detail pesanan',
+                'data' => null
             ], 500);
         }
     }
-
     public function createPesananWithTransaction(Request $request){
         try {
             // Validate pesanan data
@@ -205,6 +254,9 @@ class PesananController extends Controller
         }
     }
 
+    /**
+     * Cancel pesanan (only if pending)
+     */
     public function cancel(Request $request){
         try {
             $validator = Validator::make($request->only('id_pesanan'), [
@@ -245,17 +297,16 @@ class PesananController extends Controller
                 ], 422);
             }
             if($pesanan->gambar_referensi != null){
-                $path = $this->dirPath($pesanan->uuid . '/catatan_pesanan/' . $pesanan->gambar_referensi);
-                if(file_exists($path)){
-                    unlink($path);
-                }
+                Storage::disk('pesanan')->delete('catatan_pesanan/' . $pesanan->gambar_referensi);
             }
             // Cancel related transactions
             Transaksi::where('id_pesanan', $pesanan->id_pesanan)
                 ->update(['status_transaksi' => 'dibatalkan']);
+
             $pesanan->update([
                 'status_pesanan' => 'dibatalkan',
             ]);
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Pesanan berhasil dibatalkan'

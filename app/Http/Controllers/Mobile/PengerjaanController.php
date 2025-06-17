@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 class PengerjaanController extends Controller
 {
@@ -24,55 +25,99 @@ class PengerjaanController extends Controller
     }
     /**
      * Get all revisi for the authenticated user 
-     */
-    public function getAll(Request $request){
-        try {
-            $revisi = Revisi::join('pesanan', 'pesanan.id_pesanan', '=', 'revisi.id_pesanan')
-                ->where('pesanan.id_user', User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user)
-                ->orderBy('revisi.created_at', 'desc')
-                ->get();
+     */public function getAll(Request $request)
+{
+    try {
+        $idUser = User::where('id_auth', $request->user()->id_auth)->first()->id_user;
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Revisi berhasil diambil',
-                'data' => $revisi
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Gagal mengambil revisi: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengambil revisi',
-                'data' => $e->getMessage()
-            ], 500);
-        }
+        $revisi = Revisi::join('pesanan', 'pesanan.id_pesanan', '=', 'revisi.id_pesanan')
+            ->where('pesanan.id_user', $idUser)
+            ->orderBy('revisi.created_at', 'desc')
+            ->select(
+                'revisi.*',
+                'pesanan.uuid as uuid_pesanan'
+            )
+            ->get();
+
+        // Modifikasi format data editor_file dan user_file jika berupa json/array
+        $revisi = $revisi->map(function ($item) {
+            return [
+                'id_revisi'     => $item->id_revisi,
+                'id_pesanan'    => $item->id_pesanan,
+                'uuid_pesanan'  => $item->uuid_pesanan,
+                'catatan'       => $item->catatan,
+                'status'        => $item->status,
+                'created_at'    => $item->created_at,
+                'updated_at'    => $item->updated_at,
+                'editor_file'   => json_decode($item->editor_file, true), // atau decode array jika perlu
+                'user_file'     => json_decode($item->user_file, true),
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Revisi berhasil diambil',
+            'data' => $revisi
+        ], 200);
+    } catch (\Exception $e) {
+        Log::error('Gagal mengambil revisi: ' . $e->getMessage());
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal mengambil revisi',
+            'data' => $e->getMessage()
+        ], 500);
     }
+}
+
     /**
      * Get detailed revisi information
      */
-    public function getDetail(Request $request, $id_revisi){
-        try {
-            $pesanan = Revisi::with(['userFiles','editorFiles'])->where('id_revisi', $id_revisi)->first();
-            if (!$pesanan) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Revisi tidak ditemukan',
-                    'data' => null
-                ], 404);
-            }
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Detail revisi berhasil diambil',
-                'data' => $pesanan
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Gagal mengambil detail revisi: ' . $e->getMessage());
+  public function getDetail(Request $request, $uuid_pesanan)
+{
+    try {
+        // Ambil data revisi berdasarkan uuid_pesanan dari relasi pesanan
+        $revisi = Revisi::with(['userFiles', 'editorFiles', 'pesanan'])
+            ->whereHas('pesanan', function ($query) use ($uuid_pesanan) {
+                $query->where('uuid', $uuid_pesanan);
+            })
+            ->first();
+
+        if (!$revisi) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal mengambil detail revisi',
-                'data' => $e->getMessage()
-            ], 500);
+                'message' => 'Revisi tidak ditemukan',
+                'data' => null
+            ], 404);
         }
+
+        // Format respons agar editorFiles dan userFiles setara dengan data lainnya
+        $data = [
+            'id_revisi'     => $revisi->id_revisi,
+            'id_pesanan'    => $revisi->id_pesanan,
+            'uuid_pesanan'  => $revisi->pesanan->uuid,
+            'catatan'       => $revisi->catatan,
+            'status'        => $revisi->status,
+            'created_at'    => $revisi->created_at,
+            'updated_at'    => $revisi->updated_at,
+            'image_hasil'    => $revisi->editorFiles->first()->nama_file,
+        ];
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Detail revisi berhasil diambil',
+            'data' => $data
+        ], 200);
+
+    } catch (\Exception $e) {
+        Log::error('Gagal mengambil detail revisi: ' . $e->getMessage());
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal mengambil detail revisi',
+            'data' => $e->getMessage()
+        ], 500);
     }
+}
+
     /**
      * Get revision history for a pesanan
      */

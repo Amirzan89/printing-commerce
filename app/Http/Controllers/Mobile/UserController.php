@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Mobile;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+// use Illuminate\Support\Facades\Auth;
 use App\Models\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\UtilityController;
@@ -54,34 +55,221 @@ class UserController extends Controller
                     'id' => $user->uuid,
                     'name' => $user->nama_user,
                     'email' => $auth->email,
-                    'role' => $auth->role
+                    'role' => $auth->role,
+                    'alamat' => $user->alamat,
+                'no_telpon' => $user->no_telpon,
+                'foto' => $user->foto
                 ]
             ]
         ]);
     }
+    public function logingoogle(Request $request){
+        $validator = Validator::make($request->only('email'), [
+            'email' => 'required|email',
+        ], [
+            'email.required' => 'Email wajib di isi',
+            'email.email' => 'Email yang anda masukkan invalid',
+        ]);
+        
+        if ($validator->fails()) {
+            $errors = [];
+            foreach ($validator->errors()->toArray() as $field => $errorMessages) {
+                $errors[$field] = $errorMessages[0];
+                break;
+            }
+            return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
+        }
+        
+        $auth = Auth::where('email', $request->input('email'))->first();
+        if(!$auth){
+            return response()->json(['status' => 'error','note' => $auth, 'message' => 'Invalid Credentials'], 401);
+        }
+        
+        // Get user details
+        $user = User::where('id_auth', $auth->id_auth)->first();
+        
+        // Create token with abilities for mobile app
+        $token = $auth->createToken('mobile-auth-token', ['mobile-access'])->plainTextToken;
+        
+        // Return token with user info
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Login berhasil',
+            'data' => [
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => [
+                    'id' => $user->uuid,
+                    'name' => $user->nama_user,
+                    'email' => $auth->email,
+                    'role' => $auth->role,
+                    'alamat' => $user->alamat,
+                'no_telpon' => $user->no_telpon,
+                'foto' => $user->foto
+                ]
+            ]
+        ]);
+    }
+  
+  
+  
+    public function CekEmail(Request $request){
+        $validator = Validator::make($request->only('email'), [
+            'email' => 'required|email',
+        ], [
+            'email.required' => 'Email wajib di isi',
+        ]);
+        
+         if(Auth::select("email")->whereRaw("BINARY email = ?",[$request->input('email')])->exists()){
+            return response()->json(['status'=>'error','message'=>'Email sudah digunakan'],400);
+        }else{
+            return response()->json(['status'=>'success','message'=>'Silahkan Lanjutkan'],200);}
+     
+    }
+public function changePassEmail(Request $request)
+{
+    $validator = Validator::make($request->only('email', 'password'), [
+        'email' => 'required|email',
+        'password' =>'required'
+    ], [
+        'email.required' => 'Email wajib diisi',
+        'email.email' => 'Format email tidak valid',
+        'password.required' => 'Password wajib diisi',
+        'password.min' => 'Password minimal 8 karakter',
+        'password.max' => 'Password maksimal 25 karakter',
+        
+    ]);
 
-    public function register(Request $request){
-        $validator = Validator::make($request->only('email', 'nama_user', 'password', 'password_confirmation'), [
+    if ($validator->fails()) {
+        $errors = [];
+        foreach ($validator->errors()->toArray() as $field => $errorMessages) {
+            $errors[$field] = $errorMessages[0];
+            break;
+        }
+        return response()->json(['status' => 'error', 'message' => implode(', ', $errors)], 400);
+    }
+
+    $auth = Auth::whereRaw("BINARY email = ?", [$request->email])->first();
+    if (!$auth) {
+        return response()->json(['status' => 'error', 'message' => 'Email tidak ditemukan'], 404);
+    }
+
+    $auth->password = Hash::make($request->password);
+    $auth->save();
+
+    return response()->json(['status' => 'success', 'message' => 'Password berhasil diperbarui']);
+}
+
+public function updateProfile(Request $request)
+{
+    $auth = auth()->user();
+
+    if (!$auth) {
+        return response()->json([
+            'message' => 'User tidak terautentikasi'
+        ], 401);
+    }
+
+    // Validasi
+    $validator = Validator::make($request->all(), [
+        'nama_user' => 'required|string|max:50',
+        'no_telpon' => 'nullable|string|max:20',
+        'alamat' => 'nullable|string',
+        'email' => 'required|email|max:255|unique:auth,email,' . $auth->id_auth . ',id_auth',
+        'foto' => 'nullable|file|image|mimes:jpeg,png,jpg|max:2048',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validasi gagal',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    // Update email
+    $auth->email = $request->email;
+    $auth->save();
+
+    $user = User::where('id_auth', $auth->id_auth)->first();
+    if (!$user) {
+        return response()->json(['message' => 'User profile tidak ditemukan'], 404);
+    }
+if ($request->hasFile('foto') && $request->file('foto')->isValid()) {
+    $file = $request->file('foto');
+
+    // Buat nama file unik secara manual
+    $hashedName = uniqid('user_') . '.' . $file->getClientOriginalExtension();
+
+    // Path ke folder luar Laravel
+    $destinationPath = base_path('../public_html/assets3/img/user');
+
+    // Buat folder jika belum ada
+    if (!file_exists($destinationPath)) {
+        mkdir($destinationPath, 0777, true);
+    }
+
+    // Hapus foto lama
+    if ($user->foto && file_exists($destinationPath . '/' . $user->foto)) {
+        @unlink($destinationPath . '/' . $user->foto);
+    }
+
+    // Pindahkan file ke folder tujuan dengan nama yang sesuai
+    $file->move($destinationPath, $hashedName);
+
+    // Simpan nama file ke database
+    $user->foto = $hashedName;
+}
+
+    // Update data user
+    $user->nama_user = $request->nama_user;
+    $user->no_telpon = $request->no_telpon;
+    $user->alamat = $request->alamat;
+    $user->save();
+
+    // Generate token baru
+    $token = $auth->createToken('mobile-auth-token', ['mobile-access'])->plainTextToken;
+
+    return response()->json([
+        'message' => 'Berhasil update data',
+        'data' => [
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => [
+                'id' => $user->uuid,
+                'name' => $user->nama_user,
+                'email' => $auth->email,
+                'role' => $auth->role,
+                'alamat' => $user->alamat,
+                'no_telpon' => $user->no_telpon,
+                'foto' => $user->foto,
+            ],
+        ],
+    ], 200);
+}
+
+  public function register(Request $request){
+        $validator = Validator::make($request->only('email', 'nama_user','no_telpon','password', 'password_confirmation'), [
             'email'=>'required|email',
             'nama_user' => 'required|min:3|max:50',
+            'no_telpon' => 'required|max:15',
             'password' => [
                 'required',
                 'string',
                 'min:8',
                 'max:25',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\p{P}\p{S}])[\p{L}\p{N}\p{P}\p{S}]+$/u',
             ],
             'password_confirmation' => 'required|same:password',
         ],[
             'email.required'=>'Email wajib di isi',
             'email.email'=>'Email yang anda masukkan invalid',
+            'no_telpon.required' => 'Nomor Telepon wajib di isi',
             'nama_user.required' => 'Nama user wajib di isi',
             'nama_user.min'=>'Nama user minimal 3 karakter',
             'nama_user.max' => 'Nama user maksimal 50 karakter',
             'password.required'=>'Password wajib di isi',
             'password.min'=>'Password minimal 8 karakter',
             'password.max'=>'Password maksimal 25 karakter',
-            'password.regex'=>'Password terdiri dari 1 huruf besar, huruf kecil, angka dan karakter unik',
+           
             'password_confirmation.required'=>'Password confirmation wajib di isi',
             'password_confirmation.same'=>'Password confirmation tidak sama dengan password',
         ]);
@@ -99,11 +287,13 @@ class UserController extends Controller
         $idAuth = Auth::insertGetId([
             'email' => $request->input('email'),
             'password' => Hash::make($request->input('password')),
+            // 'no_telpon' => $request->input('no_telpon'),
             'role'=> 'user',
         ]);
         $ins = User::insert([
             'uuid' =>  Str::uuid(),
             'nama_user' => $request->input('nama_user'),
+            'no_telpon' => $request->input('no_telpon'),
             'id_auth' => $idAuth,
         ]);
         if(!$ins){
@@ -111,12 +301,14 @@ class UserController extends Controller
         }
         return response()->json(['status' => 'success', 'message' => 'Register berhasil. Silahkan login untuk melanjutkan.']);
     }
+    
     public function dashboard(Request $request){
         $dataShow = [
             'userAuth' => array_merge(User::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
         ];
         return response()->json($dataShow);
     }
+    
     public function update(Request $request){
         $user = User::where('id_auth', $request->user()->id_auth)->first();
         $user->name = $request->name;
@@ -154,7 +346,7 @@ class UserController extends Controller
             'password.required'=>'Password wajib di isi',
             'password.min'=>'Password minimal 8 karakter',
             'password.max'=>'Password maksimal 25 karakter',
-            'password.regex'=>'Password terdiri dari 1 huruf besar, huruf kecil, angka dan karakter unik',
+          
             'foto.image' => 'Foto user harus berupa gambar',
             'foto.mimes' => 'Format foto user tidak valid. Gunakan format jpeg, png, jpg',
             'foto.max' => 'Ukuran foto user tidak boleh lebih dari 5MB',
