@@ -6,6 +6,7 @@ use App\Http\Controllers\UtilityController;
 use App\Models\Admin;
 use App\Models\Pesanan;
 use App\Models\Editor;
+use App\Models\RevisiEditor;
 use Carbon\Carbon;
 class PesananController extends Controller
 {
@@ -14,7 +15,10 @@ class PesananController extends Controller
         if($status == 'proses'){
             $status = 'diproses';
         }
-        $validStatuses = ['pending', 'diproses', 'menunggu_editor', 'dikerjakan', 'revisi', 'selesai', 'dibatalkan'];
+        if($status == 'menunggu'){
+            $status = 'pending';
+        }
+        $validStatuses = ['pending', 'diproses', 'menunggu_editor', 'dikerjakan', 'menunggu_review', 'revisi', 'selesai', 'dibatalkan'];
         if (!in_array($status, $validStatuses)) {
             $status = 'pending';
         }
@@ -32,9 +36,16 @@ class PesananController extends Controller
             ->orderBy('pesanan.created_at', $orderBy)
             ->where('status_pesanan', $status)
             ->get();
+
         $pesananList->each(function($pesanan) {
-            $latestEditor = $pesanan->editorFiles()->with('editor')->latest('updated_at')->first();
-            $pesanan->nama_editor = $latestEditor ? $latestEditor->editor->nama_editor : '-';
+            $latestEditor = RevisiEditor::join('revisi', 'revisi.id_revisi', '=', 'revisi_editor.id_revisi')
+                ->rightJoin('pesanan', 'pesanan.id_pesanan', '=', 'revisi.id_pesanan')
+                ->rightJoin('editor', 'editor.id_editor', '=', 'pesanan.id_editor')
+                ->where('revisi.id_pesanan', $pesanan->id_pesanan)
+                ->select('editor.nama_editor')
+                ->latest('revisi_editor.updated_at')
+                ->first();
+            $pesanan->nama_editor = $latestEditor ? $latestEditor->nama_editor : '-';
         });
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
@@ -66,13 +77,14 @@ class PesananController extends Controller
                 'jenis_jasa' => $pesanan->toJasa->kategori ?? '-',
                 'kelas_jasa' => $pesanan->toPaketJasa->kelas_jasa,
                 'maksimal_revisi' => $pesanan->maksimal_revisi ?? 0,
-                'status_pesanan_list' => ['pending' => 'Menunggu Pembayaran', 'diproses' => 'Proses', 'menunggu_editor' => 'Menunggu Editor', 'dikerjakan' => 'Dikerjakan', 'revisi' => 'Revisi', 'selesai' => 'Selesai', 'dibatalkan' => 'Dibatalkan'],
+                'status_pesanan_list' => ['pending' => 'Menunggu Pembayaran', 'diproses' => 'Proses', 'menunggu_editor' => 'Menunggu Editor', 'dikerjakan' => 'Dikerjakan', 'menunggu_review' => 'Menunggu Review', 'revisi' => 'Revisi', 'selesai' => 'Selesai', 'dibatalkan' => 'Dibatalkan'],
                 'status_pesanan' => $pesanan->status_pesanan,
                 'revisi_used' => $pesanan->revisi_used,
                 'sisa_revisi' => $pesanan->revisi_tersisa,
                 'deskripsi' => $pesanan->fromCatatanPesanan->catatan_pesanan ?? '-',
                 'gambar_referensi' => $pesanan->fromCatatanPesanan->gambar_referensi ?? null,
                 'revisi_editor_terbaru' => $pesanan->latestRevision && $pesanan->latestRevision->editorFiles->count() > 0 ? $pesanan->latestRevision->editorFiles->first()->nama_file : null,
+                'revisi_user_terbaru' => $pesanan->latestRevision && $pesanan->latestRevision->userFiles->count() > 0 ? $pesanan->latestRevision->userFiles->first()->nama_file : null,
                 'revisions' => $pesanan->revisions ?? [],
                 'estimasi_waktu' => [
                     'dari' => $pesanan->estimasi_waktu ? Carbon::parse($pesanan->estimasi_waktu)->format('Y-m-d') : null,
@@ -83,6 +95,7 @@ class PesananController extends Controller
                 'status' => ucfirst($pesanan->status_pesanan),
                 'status_raw' => $pesanan->status_pesanan,
                 'editor_assigned' => $pesanan->toEditor,
+                'catatan_editor' => $pesanan->latestRevision->catatan_editor ?? '',
             ],
             'headerData' => UtilityController::getHeaderData(),
             'editorList' => Editor::select('id_editor', 'nama_editor')->get(),
@@ -154,6 +167,8 @@ class PesananController extends Controller
                 ]
             ]
         ];
+        // echo json_encode($dataShow);
+        // exit();
         return view('page.pesanan.detail', $dataShow);
     }
     public function getStatistics()

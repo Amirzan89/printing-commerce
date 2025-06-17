@@ -165,12 +165,6 @@ public function getAll(Request $request)
                     'message' => 'Metode pembayaran tidak ditemukan'
                 ], 404);
             }
-            if(($request->input('catatan_user') == null || $request->input('catatan_user') == '') && !$request->hasFile('gambar_referensi')){
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Catatan User atau gambar referensi wajib diisi'
-                ], 400);
-            }
             // Calculate total price and estimation
             $estimasiWaktu = Carbon::now();
             $jumlahRevisi = $request->input('maksimal_revisi') ?? $paketJasa->maksimal_revisi;
@@ -193,14 +187,14 @@ public function getAll(Request $request)
                 ]);
                 mkdir($this->dirPath($uuid));
                 $filename = null;
-                if ($request->hasFile('gambar_referensi') && $request->file('gambar_referensi')->isValid() && in_array($request->file('gambar_referensi')->extension(), ['jpeg', 'png', 'jpg'])) {
-                    $file = $request->file('gambar_referensi');
-                    $filename = $file->hashName();
-                    mkdir($this->dirPath($uuid . '/catatan_pesanan'));
-                    $file->move($this->dirPath($uuid . '/catatan_pesanan/'), $filename);
-                }
-                // Create catatan pesanan record
                 if($request->input('catatan_user') != null && $request->input('catatan_user') != ''){
+                    if ($request->hasFile('gambar_referensi') && $request->file('gambar_referensi')->isValid() && in_array($request->file('gambar_referensi')->extension(), ['jpeg', 'png', 'jpg'])) {
+                        $file = $request->file('gambar_referensi');
+                        $filename = $file->hashName();
+                        mkdir($this->dirPath($uuid . '/catatan_pesanan'));
+                        $file->move($this->dirPath($uuid . '/catatan_pesanan/'), $filename);
+                    }
+                    // Create catatan pesanan record
                     CatatanPesanan::create([
                         'catatan_pesanan' => $request->input('catatan_user'),
                         'gambar_referensi' => $filename,
@@ -209,10 +203,8 @@ public function getAll(Request $request)
                         'id_user' => User::select('id_user')->where('id_auth', $request->user()->id_auth)->first()->id_user
                     ]);
                 }
-                
                 // Generate unique order ID for transaction
                 $orderId = 'TRX-' . date('Ymd') . '-' . strtoupper(Str::random(8));
-                
                 // Set expiration time (24 hours from now)
                 $expiredAt = Carbon::now()->addHours(24);
                 

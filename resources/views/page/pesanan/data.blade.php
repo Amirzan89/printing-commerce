@@ -232,6 +232,7 @@ $tPath = app()->environment('local') ? '' : '';
                         <a href="{{ url('/pesanan?status=proses') }}" class="btn {{ $currentStatus == 'diproses' ? 'btn-secondary' : 'btn-outline-secondary' }}">Proses</a>
                         <a href="{{ url('/pesanan?status=menunggu_editor') }}" class="btn {{ $currentStatus == 'menunggu_editor' ? 'btn-secondary' : 'btn-outline-secondary' }}">Menunggu Editor</a>
                         <a href="{{ url('/pesanan?status=dikerjakan') }}" class="btn {{ $currentStatus == 'dikerjakan' ? 'btn-secondary' : 'btn-outline-secondary' }}">Dikerjakan</a>
+                        <a href="{{ url('/pesanan?status=menunggu_review') }}" class="btn {{ $currentStatus == 'menunggu_review' ? 'btn-secondary' : 'btn-outline-secondary' }}">Menunggu Review</a>
                         <a href="{{ url('/pesanan?status=revisi') }}" class="btn {{ $currentStatus == 'revisi' ? 'btn-secondary' : 'btn-outline-secondary' }}">Revisi</a>
                         <a href="{{ url('/pesanan?status=selesai') }}" class="btn {{ $currentStatus == 'selesai' ? 'btn-secondary' : 'btn-outline-secondary' }}">Selesai</a>
                         <a href="{{ url('/pesanan?status=dibatalkan') }}" class="btn {{ $currentStatus == 'dibatalkan' ? 'btn-secondary' : 'btn-outline-secondary' }}">Dibatalkan</a>
@@ -293,7 +294,7 @@ $tPath = app()->environment('local') ? '' : '';
                                             <td class="border-bottom-0">
                                                 <p class="mb-0 fw-normal">{{ $data['estimasi_waktu']}}</p>
                                             </td>
-                                            @if(in_array($currentStatus, ['menunggu_editor', 'dikerjakan', 'revisi']))
+                                            @if(in_array($currentStatus, ['menunggu_editor', 'dikerjakan', 'menunggu_review', 'revisi']))
                                             <td class="border-bottom-0">
                                                 <p class="mb-0 fw-normal">{{ $data['nama_editor']}}</p>
                                             </td>

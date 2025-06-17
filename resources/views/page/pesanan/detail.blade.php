@@ -262,6 +262,7 @@ $tPath = app()->environment('local') ? '' : '';
     const reff = '/pesanan';
     var csrfToken = "{{ csrf_token() }}";
     var userAuth = @json($userAuth);
+    var pesananData = @json($pesananData);
     </script>
     <!--  Body Wrapper -->
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
@@ -371,58 +372,68 @@ $tPath = app()->environment('local') ? '' : '';
                                         </div>
                                     </div>
                                 </div>
-                                @if(in_array($pesananData['status_pesanan'], ['dikerjakan', 'revisi', 'selesai']))
-                                <!-- Hasil Desain -->
-                                <div class="row mb-3">
-                                    <div class="col-12">
-                                        <label class="form-label">Hasil Desain</label>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="openImageModal('{{ asset('assets3/img/pesanan/'. $pesananData['uuid'] . '/revisi_editor/' . $pesananData['revisi_editor_terbaru']) }}')">
-                                                <i class="fas fa-image"></i> {{ isset($pesananData['revisi_editor_terbaru']) && !empty($pesananData['revisi_editor_terbaru']) && !is_null($pesananData['revisi_editor_terbaru']) ? 'Gambar.' . pathinfo($pesananData['revisi_editor_terbaru'])['extension'] : 'Tidak ada gambar' }}
-                                            </button>
-                                            <input type="file" id="input_hasil" name="gambar_hasil_desain" hidden onchange="handleFileChange(event)">
-                                            <button type="button" class="btn btn-success btn-sm" onclick="handleFileClick()">
-                                                <i class="fas fa-upload"></i> Upload
-                                            </button>
+                                @if(in_array($pesananData['status_pesanan'], ['dikerjakan', 'revisi', 'menunggu_review', 'selesai']))
+                                    <!-- Hasil Desain -->
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <label class="form-label">Hasil Desain</label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="openImageModal('{{ asset('assets3/img/pesanan/'. $pesananData['uuid'] . '/revisi_editor/' . $pesananData['revisi_editor_terbaru']) }}')">
+                                                    <i class="fas fa-image"></i> {{ isset($pesananData['revisi_editor_terbaru']) && !empty($pesananData['revisi_editor_terbaru']) && !is_null($pesananData['revisi_editor_terbaru']) ? 'Gambar.' . pathinfo($pesananData['revisi_editor_terbaru'])['extension'] : 'Tidak ada gambar' }}
+                                                </button>
+                                                <input type="file" id="input_hasil" name="gambar_hasil_desain" hidden onchange="handleFileChange(event)">
+                                                <button type="button" class="btn btn-success btn-sm" {{ in_array($pesananData['status_pesanan'], ['menunggu_review', 'selesai']) ? 'disabled' : '' }} onclick="handleFileClick()">
+                                                    <i class="fas fa-upload"></i> Upload
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <label class="form-label">Catatan Editor</label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <textarea name="catatan_editor" class="form-control" rows="4" {{ in_array($pesananData['status_pesanan'], ['menunggu_review', 'selesai', 'dibatalkan']) ? 'readonly' : '' }}>{{ $pesananData['catatan_editor'] }}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endif
-                                <!-- Gambar Referensi Section -->
-                                <div class="row mb-3">
-                                    <div class="col-12">
-                                        <label class="form-label">Gambar Revisi Pelanggan</label>
-                                        <div class="d-flex align-items-center gap-2">
-                                            @if(isset($pesananData['revisi_user']) && !empty($pesananData['revisi_user']) && !is_null($pesananData['revisi_user']))
-                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="openImageModal('{{ asset('assets3/img/pesanan/'. $pesananData['uuid'] . '/revisi_user/' . $pesananData['revisi_user']) }}')">
-                                                    <i class="fas fa-image"></i> {{ isset($pesananData['revisi_user']) && !empty($pesananData['revisi_user']) && !is_null($pesananData['revisi_user']) ? 'Gambar.' . pathinfo($pesananData['revisi_user'])['extension'] : 'Tidak ada gambar' }}
-                                                </button>
-                                                <button type="button" class="btn btn-success btn-sm" onclick="downloadImage('{{ asset('assets3/img/pesanan/'. $pesananData['uuid'] . '/revisi_user/' . $pesananData['revisi_user']) }}', '{{ basename($pesananData['revisi_user']) }}')">
-                                                    <i class="fas fa-download"></i> Download
-                                                </button>
-                                            @else
-                                                <div class="text-muted">Tidak ada gambar referensi</div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                                @if(in_array($pesananData['status_pesanan'], ['diproses', 'menunggu_editor', 'dikerjakan', 'revisi']))
-                                <!-- Editor Selection -->
-                                <div class="row mb-3">
-                                    <div class="col-12">
-                                        <div class="form-group">
-                                            <label class="form-label">Nama Editor</label>
-                                            <select class="form-select" name="editor_id">
-                                                @if(!$pesananData['id_editor'])
-                                                    <option value="">Pilih Editor</option>
+                                @if(in_array($pesananData['status_pesanan'], ['revisi']))
+                                    <!-- Gambar Revisi Editor Section -->
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <label class="form-label">Gambar Revisi Pelanggan</label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                @if(isset($pesananData['revisi_user_terbaru']) && !empty($pesananData['revisi_user_terbaru']) && !is_null($pesananData['revisi_user_terbaru']))
+                                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="openImageModal('{{ asset('assets3/img/pesanan/'. $pesananData['uuid'] . '/revisi_user/' . $pesananData['revisi_user_terbaru']) }}')">
+                                                        <i class="fas fa-image"></i> {{ isset($pesananData['revisi_user_terbaru']) && !empty($pesananData['revisi_user_terbaru']) && !is_null($pesananData['revisi_user_terbaru']) ? 'Gambar.' . pathinfo($pesananData['revisi_user_terbaru'])['extension'] : 'Tidak ada gambar' }}
+                                                    </button>
+                                                    <button type="button" class="btn btn-success btn-sm" onclick="downloadImage('{{ asset('assets3/img/pesanan/'. $pesananData['uuid'] . '/revisi_user/' . $pesananData['revisi_user_terbaru']) }}', '{{ basename($pesananData['revisi_user_terbaru']) }}')">
+                                                        <i class="fas fa-download"></i> Download
+                                                    </button>
+                                                @else
+                                                    <div class="text-muted">Tidak ada gambar revisi</div>
                                                 @endif
-                                                @foreach($editorList as $editor)
-                                                    <option value="{{ $editor->id_editor }}" {{ $pesananData['id_editor'] == $editor->id_editor ? 'selected' : '' }}>{{ $editor->nama_editor }}</option>
-                                                @endforeach
-                                            </select>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                @endif
+                                @if(in_array($pesananData['status_pesanan'], ['menunggu_editor', 'dikerjakan', 'revisi', 'menunggu_review']))
+                                    <!-- Editor Selection -->
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <label class="form-label">Nama Editor</label>
+                                                <select class="form-select" name="editor_id" {{ in_array($pesananData['status_pesanan'], ['menunggu_review', 'selesai', 'dibatalkan']) ? 'readonly disabled' : '' }}>
+                                                    @if(!$pesananData['id_editor'])
+                                                        <option value="">Pilih Editor</option>
+                                                    @endif
+                                                    @foreach($editorList as $editor)
+                                                        <option value="{{ $editor->id_editor }}" {{ $pesananData['id_editor'] == $editor->id_editor ? 'selected' : '' }}>{{ $editor->nama_editor }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endif
                                 <!-- Action Buttons -->
                                 <div class="row">
@@ -431,28 +442,34 @@ $tPath = app()->environment('local') ? '' : '';
                                             <i class="fas fa-arrow-left"></i> Kembali
                                         </button>
                                         <div class="d-flex gap-2">
-                                            <!-- Edit Mode Controls - Initially Hidden -->
-                                            <div id="editModeControls" style="display: none;">
-                                                <select name="status" id="statusSelect" class="form-select">
-                                                    @foreach($pesananData['status_pesanan_list'] as $key => $status)
-                                                        <option value="{{ $key }}" {{ $pesananData['status_pesanan'] == $key ? 'selected' : '' }}>{{ $status }}</option>
-                                                    @endforeach
+                                            @if(in_array($pesananData['status_pesanan'], ['pending', 'diproses', 'menunggu_review', 'selesai', 'dibatalkan']))
+                                                <select name="status" id="statusSelect" class="form-select" readonly disabled>
+                                                    <option value="{{ $pesananData['status_pesanan'] }}">{{ $pesananData['status_pesanan'] }}</option>
                                                 </select>
-                                                <div class="d-flex gap-2">
-                                                    <button type="button" class="btn btn-success" onclick="saveChanges()">
-                                                        <i class="fas fa-save"></i> Simpan
-                                                    </button>
-                                                    <button type="button" class="btn btn-danger" onclick="cancelEdit()">
-                                                        Batal
+                                            @else
+                                                <!-- Edit Mode Controls - Initially Hidden -->
+                                                <div id="editModeControls" style="display: none;">
+                                                    <select name="status" id="statusSelect" class="form-select">
+                                                        @foreach($pesananData['status_pesanan_list'] as $key => $status)
+                                                            <option value="{{ $key }}" {{ $pesananData['status_pesanan'] == $key ? 'selected' : '' }}>{{ $status }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div class="d-flex gap-2">
+                                                        <button type="button" class="btn btn-success" onclick="saveChanges()">
+                                                            <i class="fas fa-save"></i> Simpan
+                                                        </button>
+                                                        <button type="button" class="btn btn-danger" onclick="cancelEdit()">
+                                                            Batal
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <!-- Read Mode Controls - Initially Visible -->
+                                                <div id="readModeControls">
+                                                    <button type="button" class="btn btn-warning" onclick="enableEditMode()">
+                                                        <i class="fas fa-edit"></i> Edit
                                                     </button>
                                                 </div>
-                                            </div>
-                                            <!-- Read Mode Controls - Initially Visible -->
-                                            <div id="readModeControls">
-                                                <button type="button" class="btn btn-warning" onclick="enableEditMode()">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </button>
-                                            </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -506,6 +523,7 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
     
     <script>
+        let uploadedFile = null;
         // Image Modal Functions
         function openImageModal(imageSrc) {
             if(imageSrc == '') {
@@ -561,10 +579,8 @@ $tPath = app()->environment('local') ? '' : '';
         function enableEditMode() {
             document.getElementById('editModeControls').style.display = 'flex';
             document.getElementById('editModeControls').style.gap = '10px';
-            // document.getElementById('editModeControls').style.justifyContent = 'flex-end';
             document.getElementById('readModeControls').style.display = 'none';
             document.getElementById('readModeControls').style.gap = '0';
-            // document.getElementById('readModeControls').style.justifyContent = 'flex-start';
             
             // Enable all form inputs
             const form = document.querySelector('form');
@@ -572,7 +588,9 @@ $tPath = app()->environment('local') ? '' : '';
             
             // List of fields that should remain readonly
             const readOnlyFields = ['id_pesanan', 'nama_pelanggan', 'jenis_jasa', 'kelas_jasa', 'sisa_revisi', 'deskripsi', 'tanggal_awal', 'tanggal_selesai'];
-            
+            if(document.getElementById('statusSelect').value == 'dikerjakan' || document.getElementById('statusSelect').value == 'menunggu_review'){
+                readOnlyFields.push('editor_id');
+            }
             inputs.forEach(input => {
                 // Only enable fields that should be editable
                 if (!readOnlyFields.includes(input.name)) {
@@ -580,89 +598,10 @@ $tPath = app()->environment('local') ? '' : '';
                     input.removeAttribute('disabled');
                 }
             });
+            // Get current status and update available options
+            const currentStatus = document.getElementById('statusSelect').value;
+            updateAvailableStatuses(currentStatus);
         }
-
-        // Function to save changes
-        function saveChanges() {
-            document.getElementById('preloader').style.display = 'block';
-            
-            // Check if there's a file selected to upload
-            if (uploadedFile) {
-                // Upload file first, then save other changes
-                uploadFileAndSaveChanges();
-            } else {
-                // No file selected, just save status changes
-                saveStatusChanges();
-            }
-        }
-
-        function uploadFileAndSaveChanges() {
-            // Create FormData object for file upload
-            const formData = new FormData();
-            formData.append('gambar_hasil_desain', uploadedFile);
-            formData.append('id_pesanan', '{{ $pesananData['uuid'] }}');
-            formData.append('_token', csrfToken);
-            
-            // Upload file first
-            fetch('/pesanan/upload-hasil-desain', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // File uploaded successfully, now save status changes
-                    updateHasilDesainUI(data.filename, data.file_path);
-                    uploadedFile = null; // Clear the file
-                    saveStatusChanges();
-                } else {
-                    document.getElementById('preloader').style.display = 'none';
-                    showRedPopup(data.message || 'Gagal mengupload file');
-                }
-            })
-            .catch(error => {
-                document.getElementById('preloader').style.display = 'none';
-                console.error('Error:', error);
-                showRedPopup('Terjadi kesalahan saat mengupload file');
-            });
-        }
-
-        function saveStatusChanges() {
-            const xhr = new XMLHttpRequest();
-            xhr.open('PUT', '/pesanan/update', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
-            
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    document.getElementById('preloader').style.display = 'none';
-                    
-                    if (xhr.status === 200) {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.status === 'success') {
-                            showGreenPopup(response.message);
-                            setTimeout(function() {
-                                window.location.href = '/pesanan';
-                            }, 2000);
-                        } else {
-                            showRedPopup(response.message);
-                        }
-                    } else {
-                        showRedPopup('Terjadi kesalahan saat menyimpan');
-                    }
-                }
-            };
-            
-            xhr.send(JSON.stringify({
-                id_pesanan: '{{ $pesananData['uuid'] }}',
-                status: document.getElementById('statusSelect').value,
-                editor_id: document.querySelector('select[name="editor_id"]').value
-            }));
-        }
-
         // Function to cancel edit mode
         function cancelEdit() {
             if (confirm('Apakah Anda yakin ingin membatalkan perubahan?')) {
@@ -691,6 +630,162 @@ $tPath = app()->environment('local') ? '' : '';
                 gambar_hasil_desain.removeAttribute('disabled');
             }
         }
+        // Function to determine which statuses are available based on current status
+        function updateAvailableStatuses(currentStatus) {
+            const statusSelect = document.getElementById('statusSelect');
+            const options = statusSelect.options;
+            const statusFlow = {
+                'pending': [''],
+                'diproses': [''],
+                'menunggu_editor': ['dikerjakan', 'dibatalkan'],
+                'dikerjakan': ['menunggu_review', 'dibatalkan'],
+                'menunggu_review': ['revisi', 'selesai', 'dibatalkan'],
+                'revisi': ['menunggu_review', 'dibatalkan'],
+                'selesai': ['selesai'],
+                'dibatalkan': ['dibatalkan']
+            };
+            // Get allowed next statuses
+            const allowedStatuses = statusFlow[currentStatus] || [];
+            // Disable all options first
+            for (let i = 0; i < options.length; i++) {
+                const option = options[i];
+                if (!allowedStatuses.includes(option.value)) {
+                    option.disabled = true;
+                    option.style.color = '#999';
+                } else {
+                    option.disabled = false;
+                    option.style.color = '';
+                }
+            }
+        }
+        function saveStatusPesananAPI(){
+            var url = '/pesanan/update-status';
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    document.getElementById('preloader').style.display = 'none';
+                    
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === 'success') {
+                            showGreenPopup(response.message);
+                            setTimeout(function() {
+                                window.location.href = '/pesanan';
+                            }, 2000);
+                        } else {
+                            showRedPopup(response.message);
+                        }
+                    } else {
+                        showRedPopup('Terjadi kesalahan saat menyimpan');
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({
+                id_pesanan: '{{ $pesananData['uuid'] }}',
+                status_pesanan: document.getElementById('statusSelect').value,
+            }));
+        }
+        function saveAssignEditorAPI(){
+            var url = '/pengerjaan/assign-editor';
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    document.getElementById('preloader').style.display = 'none';
+                    
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === 'success') {
+                            showGreenPopup(response.message);
+                            setTimeout(function() {
+                                window.location.href = '/pesanan';
+                            }, 2000);
+                        } else {
+                            showRedPopup(response.message);
+                        }
+                    } else {
+                        showRedPopup('Terjadi kesalahan saat menyimpan');
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({
+                id_pesanan: '{{ $pesananData['uuid'] }}',
+                status_pesanan: document.getElementById('statusSelect').value,
+                id_editor: document.querySelector('select[name="editor_id"]').value,
+            }));
+        }
+        function saveCompletedAPI(){
+            if('{{ $pesananData['status_pesanan'] }}' == 'revisi' && uploadedFile == null){
+                document.getElementById('preloader').style.display = 'none';
+                showRedPopup('Gambar revisi belum diupload');
+                return;
+            }
+            var url = '/pengerjaan/mark-completed';
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+            const formData = new FormData();
+            formData.append('id_pesanan', '{{ $pesananData['uuid'] }}');
+            formData.append('file_hasil', uploadedFile);
+            formData.append('catatan_editor', document.querySelector('textarea[name="catatan_editor"]').value);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    document.getElementById('preloader').style.display = 'none';
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === 'success') {
+                            showGreenPopup(response.message);
+                            setTimeout(function() {
+                                window.location.href = '/pesanan';
+                            }, 2000);
+                        } else {
+                            showRedPopup(response.message);
+                        }
+                    } else {
+                        console.error('Response:', xhr.responseText);
+                        showRedPopup('Terjadi kesalahan saat menyimpan');
+                    }
+                }
+            };
+            xhr.send(formData);
+        }
+        function saveChanges() {
+            var statusSelect = document.getElementById('statusSelect').value;
+            if(statusSelect == '{{ $pesananData['status_pesanan'] }}'){
+                showRedPopup('Status pesanan belum diubah');
+                return;
+            }
+            document.getElementById('preloader').style.display = 'block';
+            switch(statusSelect){
+                case 'menunggu_editor':
+                    saveStatusPesananAPI();
+                    break;
+                case 'dikerjakan':
+                    saveAssignEditorAPI();
+                    break;
+                case 'revisi':
+                    saveAssignEditorAPI();
+                    break;
+                case 'menunggu_review':
+                    saveCompletedAPI();
+                    break;
+                case 'selesai':
+                    saveStatusPesananAPI();
+                    break;
+                case 'dibatalkan':
+                    saveStatusPesananAPI();
+                    break;
+                default:
+                    console.log('read-only')
+                    break;
+            }
+        }
+
         // Enhance download functionality
         function downloadImage(imageSrc, fileName) {
             const link = document.createElement('a');
@@ -708,7 +803,6 @@ $tPath = app()->environment('local') ? '' : '';
         });
 
         const allowedFormats = ['image/png', 'image/jpeg', 'image/jpg'];
-        let uploadedFile = null;
 
         function handleFileClick() {
             document.getElementById('input_hasil').click();

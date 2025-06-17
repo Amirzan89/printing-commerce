@@ -13,8 +13,8 @@ class UtilityController extends Controller
         return ['status'=>'success', 'data' => $userDB->toArray()];
     }
     public static function getHeaderData(){
-        return Pesanan::with(['toUser', 'toJasa'])
-            ->select('id_pesanan', 'deskripsi', 'status_pesanan', 'total_harga', 'id_user', 'id_jasa', 'created_at')
+        return Pesanan::with(['toUser', 'toJasa'])->join('catatan_pesanan', 'catatan_pesanan.id_pesanan', '=', 'pesanan.id_pesanan')
+            ->select('pesanan.id_pesanan', 'catatan_pesanan', 'status_pesanan', 'total_harga', 'pesanan.id_user', 'id_jasa', 'created_at')
             ->where('status_pesanan', 'pending')
             ->orderBy('created_at', 'desc')
             ->limit(5)

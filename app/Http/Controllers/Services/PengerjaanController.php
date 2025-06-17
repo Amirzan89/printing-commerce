@@ -155,14 +155,14 @@ class PengerjaanController extends Controller
         try {
             $validator = Validator::make($request->only('id_pesanan', 'file_hasil', 'catatan_editor'), [
                 'id_pesanan' => 'required',
-                'file_hasil' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp|max:2048',
+                'file_hasil' => 'required|image|mimes:jpg,jpeg,png|max:5048',
                 'catatan_editor' => 'nullable|string|max:500',
             ], [
                 'id_pesanan.required' => 'ID pesanan wajib diisi',
                 'file_hasil.required' => 'File revisi wajib diisi',
                 'file_hasil.file' => 'File revisi harus berupa file',
-                'file_hasil.mimes' => 'File revisi harus berupa file PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, JPEG, PNG, GIF, atau WEBP',
-                'file_hasil.max' => 'File revisi maksimal 2MB',
+                'file_hasil.mimes' => 'File revisi harus berupa file JPG, JPEG, PNG',
+                'file_hasil.max' => 'File revisi maksimal 5MB',
                 'catatan_editor.string' => 'Catatan harus berupa teks',
                 'catatan_editor.max' => 'Catatan maksimal 500 karakter'
             ]);
@@ -208,16 +208,16 @@ class PengerjaanController extends Controller
                     'updated_at' => Carbon::now(),
                     'id_pesanan' => $pesanan->id_pesanan,
                 ]);
-            }
-            else{
-                $file_name = $pesanan->uuid . '_revisi_' . $pesanan->revisions()->count() . '.' . $request->file('file_hasil')->getClientOriginalExtension();
+            }else{
+                $revisiCount = $pesanan->revisions()->count();
+                $urutanRevisi = $revisiCount > 0 ? $revisiCount : 1;
+                $file_name = $pesanan->uuid . '_revisi_' . $urutanRevisi . '.' . $request->file('file_hasil')->getClientOriginalExtension();
                 file_put_contents($this->dirPath($pesanan->uuid) . '/revisi_editor/' . $file_name, file_get_contents($request->file('file_hasil')));
-                $idRevisi = Revisi::where('id_pesanan', $pesanan->id_pesanan)->where('urutan_revisi', $pesanan->revisions()->count())->first()->id_revisi;
-                Revisi::where('id_pesanan', $pesanan->id_pesanan)->where('urutan_revisi', $pesanan->revisions()->count())->update([
-                    'updated_at' => Carbon::now(),
-                ]);
+                $revision = Revisi::where('id_pesanan', $pesanan->id_pesanan)
+                    ->where('urutan_revisi', $urutanRevisi - 1)
+                    ->first();
+                $idRevisi = $revision->id_revisi;
             }
-            // Insert assignment history to revisi_editor table
             RevisiEditor::create([
                 'nama_file' => $file_name,
                 'catatan_editor' => $request->input('catatan_editor') ?? null,

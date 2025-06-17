@@ -42,7 +42,7 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::get('/detail/{uuid}',[ShowPesananController::class,'showDetail']);
         Route::get('/statistics', [PesananController::class, 'getStatistics']);
         // route for pesanan
-        Route::put('/update', [PesananController::class, 'updateStatus']);
+        Route::put('/update-status', [PesananController::class, 'updateStatus']);
         Route::delete('/delete', [PesananController::class, 'deletePesanan']);
     });
     
