@@ -33,7 +33,7 @@ class Pesanan extends Model
     }
     public function fromCatatanPesanan()
     {
-        return $this->hasMany(CatatanPesanan::class, 'id_pesanan');
+        return $this->hasOne(CatatanPesanan::class, 'id_pesanan');
     }
     public function fromTransaksi()
     {

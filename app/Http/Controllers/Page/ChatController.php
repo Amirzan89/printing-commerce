@@ -19,13 +19,13 @@ class ChatController extends Controller
     {
         $this->chatService = $chatService;
     }
-
+    
     public function index()
     {
+        return view('page.chat.index');
+        return view('page.chat.index', compact('conversations'));
         // Get all chat conversations for current user
         $conversations = $this->chatService->getUserConversations(auth()->id());
-        
-        return view('page.chat.index', compact('conversations'));
     }
 
     public function show($uuid)

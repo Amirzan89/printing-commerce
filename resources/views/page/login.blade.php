@@ -30,6 +30,57 @@ if(app()->environment('local')){
         body img{
             pointer-events: none;
         }
+        
+        /* Enhanced SVG positioning */
+        #login-content {
+            border-radius: 20px 0 0 20px;
+            overflow: hidden !important;
+        }
+        
+        /* Responsive fixes - maintain horizontal layout */
+        @media (max-width: 768px) {
+            main {
+                width: 95% !important;
+                /* Keep horizontal layout - NO flex-direction: column */
+            }
+            
+            main > div:first-child {
+                width: 35% !important; /* Slightly smaller green section */
+            }
+            
+            main > div:last-child {
+                width: 65% !important; /* More space for form */
+            }
+            
+            main > div:last-child > div {
+                width: 80% !important; /* Wider form container */
+                left: 50% !important;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            main {
+                width: 98% !important;
+                border-radius: 15px !important;
+            }
+            
+            main > div:first-child {
+                width: 30% !important; /* Even smaller green section */
+            }
+            
+            main > div:last-child {
+                width: 70% !important;
+            }
+            
+            main > div:last-child > div {
+                width: 90% !important;
+                left: 55% !important;
+            }
+            
+            #login-content {
+                border-radius: 15px 0 0 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -50,10 +101,10 @@ if(app()->environment('local')){
     @endif
     </script>
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full" data-sidebar-position="fixed" data-header-position="fixed">
-        <div class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center bg-warning">
-            <main class="d-flex bg-white rounded-5" style="width: 80%">
-                <div class="position-relative" style="width: 40%;">
-                    <div id="login-content"></div>
+        <div class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center">
+            <main class="d-flex bg-white rounded-5" style="width: 80%; min-height: 70vh; max-height: 80vh;">
+                <div class="position-relative" style="width: 40%; min-height: 100%; overflow: hidden;">
+                    <div id="login-content" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
                     <div id="logo-content" class="position-absolute z-10 d-flex justify-content-center align-items-center flex-column-reverse" style="top: 20%; left: 50%; transform: translate(-50%, -50%);">
                         <p class="text-white">Solusi Cerdas Design Cepat</p>
                     </div>
@@ -96,7 +147,12 @@ if(app()->environment('local')){
             xhr.open('GET', svgFile, true);
             xhr.onload = function(){
                 if (xhr.status === 200) {
-                    targetElement.innerHTML += xhr.responseText.replace(/width="[^"]*"/, '').replace(/height="[^"]*"/, '');
+                    // Keep original SVG shape with perfect scaling
+                    let svgContent = xhr.responseText
+                        .replace(/width="[^"]*"/, 'width="100%"')
+                        .replace(/height="[^"]*"/, 'height="100%"')
+                        .replace(/viewBox="[^"]*"/, 'viewBox="0 0 616 840" preserveAspectRatio="none"');
+                    targetElement.innerHTML += svgContent;
                 }
             };
             xhr.onerror = function(){

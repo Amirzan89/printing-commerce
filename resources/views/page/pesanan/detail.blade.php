@@ -123,6 +123,127 @@ $tPath = app()->environment('local') ? '' : '';
         .badge {
             font-size: 0.75rem;
         }
+        
+        /* Image Preview Styles */
+        .image-preview-container {
+            border: 1px solid #e9ecef;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+        }
+        
+        .image-thumbnail img {
+            transition: all 0.3s ease;
+            border-radius: 0.375rem;
+        }
+        
+        .image-thumbnail img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .image-info h6 {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .btn-group .btn {
+            border-radius: 0.25rem;
+        }
+        
+        .btn-group .btn:first-child {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        .btn-group .btn:last-child {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        
+        /* Modal Enhancements */
+        .modal-dialog-centered {
+            display: flex;
+            align-items: center;
+            min-height: calc(100% - 1rem);
+        }
+        
+        #modalImage {
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Error State */
+        .image-error {
+            border: 2px dashed #dc3545 !important;
+            background-color: #f8d7da;
+        }
+        
+        /* Loading State */
+        .image-loading {
+            position: relative;
+            opacity: 0.7;
+        }
+        
+        .image-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #007bff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Action Buttons Responsive Styles */
+        @media screen and (max-width: 500px) {
+            .row .col-12.d-flex.justify-content-between {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .row .col-12.d-flex.justify-content-between button {
+                width: 100%;
+            }
+            
+            .row .col-12.d-flex.justify-content-between .d-flex {
+                width: 100%;
+                flex-direction: column;
+            }
+            
+            #editModeControls {
+                width: 100%;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            #editModeControls .d-flex {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+            
+            #editModeControls select,
+            #editModeControls button {
+                width: 100%;
+            }
+            
+            #readModeControls {
+                width: 100%;
+            }
+            
+            #readModeControls button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
@@ -159,53 +280,50 @@ $tPath = app()->environment('local') ? '' : '';
             <div class="container-fluid" style="background-color: #F6F9FF">
                 <div class="pagetitle mt-2 mt-sm-3 mt-md-3 mt-lg-4 mb-2 mb-sm-3 mb-md-3 mb-lg-4">
                     <h1>Detail Pesanan</h1>
-                    <nav>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="/dashboard">Beranda</a></li>
-                            <li class="breadcrumb-item"><a href="/pesanan">Kelola Pesanan</a></li>
-                            <li class="breadcrumb-item active">Detail Pesanan</li>
-                        </ol>
-                    </nav>
                 </div>
 
                 <div class="container py-4">
                     <div class="card">
                         <div class="card-body">
                             <h2 class="card-title">Detail Pesanan</h2>
-
+                            {{-- @php
+                                $currentStatus = $pesananData['status_raw'];
+                                $config = $statusConfig[$currentStatus] ?? [];
+                            @endphp --}}
                             <form id="editForm" class="needs-validation" novalidate>
+                                <!-- Basic Info Section -->
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="form-label">ID Pesanan</label>
-                                            <input type="text" class="form-control" value="{{ $pesananData['uuid'] }}" disabled>
+                                            <input type="text" name="id_pesanan" class="form-control" value="{{ $pesananData['uuid'] }}" readonly>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="form-label">Nama Pelanggan</label>
-                                            <input type="text" class="form-control" value="{{ $pesananData['nama_pelanggan'] }}" disabled>
+                                            <input type="text" name="nama_pelanggan" class="form-control" value="{{ $pesananData['nama_pelanggan'] }}" readonly>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label class="form-label">Jenis Jasa</label>
-                                            <input type="text" class="form-control" value="{{ $pesananData['jenis_jasa'] }}" disabled>
+                                            <input type="text" name="jenis_jasa" class="form-control" value="{{ $pesananData['jenis_jasa'] }}" readonly>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label class="form-label">Kelas Jasa</label>
-                                            <input type="text" class="form-control" value="{{ $pesananData['kelas_jasa'] }}" disabled>
+                                            <input type="text" name="kelas_jasa" class="form-control" value="{{ $pesananData['kelas_jasa'] }}" readonly>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                         <div class="form-group">
-                                            <label class="form-label">Revisi</label>
-                                            <input type="text" class="form-control" value="{{ $pesananData['revisi_used'] }}/{{ $pesananData['maksimal_revisi'] }} (Sisa: {{ $pesananData['sisa_revisi'] }})" disabled>
+                                            <label class="form-label">Sisa Revisi</label>
+                                            <input type="text" name="sisa_revisi" class="form-control" value="{{ $pesananData['sisa_revisi'] }}" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -214,157 +332,133 @@ $tPath = app()->environment('local') ? '' : '';
                                     <div class="col-12">
                                         <div class="form-group">
                                             <label class="form-label">Deskripsi Pesanan</label>
-                                            <textarea class="form-control" rows="4" disabled>{{ $pesananData['deskripsi'] }}</textarea>
+                                            <textarea name="deskripsi" class="form-control" rows="4" readonly>{{ $pesananData['deskripsi'] }}</textarea>
                                         </div>
                                     </div>
                                 </div>
 
+                                <!-- Gambar Referensi Section -->
                                 <div class="row mb-3">
                                     <div class="col-12">
-                                        <div class="form-group">
-                                            <label class="form-label">Status Pesanan</label>
-                                            <div class="status-badge status-{{ strtolower($pesananData['status']) }}">
-                                                {{ $pesananData['status'] }}
-                                            </div>
+                                        <label class="form-label">Gambar Referensi</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if(isset($pesananData['gambar_referensi']) && !empty($pesananData['gambar_referensi']) && !is_null($pesananData['gambar_referensi']))
+                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="openImageModal('{{ asset('assets3/img/pesanan/'. $pesananData['uuid'] . '/catatan_pesanan/' . $pesananData['gambar_referensi']) }}')">
+                                                    <i class="fas fa-image"></i> {{ isset($pesananData['gambar_referensi']) && !empty($pesananData['gambar_referensi']) && !is_null($pesananData['gambar_referensi']) ? 'Gambar.' . pathinfo($pesananData['gambar_referensi'])['extension'] : 'Tidak ada gambar' }}
+                                                </button>
+                                                <button type="button" class="btn btn-success btn-sm" onclick="downloadImage('{{ asset('assets3/img/pesanan/'. $pesananData['uuid'] . '/catatan_pesanan/' . $pesananData['gambar_referensi']) }}', '{{ basename($pesananData['gambar_referensi']) }}')">
+                                                    <i class="fas fa-download"></i> Download
+                                                </button>
+                                            @else
+                                                <div class="text-muted">Tidak ada gambar referensi</div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Brief Section -->
-                                @if($pesananData['catatan_pesanan'])
+                                <!-- Estimasi Pengerjaan -->
                                 <div class="row mb-3">
-                                    <div class="col-12">
+                                    <div class="col-md-6">
                                         <div class="form-group">
-                                            <label class="form-label">Catatan Pesanan</label>
-                                            <textarea class="form-control" rows="4" disabled>{{ $pesananData['catatan_pesanan']->catatan_pesanan }}</textarea>
+                                            <label class="form-label">Dari</label>
+                                            <input type="date" name="tanggal_awal" class="form-control" value="{{ $pesananData['estimasi_waktu']['dari'] }}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Sampai</label>
+                                            <input type="date" name="tanggal_selesai" class="form-control" value="{{ $pesananData['estimasi_waktu']['sampai'] }}" readonly>
                                         </div>
                                     </div>
                                 </div>
-
-                                @if($pesananData['catatan_pesanan']->hasGambar())
+                                @if(in_array($pesananData['status_pesanan'], ['dikerjakan', 'revisi', 'selesai']))
+                                <!-- Hasil Desain -->
                                 <div class="row mb-3">
                                     <div class="col-12">
-                                        <div class="form-group">
-                                            <label class="form-label">Gambar Referensi</label>
-                                            <div class="dropzone-container">
-                                                <img src="{{ $pesananData['catatan_pesanan']->gambar_referensi }}" alt="Gambar Referensi" class="img-fluid img-preview">
-                                            </div>
+                                        <label class="form-label">Hasil Desain</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="openImageModal('{{ asset('assets3/img/pesanan/'. $pesananData['uuid'] . '/revisi_editor/' . $pesananData['revisi_editor_terbaru']) }}')">
+                                                <i class="fas fa-image"></i> {{ isset($pesananData['revisi_editor_terbaru']) && !empty($pesananData['revisi_editor_terbaru']) && !is_null($pesananData['revisi_editor_terbaru']) ? 'Gambar.' . pathinfo($pesananData['revisi_editor_terbaru'])['extension'] : 'Tidak ada gambar' }}
+                                            </button>
+                                            <input type="file" id="input_hasil" name="gambar_hasil_desain" hidden onchange="handleFileChange(event)">
+                                            <button type="button" class="btn btn-success btn-sm" onclick="handleFileClick()">
+                                                <i class="fas fa-upload"></i> Upload
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                                 @endif
-                                @endif
-
+                                <!-- Gambar Referensi Section -->
                                 <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label">Estimasi Pengerjaan</label>
-                                            <div class="input-group">
-                                                <input type="date" class="form-control" value="{{ $pesananData['estimasi_waktu']['dari'] }}" disabled>
-                                                <span class="input-group-text">Sampai</span>
-                                                <input type="date" class="form-control" value="{{ $pesananData['estimasi_waktu']['sampai'] }}" disabled>
-                                            </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Gambar Revisi Pelanggan</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if(isset($pesananData['revisi_user']) && !empty($pesananData['revisi_user']) && !is_null($pesananData['revisi_user']))
+                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="openImageModal('{{ asset('assets3/img/pesanan/'. $pesananData['uuid'] . '/revisi_user/' . $pesananData['revisi_user']) }}')">
+                                                    <i class="fas fa-image"></i> {{ isset($pesananData['revisi_user']) && !empty($pesananData['revisi_user']) && !is_null($pesananData['revisi_user']) ? 'Gambar.' . pathinfo($pesananData['revisi_user'])['extension'] : 'Tidak ada gambar' }}
+                                                </button>
+                                                <button type="button" class="btn btn-success btn-sm" onclick="downloadImage('{{ asset('assets3/img/pesanan/'. $pesananData['uuid'] . '/revisi_user/' . $pesananData['revisi_user']) }}', '{{ basename($pesananData['revisi_user']) }}')">
+                                                    <i class="fas fa-download"></i> Download
+                                                </button>
+                                            @else
+                                                <div class="text-muted">Tidak ada gambar referensi</div>
+                                            @endif
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                </div>
+                                @if(in_array($pesananData['status_pesanan'], ['diproses', 'menunggu_editor', 'dikerjakan', 'revisi']))
+                                <!-- Editor Selection -->
+                                <div class="row mb-3">
+                                    <div class="col-12">
                                         <div class="form-group">
                                             <label class="form-label">Nama Editor</label>
-                                            <select class="form-select" id="editor" name="editor">
-                                                <option value="">Pilih Editor</option>
+                                            <select class="form-select" name="editor_id">
+                                                @if(!$pesananData['id_editor'])
+                                                    <option value="">Pilih Editor</option>
+                                                @endif
                                                 @foreach($editorList as $editor)
-                                                    <option value="{{ $editor->id_editor }}" {{ $pesananData['editor']['id'] == $editor->id_editor ? 'selected' : '' }}>
-                                                        {{ $editor->nama_editor }}
-                                                    </option>
+                                                    <option value="{{ $editor->id_editor }}" {{ $pesananData['id_editor'] == $editor->id_editor ? 'selected' : '' }}>{{ $editor->nama_editor }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
                                 </div>
-
+                                @endif
+                                <!-- Action Buttons -->
                                 <div class="row">
-                                    <div class="col-12 d-flex justify-content-end gap-2">
-                                        <button type="button" class="btn btn-secondary" onclick="window.location.href='/pesanan'">Cancel</button>
-                                        <button type="submit" class="btn btn-success">Save</button>
+                                    <div class="col-12 d-flex justify-content-between">
+                                        <button type="button" class="btn btn-secondary" onclick="history.back()">
+                                            <i class="fas fa-arrow-left"></i> Kembali
+                                        </button>
+                                        <div class="d-flex gap-2">
+                                            <!-- Edit Mode Controls - Initially Hidden -->
+                                            <div id="editModeControls" style="display: none;">
+                                                <select name="status" id="statusSelect" class="form-select">
+                                                    @foreach($pesananData['status_pesanan_list'] as $key => $status)
+                                                        <option value="{{ $key }}" {{ $pesananData['status_pesanan'] == $key ? 'selected' : '' }}>{{ $status }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="d-flex gap-2">
+                                                    <button type="button" class="btn btn-success" onclick="saveChanges()">
+                                                        <i class="fas fa-save"></i> Simpan
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger" onclick="cancelEdit()">
+                                                        Batal
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <!-- Read Mode Controls - Initially Visible -->
+                                            <div id="readModeControls">
+                                                <button type="button" class="btn btn-warning" onclick="enableEditMode()">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </form>
                         </div>
                     </div>
-
-                    <!-- Riwayat Revisi Section -->
-                    @if(count($pesananData['revisions']) > 0)
-                    <div class="card mt-4">
-                        <div class="card-body">
-                            <h3 class="card-title">Riwayat Revisi</h3>
-                            
-                            @foreach($pesananData['revisions'] as $revision)
-                            <div class="revision-item border rounded p-3 mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h5 class="mb-0">Revisi #{{ $revision->urutan_revisi }}</h5>
-                                    <small class="text-muted">{{ $revision->created_at->format('d M Y H:i') }}</small>
-                                </div>
-                                
-                                @if($revision->catatan_user)
-                                <div class="mb-3">
-                                    <strong>Catatan User:</strong>
-                                    <p class="mb-0">{{ $revision->catatan_user }}</p>
-                                </div>
-                                @endif
-                                
-                                <!-- User Files -->
-                                @if(count($revision->userFiles) > 0)
-                                <div class="mb-3">
-                                    <strong>File dari User:</strong>
-                                    <div class="row">
-                                        @foreach($revision->userFiles as $file)
-                                        <div class="col-md-4 mb-2">
-                                            <div class="file-item p-2 border rounded">
-                                                <i class="fas fa-file-pdf text-danger me-2"></i>
-                                                <span>{{ $file->file_name }}</span>
-                                                @if($file->catatan_user)
-                                                <small class="d-block text-muted">{{ $file->catatan_user }}</small>
-                                                @endif
-                                                <small class="d-block text-muted">{{ $file->uploaded_at->format('d M Y H:i') }}</small>
-                                            </div>
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                                @endif
-                                
-                                <!-- Editor Files -->
-                                @if(count($revision->editorFiles) > 0)
-                                <div class="mb-3">
-                                    <strong>Response dari Editor:</strong>
-                                    <div class="row">
-                                        @foreach($revision->editorFiles as $file)
-                                        <div class="col-md-4 mb-2">
-                                            <div class="file-item p-2 border rounded bg-light">
-                                                <i class="fas fa-file-pdf text-success me-2"></i>
-                                                <span>{{ $file->file_name }}</span>
-                                                <span class="badge badge-{{ $file->type === 'final' ? 'success' : 'info' }} ms-2">
-                                                    {{ ucfirst($file->type) }}
-                                                </span>
-                                                @if($file->catatan_editor)
-                                                <small class="d-block text-muted">{{ $file->catatan_editor }}</small>
-                                                @endif
-                                                <small class="d-block text-muted">{{ $file->uploaded_at->format('d M Y H:i') }}</small>
-                                            </div>
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                                @else
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-clock me-2"></i>
-                                    Menunggu response dari editor
-                                </div>
-                                @endif
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
                 </div>
                 @include('components.admin.footer')
             </div>
@@ -373,12 +467,347 @@ $tPath = app()->environment('local') ? '' : '';
     @include('components.preloader')
     <div id="greenPopup" style="display:none"></div>
     <div id="redPopup" style="display:none"></div>
+    
+    <!-- Image Preview Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalLabel">
+                        <i class="fas fa-image me-2"></i>Gambar Referensi
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-0">
+                    <img id="modalImage" src="" alt="Gambar Referensi" class="img-fluid" style="max-height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <div class="d-flex justify-content-between w-100">
+                        <span id="imageFileName" class="text-muted"></span>
+                        <div>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times"></i> Tutup
+                            </button>
+                            <a id="downloadBtn" href="" download="" class="btn btn-success">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script src="{{ asset($tPath.'assets/libs/jquery/dist/jquery.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/sidebarmenu.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/app.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
+    
+    <script>
+        // Image Modal Functions
+        function openImageModal(imageSrc) {
+            if(imageSrc == '') {
+                return;
+            }
+            const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+            const modalImage = document.getElementById('modalImage');
+            const imageFileName = document.getElementById('imageFileName');
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            // Set image source
+            modalImage.src = imageSrc;
+            modalImage.onerror = function() {
+                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMDAgMTAwTDI4MCAyMDBIMTIwTDIwMCAxMDBaIiBmaWxsPSIjRENEQ0RDIi8+CjxjaXJjbGUgY3g9IjE2MCIgY3k9IjE0MCIgcj0iMTUiIGZpbGw9IiNEQ0RDREMiLz4KPHRleHQgeD0iMjAwIiB5PSIyNDAiIGZpbGw9IiM5OTk5OTkiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R2FtYmFyIHRpZGFrIGRhcGF0IGRpdG11a2FuPC90ZXh0Pgo8L3N2Zz4K';
+                imageFileName.textContent = 'Gambar tidak dapat dimuat';
+                downloadBtn.style.display = 'none';
+            };
+            
+            // Set file name
+            const fileName = imageSrc.split('/').pop();
+            imageFileName.textContent = fileName;
+            
+            // Set download link
+            downloadBtn.href = imageSrc;
+            downloadBtn.download = fileName;
+            downloadBtn.style.display = 'inline-block';
+            
+            // Show modal
+            modal.show();
+        }
+        // Handle image load errors on thumbnail
+        document.addEventListener('DOMContentLoaded', function() {
+            const thumbnails = document.querySelectorAll('.image-thumbnail img');
+            thumbnails.forEach(img => {
+                img.addEventListener('error', function() {
+                    this.style.border = '2px dashed #dc3545';
+                    this.title = 'Gambar tidak dapat dimuat';
+                });
+                
+                img.addEventListener('load', function() {
+                    this.style.border = '1px solid #dee2e6';
+                    this.title = 'Klik untuk melihat gambar ukuran penuh';
+                });
+            });
+        });
+
+        /////
+        function enableEditMode() {
+            document.getElementById('editModeControls').style.display = 'flex';
+            document.getElementById('editModeControls').style.gap = '10px';
+            // document.getElementById('editModeControls').style.justifyContent = 'flex-end';
+            document.getElementById('readModeControls').style.display = 'none';
+            document.getElementById('readModeControls').style.gap = '0';
+            // document.getElementById('readModeControls').style.justifyContent = 'flex-start';
+            
+            // Enable all form inputs
+            const form = document.querySelector('form');
+            const inputs = form.querySelectorAll('input, select, textarea');
+            
+            // List of fields that should remain readonly
+            const readOnlyFields = ['id_pesanan', 'nama_pelanggan', 'jenis_jasa', 'kelas_jasa', 'sisa_revisi', 'deskripsi', 'tanggal_awal', 'tanggal_selesai'];
+            
+            inputs.forEach(input => {
+                // Only enable fields that should be editable
+                if (!readOnlyFields.includes(input.name)) {
+                    input.removeAttribute('readonly');
+                    input.removeAttribute('disabled');
+                }
+            });
+        }
+
+        // Function to save changes
+        function saveChanges() {
+            document.getElementById('preloader').style.display = 'block';
+            
+            // Check if there's a file selected to upload
+            if (uploadedFile) {
+                // Upload file first, then save other changes
+                uploadFileAndSaveChanges();
+            } else {
+                // No file selected, just save status changes
+                saveStatusChanges();
+            }
+        }
+
+        function uploadFileAndSaveChanges() {
+            // Create FormData object for file upload
+            const formData = new FormData();
+            formData.append('gambar_hasil_desain', uploadedFile);
+            formData.append('id_pesanan', '{{ $pesananData['uuid'] }}');
+            formData.append('_token', csrfToken);
+            
+            // Upload file first
+            fetch('/pesanan/upload-hasil-desain', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // File uploaded successfully, now save status changes
+                    updateHasilDesainUI(data.filename, data.file_path);
+                    uploadedFile = null; // Clear the file
+                    saveStatusChanges();
+                } else {
+                    document.getElementById('preloader').style.display = 'none';
+                    showRedPopup(data.message || 'Gagal mengupload file');
+                }
+            })
+            .catch(error => {
+                document.getElementById('preloader').style.display = 'none';
+                console.error('Error:', error);
+                showRedPopup('Terjadi kesalahan saat mengupload file');
+            });
+        }
+
+        function saveStatusChanges() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', '/pesanan/update', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    document.getElementById('preloader').style.display = 'none';
+                    
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === 'success') {
+                            showGreenPopup(response.message);
+                            setTimeout(function() {
+                                window.location.href = '/pesanan';
+                            }, 2000);
+                        } else {
+                            showRedPopup(response.message);
+                        }
+                    } else {
+                        showRedPopup('Terjadi kesalahan saat menyimpan');
+                    }
+                }
+            };
+            
+            xhr.send(JSON.stringify({
+                id_pesanan: '{{ $pesananData['uuid'] }}',
+                status: document.getElementById('statusSelect').value,
+                editor_id: document.querySelector('select[name="editor_id"]').value
+            }));
+        }
+
+        // Function to cancel edit mode
+        function cancelEdit() {
+            if (confirm('Apakah Anda yakin ingin membatalkan perubahan?')) {
+                disableEditMode();
+                // Here you would typically reset the form to its original values
+                document.querySelector('form').reset();
+            }
+        }
+
+        // Function to disable edit mode
+        function disableEditMode() {
+            document.getElementById('editModeControls').style.display = 'none';
+            document.getElementById('readModeControls').style.display = 'block';
+            
+            const form = document.querySelector('form');
+            const inputs = form.querySelectorAll('input, select, textarea');
+            
+            // Disable all inputs
+            inputs.forEach(input => {
+                input.setAttribute('readonly', true);
+                input.setAttribute('disabled', true);
+            });
+            form.querySelector('input[name="gambar_hasil_desain"]').removeAttribute('readonly');
+            form.querySelector('input[name="gambar_hasil_desain"]').removeAttribute('disabled');
+        }
+        // Enhance download functionality
+        function downloadImage(imageSrc, fileName) {
+            const link = document.createElement('a');
+            link.href = imageSrc;
+            link.download = fileName || 'gambar-referensi';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Initialize the page in read-only mode
+        document.addEventListener('DOMContentLoaded', function() {
+            disableEditMode();
+        });
+
+        const allowedFormats = ['image/png', 'image/jpeg', 'image/jpg'];
+        let uploadedFile = null;
+
+        function handleFileClick() {
+            document.getElementById('input_hasil').click();
+        }
+
+        function handleFileChange(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (!allowedFormats.includes(file.type)) {
+                    showRedPopup("Format file harus png, jpeg, atau jpg!");
+                    return;
+                }
+                uploadedFile = file;
+                
+                // Update UI immediately without uploading
+                updateHasilDesainUIPreview(file.name);
+            }
+        }
+
+        function updateHasilDesainUIPreview(filename) {
+            // Get the preview button element
+            const previewButton = document.querySelector('.btn-outline-primary[onclick*="revisi_editor"]');
+            
+            if (previewButton) {
+                // Update preview button text to show selected file
+                const fileExtension = filename.split('.').pop();
+                previewButton.innerHTML = `<i class="fas fa-image"></i> Gambar.${fileExtension}`;
+                
+                // Disable the onclick since file is not uploaded yet
+                previewButton.setAttribute('onclick', '');
+                previewButton.style.opacity = '0.7';
+                previewButton.title = 'File dipilih, belum diupload';
+            }
+        }
+
+        // Keep the upload function for when it's actually needed (e.g., during save)
+        function uploadFile(file) {
+            // Show preloader
+            document.getElementById('preloader').style.display = 'block';
+            
+            // Create FormData object
+            const formData = new FormData();
+            formData.append('gambar_hasil_desain', file);
+            formData.append('id_pesanan', '{{ $pesananData['uuid'] }}');
+            formData.append('_token', csrfToken);
+            
+            // Send AJAX request
+            fetch('/pesanan/upload-hasil-desain', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide preloader
+                document.getElementById('preloader').style.display = 'none';
+                
+                if (data.status === 'success') {
+                    // Show success message
+                    showGreenPopup(data.message);
+                    
+                    // Update the UI after successful upload
+                    updateHasilDesainUI(data.filename, data.file_path);
+                    
+                } else {
+                    showRedPopup(data.message || 'Gagal mengupload file');
+                }
+            })
+            .catch(error => {
+                // Hide preloader
+                document.getElementById('preloader').style.display = 'none';
+                console.error('Error:', error);
+                showRedPopup('Terjadi kesalahan saat mengupload file');
+            });
+        }
+
+        function updateHasilDesainUI(filename, filePath) {
+            // Get the button element
+            const previewButton = document.querySelector('.btn-outline-primary[onclick*="revisi_editor"]');
+            const uploadButton = document.querySelector('.btn-success[onclick="handleFileClick()"]');
+            
+            if (previewButton) {
+                // Update preview button after successful upload
+                const fileExtension = filename.split('.').pop();
+                previewButton.innerHTML = `<i class="fas fa-image"></i> Gambar.${fileExtension}`;
+                previewButton.setAttribute('onclick', `openImageModal('${filePath}')`);
+                previewButton.style.opacity = '1';
+                previewButton.title = 'Klik untuk melihat gambar';
+                
+                // Change upload button text to indicate file was uploaded
+                if (uploadButton) {
+                    uploadButton.innerHTML = '<i class="fas fa-check"></i> Berhasil Diupload';
+                    uploadButton.classList.remove('btn-success');
+                    uploadButton.classList.add('btn-outline-success');
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        uploadButton.innerHTML = '<i class="fas fa-upload"></i> Upload';
+                        uploadButton.classList.remove('btn-outline-success');
+                        uploadButton.classList.add('btn-success');
+                    }, 3000);
+                }
+            }
+        }
+    </script>
 </body>
 
 </html>

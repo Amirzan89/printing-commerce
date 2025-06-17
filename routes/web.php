@@ -22,7 +22,6 @@ use App\Http\Controllers\Page\AdminController AS ShowAdminController;
 use App\Http\Controllers\Page\EditorController AS ShowEditorController;
 use App\Http\Controllers\Page\UserController AS ShowUserController;
 use App\Http\Controllers\Page\PengerjaanController AS ShowPengerjaanController;
-
 Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
     //API only jasa route
     Route::group(['prefix'=>'/jasa'], function(){
@@ -42,8 +41,6 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::get('/',[ShowPesananController::class,'showAll']);
         Route::get('/detail/{uuid}',[ShowPesananController::class,'showDetail']);
         Route::get('/statistics', [PesananController::class, 'getStatistics']);
-        Route::get('/tambah',[ShowPesananController::class,'showTambah']);
-        Route::get('/edit/{any}',[ShowPesananController::class,'showEdit']);
         // route for pesanan
         Route::put('/update', [PesananController::class, 'updateStatus']);
         Route::delete('/delete', [PesananController::class, 'deletePesanan']);
@@ -65,16 +62,16 @@ Route::group(['middleware'=>['auth:sanctum','authorize']], function(){
         Route::delete('/delete',[MetodePembayaranController::class,'deleteMPembayaran']);
     });
 
-    //API only transaksi route
-    Route::group(['prefix'=>'/transaksi'], function(){
-        //page transaksi
-        Route::get('/',[ShowTransaksiController::class,'showAll']);
-        Route::get('/detail/{any}',[ShowTransaksiController::class,'showDetail']);
-        Route::get('/pending', [ShowTransaksiController::class, 'getPendingPayments']);
-        //route for transaksi
-        Route::post('/confirm', [TransaksiController::class, 'confirmPayment']);
-        Route::post('/reject', [TransaksiController::class, 'rejectPayment']);
-    });
+    // //API only transaksi route
+    // Route::group(['prefix'=>'/transaksi'], function(){
+    //     //page transaksi
+    //     Route::get('/',[ShowTransaksiController::class,'showAll']);
+    //     Route::get('/detail/{any}',[ShowTransaksiController::class,'showDetail']);
+    //     Route::get('/pending', [ShowTransaksiController::class, 'getPendingPayments']);
+    //     //route for transaksi
+    //     Route::post('/confirm', [TransaksiController::class, 'confirmPayment']);
+    //     Route::post('/reject', [TransaksiController::class, 'rejectPayment']);
+    // });
 
     //API only chat route
     Route::group(['prefix'=>'/chat'], function(){

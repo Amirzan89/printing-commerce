@@ -45,15 +45,15 @@ class PesananController extends Controller
             'toUser',
             'toJasa',
             'toPaketJasa',
+            'toEditor',
             'fromCatatanPesanan',
             'revisions.userFiles',
             'revisions.editorFiles.editor'
-        ])->join('catatan_pesanan', 'catatan_pesanan.id_pesanan', '=', 'pesanan.id_pesanan')->where('pesanan.uuid', $uuid)->first();
+        ])->where('pesanan.uuid', $uuid)->first();
+        
         if (!$pesanan) {
             return redirect('/pesanan')->with('error', 'Data Pesanan tidak ditemukan');
         }
-        $workingEditors = $pesanan->editorFiles()->with('editor')->get()
-            ->pluck('editor')->unique('id_editor')->values();
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
             'pesananData' => [
@@ -62,22 +62,93 @@ class PesananController extends Controller
                 'jenis_jasa' => $pesanan->toJasa->kategori ?? '-',
                 'kelas_jasa' => $pesanan->toPaketJasa->kelas_jasa,
                 'maksimal_revisi' => $pesanan->maksimal_revisi ?? 0,
+                'status_pesanan_list' => ['pending' => 'Menunggu Pembayaran', 'diproses' => 'Proses', 'menunggu_editor' => 'Menunggu Editor', 'dikerjakan' => 'Dikerjakan', 'revisi' => 'Revisi', 'selesai' => 'Selesai', 'dibatalkan' => 'Dibatalkan'],
+                'status_pesanan' => $pesanan->status_pesanan,
                 'revisi_used' => $pesanan->revisi_used,
                 'sisa_revisi' => $pesanan->revisi_tersisa,
-                'deskripsi' => $pesanan->deskripsi ?? '-',
-                'catatan_pesanan' => $pesanan->fromCatatanPesanan,
-                'revisions' => $pesanan->revisions,
+                'deskripsi' => $pesanan->fromCatatanPesanan->catatan_pesanan ?? '-',
+                'gambar_referensi' => $pesanan->fromCatatanPesanan->gambar_referensi ?? null,
+                'revisi_editor_terbaru' => $pesanan->latestRevision && $pesanan->latestRevision->editorFiles->count() > 0 ? $pesanan->latestRevision->editorFiles->first()->nama_file : null,
+                'revisions' => $pesanan->revisions ?? [],
                 'estimasi_waktu' => [
                     'dari' => $pesanan->estimasi_waktu ? Carbon::parse($pesanan->estimasi_waktu)->format('Y-m-d') : null,
                     'sampai' => $pesanan->estimasi_waktu ? Carbon::parse($pesanan->estimasi_waktu)->format('Y-m-d') : null,
                     'durasi' => $pesanan->toPaketJasa->waktu_pengerjaan ?? '-'
                 ],
-                'editors' => $workingEditors,
-                'latest_editor' => $workingEditors->first(),
-                'status' => ucfirst($pesanan->status_pesanan)
+                'id_editor' => $pesanan->id_editor,
+                'status' => ucfirst($pesanan->status_pesanan),
+                'status_raw' => $pesanan->status_pesanan,
+                'editor_assigned' => $pesanan->toEditor,
             ],
             'headerData' => UtilityController::getHeaderData(),
-            'editorList' => Editor::select('id_editor', 'nama_editor')->get()
+            'editorList' => Editor::select('id_editor', 'nama_editor')->get(),
+            'editMode' => $request->query('edit', false),
+            'statusConfig' => [
+                'pending' => [
+                    'showEditor' => false,
+                    'showCatatan' => true,
+                    'showRevisions' => false,
+                    'allowEditStatus' => true,
+                    'allowEditEditor' => false,
+                    'nextStatuses' => ['diproses', 'dibatalkan']
+                ],
+                'diproses' => [
+                    'showEditor' => false,
+                    'showCatatan' => true,
+                    'showRevisions' => false,
+                    'allowEditStatus' => true,
+                    'allowEditEditor' => false,
+                    'nextStatuses' => ['menunggu_editor']
+                ],
+                'menunggu_editor' => [
+                    'showEditor' => true,
+                    'showCatatan' => true,
+                    'showRevisions' => false,
+                    'allowEditStatus' => true,
+                    'allowEditEditor' => true,
+                    'nextStatuses' => ['dikerjakan', 'dibatalkan']
+                ],
+                'dikerjakan' => [
+                    'showEditor' => true,
+                    'showCatatan' => true,
+                    'showRevisions' => true,
+                    'allowEditStatus' => false,
+                    'allowEditEditor' => false,
+                    'nextStatuses' => ['menunggu_review']
+                ],
+                'revisi' => [
+                    'showEditor' => true,
+                    'showCatatan' => true,
+                    'showRevisions' => true,
+                    'allowEditStatus' => true,
+                    'allowEditEditor' => true,
+                    'nextStatuses' => ['dikerjakan']
+                ],
+                'menunggu_review' => [
+                    'showEditor' => true,
+                    'showCatatan' => true,
+                    'showRevisions' => true,
+                    'allowEditStatus' => false,
+                    'allowEditEditor' => false,
+                    'nextStatuses' => []
+                ],
+                'selesai' => [
+                    'showEditor' => true,
+                    'showCatatan' => true,
+                    'showRevisions' => true,
+                    'allowEditStatus' => false,
+                    'allowEditEditor' => false,
+                    'nextStatuses' => []
+                ],
+                'dibatalkan' => [
+                    'showEditor' => false,
+                    'showCatatan' => true,
+                    'showRevisions' => false,
+                    'allowEditStatus' => false,
+                    'allowEditEditor' => false,
+                    'nextStatuses' => []
+                ]
+            ]
         ];
         return view('page.pesanan.detail', $dataShow);
     }

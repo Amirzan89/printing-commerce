@@ -59,16 +59,6 @@
                 </a>
             </li>
 
-            <li class="nav-item sidebar-item {{ $nav == 'transaksi' ? 'selected' : ''}}">
-                <a class="nav-link sidebar-link {{ $nav == 'transaksi' ? 'active' : ''}} d-flex align-items-center py-2" href="/transaksi"
-                    aria-expanded="false">
-                    <span class="icon-holder me-2">
-                        <img src="{{ asset($tPath.'assets2/icon/sidebar/transaksi.svg') }}" alt="Transaksi" class="white img-fluid" style="width: 26px; height: 26px;">
-                    </span>
-                    <span class="hide-menu text-white">Transaksi</span>
-                </a>
-            </li>
-
             <li class="nav-item sidebar-item {{ $nav == 'user' ? 'selected' : ''}}">
                 <a class="nav-link sidebar-link {{ $nav == 'user' ? 'active' : ''}} d-flex align-items-center py-2" href="/user"
                     aria-expanded="false">
