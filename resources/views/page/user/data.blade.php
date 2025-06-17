@@ -195,6 +195,22 @@ $tPath = app()->environment('local') ? '' : '';
                 <div class="pagetitle mt-2 mt-sm-3 mt-md-3 mt-lg-4 mb-2 mb-sm-3 mb-md-3 mb-lg-4">
                     <h1>Kelola User</h1>
                 </div>
+                @if(session('errorNotFound'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" id="errorAlert">
+                        {{ session('errorNotFound') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {{ session()->forget('errorNotFound') }}
+                    <script>
+                        setTimeout(function() {
+                            var errorAlert = document.getElementById('errorAlert');
+                            if (errorAlert) {
+                                var bsAlert = new bootstrap.Alert(errorAlert);
+                                bsAlert.close();
+                            }
+                        }, 3000);
+                    </script>
+                @endif
                 <div class="d-flex align-items-stretch">
                     <div class="card w-100">
                         <div class="card-body p-4">
@@ -266,11 +282,9 @@ $tPath = app()->environment('local') ? '' : '';
     @include('components.preloader')
     <div id="greenPopup" style="display:none"></div>
     <div id="redPopup" style="display:none"></div>
-    <script src="{{ asset($tPath.'assets/libs/jquery/dist/jquery.min.js') }}"></div>
+    <script src="{{ asset($tPath.'assets/libs/jquery/dist/jquery.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/sidebarmenu.js') }}"></script>
     <script src="{{ asset($tPath.'assets/js/app.min.js') }}"></script>
-    <script src="{{ asset($tPath.'assets2/js/page/modalDelete.js') }}"></script>
 </body>
-
 </html>

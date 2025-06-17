@@ -34,7 +34,7 @@ class UserController extends Controller
     public function showDetail(Request $request, $uuid){
         $userData = User::select('uuid','nama_user', 'jenis_kelamin', 'no_telpon', 'foto')->whereRaw("BINARY uuid = ?",[$uuid])->join('auth', 'users.id_auth', '=', 'auth.id_auth')->first();
         if(is_null($userData)){
-            return redirect('/user')->with('error', 'Data User tidak ditemukan');
+            return redirect('/user')->with('errorNotFound', 'Data User tidak ditemukan');
         }
         $dataShow = [
             'userData' => $userData,

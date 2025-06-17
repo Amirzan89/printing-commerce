@@ -195,6 +195,22 @@ $tPath = app()->environment('local') ? '' : '';
                 <div class="pagetitle mt-2 mt-sm-3 mt-md-3 mt-lg-4 mb-2 mb-sm-3 mb-md-3 mb-lg-4">
                     <h1>Kelola Admin</h1>
                 </div>
+                @if(session('errorNotFound'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" id="errorAlert">
+                        {{ session('errorNotFound') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {{ session()->forget('errorNotFound') }}
+                    <script>
+                        setTimeout(function() {
+                            var errorAlert = document.getElementById('errorAlert');
+                            if (errorAlert) {
+                                var bsAlert = new bootstrap.Alert(errorAlert);
+                                bsAlert.close();
+                            }
+                        }, 3000);
+                    </script>
+                @endif
                 <div class="d-flex align-items-stretch">
                     <div class="card w-100">
                         <div class="card-body p-4">
@@ -275,7 +291,5 @@ $tPath = app()->environment('local') ? '' : '';
     <script src="{{ asset($tPath.'assets/js/app.min.js') }}"></script>
     <script src="{{ asset($tPath.'assets/libs/simplebar/dist/simplebar.js') }}"></script>
     <script src="{{ asset($tPath.'assets2/js/popup.js') }}"></script>
-    <script src="{{ asset($tPath.'assets2/js/page/modalDelete.js') }}"></script>
 </body>
-
 </html>

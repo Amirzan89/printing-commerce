@@ -108,7 +108,7 @@ class AdminController extends Controller
     public function showEdit(Request $request, $uuid){
         $adminData = Admin::select('uuid','nama_admin', 'role', 'email')->whereNotIn('role', ['admin'])->whereRaw("BINARY uuid = ?",[$uuid])->join('auth', 'admin.id_auth', '=', 'auth.id_auth')->first();
         if(is_null($adminData)){
-            return redirect('/admin')->with('error', 'Data Admin tidak ditemukan');
+            return redirect('/admin')->with('errorNotFound', 'Data Admin tidak ditemukan');
         }
         $dataShow = [
             'adminData' => $adminData,

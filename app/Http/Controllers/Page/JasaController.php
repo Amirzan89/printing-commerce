@@ -21,12 +21,11 @@ class JasaController extends Controller
         $jasa = Jasa::where('uuid', $uuid)->first();
         
         if(is_null($jasa)){
-            return redirect('/jasa')->with('error', 'Data Jasa tidak ditemukan');
+            return redirect('/jasa')->with('errorNotFound', 'Data Jasa tidak ditemukan');
         }
         $paketJasa = PaketJasa::where('id_jasa', $jasa->id_jasa)->get();
-        $jasaImages = JasaImage::where('id_jasa', $jasa->id_jasa)->get();
         if(is_null($paketJasa)){
-            return redirect('/jasa')->with('error', 'Data Paket Jasa tidak ditemukan');
+            return redirect('/jasa')->with('errorNotFound', 'Data Paket Jasa tidak ditemukan');
         }
         $jasaData = [
             'uuid' => $jasa->uuid,

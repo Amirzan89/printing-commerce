@@ -25,7 +25,7 @@ class MetodePembayaranController extends Controller
     public function showEdit(Request $request, $uuid){
         $metodePembayaranData = MetodePembayaran::select('uuid','nama_metode_pembayaran', 'no_metode_pembayaran', 'deskripsi_1', 'deskripsi_2', 'thumbnail', 'icon')->whereRaw("BINARY uuid = ?",[$uuid])->first();
         if(is_null($metodePembayaranData)){
-            return redirect('/metode-pembayaran')->with('error', 'Data Metode Pembayaran tidak ditemukan');
+            return redirect('/metode-pembayaran')->with('errorNotFound', 'Data Metode Pembayaran tidak ditemukan');
         }
         $dataShow = [
             'headerData' => UtilityController::getHeaderData(),

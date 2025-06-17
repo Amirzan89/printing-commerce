@@ -25,7 +25,7 @@ class EditorController extends Controller
     public function showEdit(Request $request, $id){
         $editorData = Editor::where('uuid', $id)->first();
         if(is_null($editorData)){
-            return redirect('/editor')->with('error', 'Data editor tidak ditemukan');
+            return redirect('/editor')->with('errorNotFound', 'Data editor tidak ditemukan');
         }
         $dataShow = [
             'userAuth' => array_merge(Admin::where('id_auth', $request->user()['id_auth'])->first()->toArray(), ['role' => $request->user()['role']]),
